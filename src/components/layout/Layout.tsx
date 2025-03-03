@@ -1,7 +1,7 @@
 
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Camera, BookOpen, Home } from "lucide-react";
+import { Camera, BookOpen, Home, Leaf } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;

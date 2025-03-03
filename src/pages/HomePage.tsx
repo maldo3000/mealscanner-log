@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useMealJournal } from "@/context/MealJournalContext";
 import MealCard from "@/components/MealCard";
-import { Camera, Plus, ChevronRight } from "lucide-react";
+import { Camera, Plus, ChevronRight, Leaf } from "lucide-react";
 
 const HomePage: React.FC = () => {
   const { meals } = useMealJournal();
@@ -36,7 +36,10 @@ const HomePage: React.FC = () => {
       {/* Hero section */}
       <section className="mb-8">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold mb-2">Nourish</h1>
+          <h1 className="text-3xl font-bold mb-2 flex items-center justify-center">
+            <Leaf className="h-6 w-6 text-primary mr-2" />
+            alimento
+          </h1>
           <p className="text-muted-foreground">
             Capture, analyze, and track your meals
           </p>
