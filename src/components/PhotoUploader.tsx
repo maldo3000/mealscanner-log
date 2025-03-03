@@ -16,6 +16,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,10 +64,25 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
+  
+  const triggerCameraInput = () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error("Camera access is not supported by your browser");
+      return;
+    }
+    
+    try {
+      cameraInputRef.current?.click();
+    } catch (error) {
+      console.error("Camera access error:", error);
+      toast.error("Could not access camera");
+    }
+  };
 
   const clearPreview = () => {
     setPreviewUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   return (
@@ -118,7 +134,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
                   className="glass-button rounded-full py-2 px-4 text-sm font-medium flex items-center"
                   onClick={(e) => {
                     e.stopPropagation();
-                    triggerFileInput();
+                    triggerCameraInput();
                   }}
                 >
                   <Camera className="h-4 w-4 mr-2" />
@@ -140,13 +156,23 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           </div>
         )}
         
+        {/* File input for uploading images */}
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
           accept="image/*"
           className="hidden"
+        />
+        
+        {/* Camera input for taking photos */}
+        <input
+          type="file"
+          ref={cameraInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
           capture="environment"
+          className="hidden"
         />
       </div>
     </div>
