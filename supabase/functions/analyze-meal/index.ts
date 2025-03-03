@@ -18,6 +18,7 @@ serve(async (req) => {
     const { imageData, notes } = await req.json();
     
     if (!imageData) {
+      console.error('No image data provided');
       return new Response(
         JSON.stringify({ error: 'No image data provided' }), 
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -35,7 +36,7 @@ serve(async (req) => {
       );
     }
     
-    console.log('Analyzing food image with OpenAI...');
+    console.log('Analyzing food image with OpenAI Vision...');
     
     // Prepare the system prompt
     let systemPrompt = `You are a nutritional analysis AI. Analyze the food in the image and provide the following information in JSON format:
@@ -100,6 +101,38 @@ Your response must be valid JSON with these exact property names.`;
     try {
       // Parse the JSON from the content
       const analysisResult = JSON.parse(content);
+      
+      // Validate the analysis result has required fields
+      const requiredFields = ['title', 'description', 'foodItems', 'nutrition', 'nutritionScore'];
+      const missingFields = requiredFields.filter(field => !analysisResult[field]);
+      
+      if (missingFields.length > 0) {
+        console.error('Missing required fields in analysis result:', missingFields);
+        return new Response(
+          JSON.stringify({ 
+            error: `Missing required fields in analysis result: ${missingFields.join(', ')}`,
+            content: content
+          }), 
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // Ensure nutrition has all required properties
+      const nutritionFields = ['calories', 'protein', 'fat', 'carbs'];
+      const missingNutritionFields = nutritionFields.filter(field => 
+        !analysisResult.nutrition || analysisResult.nutrition[field] === undefined
+      );
+      
+      if (missingNutritionFields.length > 0) {
+        console.error('Missing nutrition fields in analysis result:', missingNutritionFields);
+        return new Response(
+          JSON.stringify({ 
+            error: `Missing nutrition fields in analysis result: ${missingNutritionFields.join(', ')}`,
+            content: content
+          }), 
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       // Return the analysis result
       return new Response(
