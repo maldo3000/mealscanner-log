@@ -22,6 +22,7 @@ export default {
 			fontFamily: {
 				sans: ['SF Pro Display', 'Inter', 'sans-serif'],
 				serif: ['SF Pro Text', 'serif'],
+				poppins: ['Poppins', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
