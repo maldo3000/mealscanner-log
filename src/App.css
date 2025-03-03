@@ -5,6 +5,7 @@
   padding: 2rem;
   text-align: center;
   font-family: 'Poppins', sans-serif;
+  -webkit-text-size-adjust: 100%;
 }
 
 .logo {
@@ -12,26 +13,43 @@
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
+  -webkit-transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em rgba(34, 197, 94, 0.6));
+  -webkit-filter: drop-shadow(0 0 2em rgba(34, 197, 94, 0.6));
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em rgba(34, 197, 94, 0.6));
+  -webkit-filter: drop-shadow(0 0 2em rgba(34, 197, 94, 0.6));
 }
 
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes logo-spin {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
+    -webkit-animation: logo-spin infinite 20s linear;
   }
 }
 
@@ -41,4 +59,11 @@
 
 .read-the-docs {
   color: #10b981;
+}
+
+/* iOS viewport fix */
+@supports (-webkit-touch-callout: none) {
+  body, html {
+    height: -webkit-fill-available;
+  }
 }
