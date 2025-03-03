@@ -1,7 +1,6 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,6 +28,7 @@ serve(async (req) => {
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
     if (!openAIApiKey) {
+      console.error('OpenAI API key not configured');
       return new Response(
         JSON.stringify({ error: 'OpenAI API key not configured' }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -82,15 +82,16 @@ Your response must be valid JSON with these exact property names.`;
       }),
     });
     
-    const responseData = await response.json();
-    
     if (!response.ok) {
-      console.error('OpenAI API error:', responseData);
+      const errorData = await response.text();
+      console.error('OpenAI API error:', errorData);
       return new Response(
-        JSON.stringify({ error: 'Failed to analyze image with OpenAI' }), 
+        JSON.stringify({ error: `OpenAI API error: ${response.status} ${response.statusText}`, details: errorData }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    const responseData = await response.json();
     
     // Extract the content from the response
     const content = responseData.choices[0].message.content;
@@ -108,7 +109,10 @@ Your response must be valid JSON with these exact property names.`;
     } catch (jsonError) {
       console.error('Error parsing OpenAI response as JSON:', jsonError);
       return new Response(
-        JSON.stringify({ error: 'Invalid response format from OpenAI' }), 
+        JSON.stringify({ 
+          error: 'Invalid response format from OpenAI',
+          content: content // Include the raw content for debugging
+        }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

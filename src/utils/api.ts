@@ -45,6 +45,12 @@ export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise
       throw new Error("No analysis data returned");
     }
     
+    // Check if there's an error in the response data
+    if (data.error) {
+      console.error("API response error:", data.error);
+      throw new Error(`API error: ${data.error}`);
+    }
+    
     return data as MealAnalysisResponse;
   } catch (error) {
     console.error("Error in analyzeMealPhoto:", error);
