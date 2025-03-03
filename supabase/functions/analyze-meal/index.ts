@@ -1,7 +1,10 @@
 
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
+// CORS headers for all responses
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -12,11 +15,14 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-  
+
   try {
-    // Get the request body
+    console.log('Received request to analyze meal image');
+    
+    // Parse the request body
     const { imageData, notes } = await req.json();
     
+    // Validate input
     if (!imageData) {
       console.error('No image data provided');
       return new Response(
@@ -24,83 +30,118 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    // Get OpenAI API key from environment variable
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    
+
+    // Validate OpenAI API key
     if (!openAIApiKey) {
-      console.error('OpenAI API key not configured');
+      console.error('OpenAI API key not found');
       return new Response(
-        JSON.stringify({ error: 'OpenAI API key not configured' }), 
+        JSON.stringify({ error: 'OpenAI API key not found in environment variables' }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
-    console.log('Analyzing food image with OpenAI Vision...');
+    console.log('Analyzing food image with OpenAI Vision API...');
     
     // Prepare the system prompt
     let systemPrompt = `You are a nutritional analysis AI. Analyze the food in the image and provide the following information in JSON format:
-1. A concise title for the meal (property: title)
-2. A short description of the meal (property: description)
-3. A list of identified food items (property: foodItems as string array)
-4. Estimated nutrition information (property: nutrition with calories, protein in grams, fat in grams, and carbs in grams)
-5. A nutritional score (property: nutritionScore) which must be one of: "very healthy", "healthy", "moderate", "unhealthy", or "not healthy"
+1. "title": A concise title for this meal (just the food name)
+2. "description": A detailed description of what you see in the image
+3. "foodItems": An array of individual food items visible in the image
+4. "nutrition": An object containing estimated nutritional information with these numeric properties:
+   - "calories": Total calories
+   - "protein": Protein in grams
+   - "fat": Fat in grams
+   - "carbs": Carbohydrates in grams
+5. "nutritionScore": Overall healthiness rating (one of: "very healthy", "healthy", "moderate", "unhealthy", "not healthy")
 
-Your response must be valid JSON with these exact property names.`;
+Your analysis must be accurate to what is visible in the image. Provide your best estimate for nutrition values.
+Your response MUST be valid JSON without any extra text, markdown, or explanations.`;
 
-    // Add the notes into the system prompt if provided
+    // Add any user notes to the system prompt if provided
     if (notes && notes.trim().length > 0) {
-      systemPrompt += `\n\nAdditional context from the user: "${notes}"\nPlease take this context into account when analyzing the image.`;
+      systemPrompt += `\n\nAdditional context from the user: ${notes}`;
     }
+
+    // Create the API request to OpenAI's vision model
+    const openAIRequest = {
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Analyze this food image and provide nutritional information in the exact JSON format specified."
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${imageData}`
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 1500
+    };
+
+    console.log('Sending request to OpenAI API...');
     
-    // Make the OpenAI API request
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call the OpenAI API
+    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${openAIApiKey}`
       },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt,
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${imageData}`,
-                },
-              },
-            ],
-          },
-        ],
-        max_tokens: 800,
-      }),
+      body: JSON.stringify(openAIRequest)
     });
-    
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API error:', errorData);
+
+    // Check if the API response is successful
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
+      console.error('OpenAI API error:', openAIResponse.status, errorText);
       return new Response(
-        JSON.stringify({ error: `OpenAI API error: ${response.status} ${response.statusText}`, details: errorData }), 
+        JSON.stringify({ 
+          error: `OpenAI API error: ${openAIResponse.status}`, 
+          details: errorText 
+        }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Parse the API response
+    const data = await openAIResponse.json();
+    console.log('Received response from OpenAI');
     
-    const responseData = await response.json();
-    
-    // Extract the content from the response
-    const content = responseData.choices[0].message.content;
-    console.log('OpenAI Response:', content);
-    
+    if (!data.choices || data.choices.length === 0) {
+      console.error('No choices in OpenAI response:', data);
+      return new Response(
+        JSON.stringify({ error: 'Invalid response from OpenAI API', data }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     try {
-      // Parse the JSON from the content
-      const analysisResult = JSON.parse(content);
+      const content = data.choices[0].message.content;
+      console.log('Raw content from OpenAI:', content);
+
+      // Extract the JSON content from the response (in case OpenAI included other text)
+      let jsonContent = content;
+      
+      // Try to find JSON content if it's wrapped in backticks or has text around it
+      const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/```\s*([\s\S]*?)\s*```/) || content.match(/(\{[\s\S]*\})/);
+      if (jsonMatch && jsonMatch[1]) {
+        jsonContent = jsonMatch[1];
+      }
+      
+      // Parse the JSON content
+      console.log('Attempting to parse JSON content');
+      const analysisResult = JSON.parse(jsonContent);
       
       // Validate the analysis result has required fields
       const requiredFields = ['title', 'description', 'foodItems', 'nutrition', 'nutritionScore'];
@@ -111,7 +152,7 @@ Your response must be valid JSON with these exact property names.`;
         return new Response(
           JSON.stringify({ 
             error: `Missing required fields in analysis result: ${missingFields.join(', ')}`,
-            content: content
+            content: jsonContent
           }), 
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -125,34 +166,51 @@ Your response must be valid JSON with these exact property names.`;
       
       if (missingNutritionFields.length > 0) {
         console.error('Missing nutrition fields in analysis result:', missingNutritionFields);
-        return new Response(
-          JSON.stringify({ 
-            error: `Missing nutrition fields in analysis result: ${missingNutritionFields.join(', ')}`,
-            content: content
-          }), 
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        // For fields that are missing, set them to a default value to prevent UI issues
+        if (!analysisResult.nutrition) {
+          analysisResult.nutrition = {};
+        }
+        
+        missingNutritionFields.forEach(field => {
+          analysisResult.nutrition[field] = 0;
+        });
+        
+        console.log('Added default values for missing nutrition fields');
       }
+      
+      // Ensure all nutrition values are numbers
+      Object.keys(analysisResult.nutrition).forEach(key => {
+        if (typeof analysisResult.nutrition[key] === 'string') {
+          // Convert string to number, removing any non-numeric characters
+          const cleanedValue = analysisResult.nutrition[key].replace(/[^\d.]/g, '');
+          analysisResult.nutrition[key] = parseFloat(cleanedValue) || 0;
+        }
+      });
+      
+      console.log('Successfully parsed and validated meal analysis data');
+      console.log('Analysis result:', JSON.stringify(analysisResult, null, 2));
       
       // Return the analysis result
       return new Response(
         JSON.stringify(analysisResult),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    } catch (jsonError) {
-      console.error('Error parsing OpenAI response as JSON:', jsonError);
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      console.error('Failed to parse content:', data.choices[0].message.content);
       return new Response(
         JSON.stringify({ 
-          error: 'Invalid response format from OpenAI',
-          content: content // Include the raw content for debugging
+          error: 'Failed to parse OpenAI response', 
+          message: parseError.message,
+          rawContent: data.choices[0].message.content 
         }), 
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
   } catch (error) {
-    console.error('Error in analyze-meal function:', error);
+    console.error('Unexpected error in analyze-meal function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ error: `Unexpected error: ${error.message}` }), 
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -1,6 +1,7 @@
 
 import { MealAnalysisResponse } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Function to encode an image file to base64
 const encodeImageToBase64 = async (file: File): Promise<string> => {
@@ -28,6 +29,12 @@ export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise
     // Encode the image to base64
     const base64Image = await encodeImageToBase64(imageFile);
     
+    if (!base64Image || base64Image.length === 0) {
+      throw new Error("Failed to encode image to base64");
+    }
+    
+    console.log(`Image encoded successfully. Size: ${Math.round(base64Image.length / 1024)}KB`);
+    
     // Call the Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('analyze-meal', {
       body: { 
@@ -49,6 +56,16 @@ export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise
     if (data.error) {
       console.error("API response error:", data.error);
       throw new Error(`API error: ${data.error}`);
+    }
+    
+    console.log("Analysis successful:", data);
+    
+    // Validate the response structure
+    const requiredFields = ['title', 'description', 'foodItems', 'nutrition', 'nutritionScore'];
+    const missingFields = requiredFields.filter(field => !data[field]);
+    
+    if (missingFields.length > 0) {
+      throw new Error(`Analysis data missing required fields: ${missingFields.join(', ')}`);
     }
     
     return data as MealAnalysisResponse;

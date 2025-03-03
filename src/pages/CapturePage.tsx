@@ -21,12 +21,14 @@ const CapturePage: React.FC = () => {
   const [title, setTitle] = useState("");
   const [mealType, setMealType] = useState<MealType>("random");
   const [notes, setNotes] = useState("");
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   
   const handlePhotoSelected = (file: File) => {
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setAnalysisResult(null);
     setIsAnalyzing(false);
+    setAnalysisError(null);
   };
   
   const handleAnalyze = async (includeNotes = false) => {
@@ -37,16 +39,37 @@ const CapturePage: React.FC = () => {
     
     try {
       setIsAnalyzing(true);
+      setAnalysisError(null);
       toast.info("Analyzing your meal photo...");
       
       // Pass notes as context if requested
-      const result = await analyzeMealPhoto(selectedFile, includeNotes ? notes : undefined);
+      const notesToUse = includeNotes ? notes : undefined;
+      console.log("Analyzing with notes:", notesToUse);
+      
+      const result = await analyzeMealPhoto(selectedFile, notesToUse);
+      
+      // Update the state with analysis results
       setAnalysisResult(result);
       setTitle(result.title);
+      
+      // Automatically determine meal type based on time of day if it's set to random
+      if (mealType === "random") {
+        const currentHour = new Date().getHours();
+        if (currentHour >= 5 && currentHour < 10) {
+          setMealType("breakfast");
+        } else if (currentHour >= 10 && currentHour < 15) {
+          setMealType("lunch");
+        } else if (currentHour >= 15 && currentHour < 21) {
+          setMealType("dinner");
+        } else {
+          setMealType("snack");
+        }
+      }
       
       toast.success("Analysis complete!");
     } catch (error) {
       console.error("Error analyzing meal photo:", error);
+      setAnalysisError(error instanceof Error ? error.message : "Failed to analyze the photo");
       toast.error("Failed to analyze the photo. Please try again.");
     } finally {
       setIsAnalyzing(false);
@@ -110,6 +133,20 @@ const CapturePage: React.FC = () => {
           <p className="text-muted-foreground">
             Our AI is identifying food items and calculating nutrition data
           </p>
+        </div>
+      )}
+      
+      {analysisError && !isAnalyzing && !analysisResult && (
+        <div className="glass-card rounded-2xl p-6 border border-red-200 bg-red-50 dark:bg-red-900/10">
+          <h3 className="text-lg font-medium mb-2 text-red-600 dark:text-red-400">Analysis Failed</h3>
+          <p className="text-red-600 dark:text-red-400 mb-4">{analysisError}</p>
+          <button
+            onClick={() => handleAnalyze(false)}
+            className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 py-2 px-4 rounded-lg font-medium flex items-center mx-auto"
+          >
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Try Again
+          </button>
         </div>
       )}
       
