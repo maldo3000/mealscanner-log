@@ -89,19 +89,32 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html, body {
     height: 100%;
     width: 100%;
+    min-height: 100%;
     -webkit-overflow-scrolling: touch;
     -webkit-text-size-adjust: 100%;
+    overscroll-behavior-y: none;
+  }
+
+  #root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   body {
     @apply bg-background text-foreground font-poppins antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    height: 100vh; /* Fallback */
+    height: calc(var(--vh, 1vh) * 100);
+    overflow-x: hidden;
+    position: relative;
   }
 }
 
@@ -174,9 +187,33 @@
 @supports (-webkit-touch-callout: none) {
   .min-h-screen {
     min-height: -webkit-fill-available;
+    min-height: calc(var(--vh, 1vh) * 100);
   }
   
   .h-screen {
     height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  
+  .fixed {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+}
+
+@supports (-webkit-touch-callout: none) {
+  .flex {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+  }
+  
+  .flex-col {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
   }
 }
