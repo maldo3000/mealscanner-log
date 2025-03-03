@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Camera, Upload, X, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -20,6 +20,17 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+
+  // Effect to handle video initialization when stream is set
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(err => {
+        console.error("Error playing video:", err);
+        toast.error("Could not start camera preview");
+      });
+    }
+  }, [stream]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,6 +86,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         stopCamera();
       }
       
+      console.log("Requesting camera access...");
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         toast.error("Camera access is not supported by your browser");
         return;
@@ -85,13 +97,9 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         audio: false 
       });
       
+      console.log("Camera access granted, setting up stream");
       setStream(mediaStream);
       setIsCapturing(true);
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        videoRef.current.play();
-      }
     } catch (error) {
       console.error("Camera access error:", error);
       toast.error("Could not access camera. Please check your camera permissions.");
@@ -107,7 +115,10 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   };
   
   const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current) {
+      console.error("Video or canvas ref is not available");
+      return;
+    }
     
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -118,7 +129,10 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     
     // Draw the current video frame to the canvas
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      console.error("Could not get canvas context");
+      return;
+    }
     
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
