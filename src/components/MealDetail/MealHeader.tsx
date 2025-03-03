@@ -28,13 +28,13 @@ const MealHeader: React.FC<MealHeaderProps> = ({
           <>
             <button
               onClick={onEditToggle}
-              className="p-2 text-muted-foreground hover:text-foreground rounded-full"
+              className="p-3 text-muted-foreground hover:text-foreground rounded-full"
             >
               <X className="h-5 w-5" />
             </button>
             <button
               onClick={onSaveChanges}
-              className="p-2 text-primary hover:text-primary/80 rounded-full"
+              className="p-3 text-primary hover:text-primary/80 rounded-full"
             >
               <Check className="h-5 w-5" />
             </button>
@@ -43,13 +43,14 @@ const MealHeader: React.FC<MealHeaderProps> = ({
           <>
             <button
               onClick={onEditToggle}
-              className="p-2 text-muted-foreground hover:text-foreground rounded-full"
+              className="p-3 text-muted-foreground hover:text-foreground rounded-full"
             >
               <Edit className="h-5 w-5" />
             </button>
             <button
               onClick={onDelete}
-              className="p-2 text-destructive hover:text-destructive/80 rounded-full"
+              className="p-3 text-destructive hover:text-destructive/80 rounded-full"
+              aria-label="Delete meal"
             >
               <Trash2 className="h-5 w-5" />
             </button>

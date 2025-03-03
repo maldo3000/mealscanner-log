@@ -31,6 +31,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
       className="block w-full relative"
       onMouseEnter={() => setShowDeleteButton(true)}
       onMouseLeave={() => setShowDeleteButton(false)}
+      onTouchStart={() => setShowDeleteButton(true)}
     >
       <Link
         to={`/meal/${meal.id}`}
@@ -96,10 +97,10 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
       {showDeleteButton && (
         <button
           onClick={handleDelete}
-          className="absolute top-3 right-3 z-10 p-2 bg-red-500 text-white rounded-full opacity-90 hover:opacity-100 transition-opacity duration-200"
+          className="absolute top-3 right-3 z-10 p-3 bg-red-500 text-white rounded-full opacity-90 hover:opacity-100 transition-opacity duration-200"
           aria-label="Delete meal"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-5 h-5" />
         </button>
       )}
     </div>

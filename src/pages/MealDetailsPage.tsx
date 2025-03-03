@@ -37,8 +37,10 @@ const MealDetailsPage: React.FC = () => {
   };
   
   const handleDelete = () => {
+    // Use a simple confirm dialog which works better on mobile
     if (window.confirm("Are you sure you want to delete this meal?")) {
       deleteMeal(id!);
+      toast.success("Meal deleted successfully");
       navigate("/journal");
     }
   };
