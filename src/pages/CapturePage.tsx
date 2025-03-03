@@ -30,13 +30,20 @@ const CapturePage: React.FC = () => {
   };
   
   const handleAnalyze = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      toast.error("Please select a photo first");
+      return;
+    }
     
     try {
       setIsAnalyzing(true);
+      toast.info("Analyzing your meal photo...");
+      
       const result = await analyzeMealPhoto(selectedFile);
       setAnalysisResult(result);
       setTitle(result.title);
+      
+      toast.success("Analysis complete!");
     } catch (error) {
       console.error("Error analyzing meal photo:", error);
       toast.error("Failed to analyze the photo. Please try again.");
@@ -46,7 +53,10 @@ const CapturePage: React.FC = () => {
   };
   
   const handleSave = () => {
-    if (!selectedFile || !analysisResult) return;
+    if (!selectedFile || !analysisResult) {
+      toast.error("Please analyze a photo first");
+      return;
+    }
     
     const timestamp = new Date().toISOString();
     
@@ -62,6 +72,7 @@ const CapturePage: React.FC = () => {
       timestamp,
     });
     
+    toast.success("Meal saved to your journal!");
     navigate('/journal');
   };
   
@@ -86,7 +97,7 @@ const CapturePage: React.FC = () => {
             className="bg-primary text-white py-2 px-6 rounded-full font-medium flex items-center"
           >
             <Plus className="h-4 w-4 mr-1" />
-            Analyze meal
+            Analyze with AI
           </button>
         </div>
       )}
