@@ -16,7 +16,10 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -65,24 +68,84 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     fileInputRef.current?.click();
   };
   
-  const triggerCameraInput = () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      toast.error("Camera access is not supported by your browser");
-      return;
-    }
-    
+  const startCamera = async () => {
     try {
-      cameraInputRef.current?.click();
+      // Stop any ongoing capture session
+      if (stream) {
+        stopCamera();
+      }
+      
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error("Camera access is not supported by your browser");
+        return;
+      }
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" },
+        audio: false 
+      });
+      
+      setStream(mediaStream);
+      setIsCapturing(true);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.play();
+      }
     } catch (error) {
       console.error("Camera access error:", error);
-      toast.error("Could not access camera");
+      toast.error("Could not access camera. Please check your camera permissions.");
     }
+  };
+  
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setIsCapturing(false);
+  };
+  
+  const capturePhoto = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    // Set canvas dimensions to match video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Draw the current video frame to the canvas
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Convert canvas to file
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        toast.error("Failed to capture image");
+        return;
+      }
+      
+      // Convert blob to File
+      const file = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
+      
+      // Process the captured photo
+      handleFile(file);
+      
+      // Stop the camera stream
+      stopCamera();
+    }, "image/jpeg", 0.9);
   };
 
   const clearPreview = () => {
     setPreviewUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
+    if (stream) {
+      stopCamera();
+    }
   };
 
   return (
@@ -92,7 +155,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           "relative w-full rounded-2xl overflow-hidden transition-all duration-300",
           "border-2 border-dashed border-border focus-within:border-primary",
           isDragging ? "border-primary bg-primary/5" : "",
-          previewUrl ? "" : "aspect-[4/3]",
+          previewUrl ? "" : isCapturing ? "aspect-[4/3]" : "aspect-[4/3]",
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -114,6 +177,32 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               <X className="h-5 w-5" />
             </button>
           </div>
+        ) : isCapturing ? (
+          <div className="relative w-full h-full">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover rounded-2xl"
+            />
+            <div className="absolute bottom-4 inset-x-0 flex justify-center space-x-4">
+              <button 
+                onClick={capturePhoto}
+                className="bg-primary text-white p-4 rounded-full"
+                aria-label="Take photo"
+              >
+                <Camera className="h-6 w-6" />
+              </button>
+              <button 
+                onClick={stopCamera}
+                className="bg-black/70 text-white p-3 rounded-full"
+                aria-label="Cancel"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         ) : (
           <div 
             className="w-full h-full flex flex-col items-center justify-center p-8 cursor-pointer"
@@ -134,7 +223,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
                   className="glass-button rounded-full py-2 px-4 text-sm font-medium flex items-center"
                   onClick={(e) => {
                     e.stopPropagation();
-                    triggerCameraInput();
+                    startCamera();
                   }}
                 >
                   <Camera className="h-4 w-4 mr-2" />
@@ -165,15 +254,8 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           className="hidden"
         />
         
-        {/* Camera input for taking photos */}
-        <input
-          type="file"
-          ref={cameraInputRef}
-          onChange={handleFileChange}
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-        />
+        {/* Canvas for capturing camera screenshots */}
+        <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
   );
