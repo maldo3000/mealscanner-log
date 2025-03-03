@@ -33,18 +33,20 @@ const App = () => {
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
 
-    // Fix for Safari scroll bounce
+    // Allow scrolling by default, only prevent default on specific elements
     const preventOverscroll = (event: TouchEvent) => {
-      // Only prevent if not on an input or textarea
-      if (
-        document.activeElement instanceof HTMLElement &&
-        (document.activeElement.tagName === 'INPUT' || 
-         document.activeElement.tagName === 'TEXTAREA')
-      ) {
-        return;
-      }
+      const target = event.target as HTMLElement;
       
-      event.preventDefault();
+      // Only prevent if on an input, textarea, or other non-scrollable element
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' || 
+         target.tagName === 'TEXTAREA' ||
+         target.tagName === 'BUTTON')
+      ) {
+        // Prevent overscroll only on these elements
+        event.preventDefault();
+      }
     };
 
     // Set initial viewport height
@@ -54,10 +56,10 @@ const App = () => {
     window.addEventListener('resize', setViewportHeight);
     window.addEventListener('orientationchange', setViewportHeight);
     
-    // Prevent overscroll/bounce on iOS
+    // Allow scrolling by default on iOS
     document.addEventListener('touchmove', preventOverscroll, { passive: false });
     
-    console.log("App initialized for mobile compatibility");
+    console.log("App initialized for mobile compatibility with scrolling enabled");
     
     return () => {
       window.removeEventListener('resize', setViewportHeight);

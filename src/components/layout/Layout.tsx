@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, BookOpen, Home } from "lucide-react";
 
@@ -9,6 +9,21 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+
+  // Enable scrolling on iOS devices
+  useEffect(() => {
+    // Prevent only horizontal scrolling and allow vertical scrolling
+    const handleTouchMove = (e: TouchEvent) => {
+      // Don't prevent default - this allows scrolling
+      return true;
+    };
+
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    
+    return () => {
+      document.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
 
   const navItems = [
     { path: "/", label: "Home", icon: <Home className="w-6 h-6" /> },
@@ -21,8 +36,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-grow pb-20">
+    <div className="flex flex-col min-h-screen overflow-y-auto">
+      <main className="flex-grow pb-20 overflow-y-auto -webkit-overflow-scrolling-touch">
         <div className="max-w-5xl mx-auto px-4 pt-6 pb-24 sm:px-6">
           {children}
         </div>
