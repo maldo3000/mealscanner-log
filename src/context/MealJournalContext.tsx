@@ -3,6 +3,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MealEntry, MealType, NutritionScore } from '@/types';
 import { generateId } from '@/utils/helpers';
 import { toast } from 'sonner';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, isWithinInterval, isSameDay } from 'date-fns';
+
+// Define filter period types
+export type FilterPeriod = 'day' | 'week' | 'custom' | null;
 
 interface MealJournalContextType {
   meals: MealEntry[];
@@ -20,6 +24,11 @@ interface MealJournalContextType {
   filterDate: Date | null;
   filterMealType: MealType | null;
   filterNutritionScore: NutritionScore | null;
+  filterPeriod: FilterPeriod;
+  setFilterPeriod: (period: FilterPeriod) => void;
+  customDateRange: { start: Date | null; end: Date | null };
+  setCustomDateRange: (range: { start: Date | null; end: Date | null }) => void;
+  totalCalories: number;
 }
 
 const MealJournalContext = createContext<MealJournalContextType | undefined>(undefined);
@@ -48,6 +57,11 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [filterMealType, setFilterMealType] = useState<MealType | null>(null);
   const [filterNutritionScore, setFilterNutritionScore] = useState<NutritionScore | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>(null);
+  const [customDateRange, setCustomDateRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null
+  });
   
   // Save meals to localStorage whenever they change
   useEffect(() => {
@@ -90,9 +104,32 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Function to apply filters and search
   const getFilteredMeals = (): MealEntry[] => {
     return meals.filter(meal => {
-      // Filter by date (if set)
-      if (filterDate) {
-        const mealDate = new Date(meal.createdAt);
+      const mealDate = new Date(meal.createdAt);
+      
+      // Filter by time period if set
+      if (filterPeriod === 'day') {
+        if (!isSameDay(mealDate, new Date())) {
+          return false;
+        }
+      } else if (filterPeriod === 'week') {
+        const today = new Date();
+        const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Start on Monday
+        const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
+        
+        if (!isWithinInterval(mealDate, { start: weekStart, end: weekEnd })) {
+          return false;
+        }
+      } else if (filterPeriod === 'custom' && customDateRange.start && customDateRange.end) {
+        const start = startOfDay(customDateRange.start);
+        const end = endOfDay(customDateRange.end);
+        
+        if (!isWithinInterval(mealDate, { start, end })) {
+          return false;
+        }
+      }
+      
+      // Filter by specific date (if set and not overridden by period filter)
+      else if (filterDate && filterPeriod === null) {
         if (
           mealDate.getDate() !== filterDate.getDate() ||
           mealDate.getMonth() !== filterDate.getMonth() ||
@@ -134,6 +171,11 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Filtered meals based on current filters
   const filteredMeals = getFilteredMeals();
+  
+  // Calculate total calories for filtered meals
+  const totalCalories = filteredMeals.reduce((total, meal) => {
+    return total + (typeof meal.nutrition.calories === 'number' ? meal.nutrition.calories : 0);
+  }, 0);
 
   // Function to clear all filters
   const clearFilters = () => {
@@ -141,6 +183,8 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setFilterMealType(null);
     setFilterNutritionScore(null);
     setSearchTerm('');
+    setFilterPeriod(null);
+    setCustomDateRange({ start: null, end: null });
   };
 
   return (
@@ -161,6 +205,11 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
         filterDate,
         filterMealType,
         filterNutritionScore,
+        filterPeriod,
+        setFilterPeriod,
+        customDateRange,
+        setCustomDateRange,
+        totalCalories,
       }}
     >
       {children}
