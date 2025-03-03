@@ -3,7 +3,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MealEntry, MealType, NutritionScore } from '@/types';
 import { generateId } from '@/utils/helpers';
 import { toast } from 'sonner';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, isWithinInterval, isSameDay } from 'date-fns';
+import { 
+  startOfDay, 
+  endOfDay, 
+  startOfWeek, 
+  endOfWeek, 
+  isWithinInterval, 
+  isSameDay,
+  parseISO
+} from 'date-fns';
 
 // Define filter period types
 export type FilterPeriod = 'day' | 'week' | 'custom' | null;
@@ -104,11 +112,14 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Function to apply filters and search
   const getFilteredMeals = (): MealEntry[] => {
     return meals.filter(meal => {
-      const mealDate = new Date(meal.createdAt);
+      // Ensure meal.createdAt is a Date object
+      const mealDate = meal.createdAt instanceof Date ? meal.createdAt : new Date(meal.createdAt);
       
       // Filter by time period if set
       if (filterPeriod === 'day') {
-        if (!isSameDay(mealDate, new Date())) {
+        const today = new Date();
+        // Use isSameDay to compare dates properly
+        if (!isSameDay(mealDate, today)) {
           return false;
         }
       } else if (filterPeriod === 'week') {
@@ -116,7 +127,11 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Start on Monday
         const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
         
-        if (!isWithinInterval(mealDate, { start: weekStart, end: weekEnd })) {
+        // Check if the meal date is within the week range
+        if (!isWithinInterval(mealDate, { 
+          start: startOfDay(weekStart), 
+          end: endOfDay(weekEnd) 
+        })) {
           return false;
         }
       } else if (filterPeriod === 'custom' && customDateRange.start && customDateRange.end) {
@@ -127,14 +142,9 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
           return false;
         }
       }
-      
       // Filter by specific date (if set and not overridden by period filter)
       else if (filterDate && filterPeriod === null) {
-        if (
-          mealDate.getDate() !== filterDate.getDate() ||
-          mealDate.getMonth() !== filterDate.getMonth() ||
-          mealDate.getFullYear() !== filterDate.getFullYear()
-        ) {
+        if (!isSameDay(mealDate, filterDate)) {
           return false;
         }
       }
