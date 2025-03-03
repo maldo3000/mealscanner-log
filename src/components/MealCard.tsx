@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { MealEntry } from "@/types";
 import { formatDate, formatTime, getNutritionScoreBadgeColor } from "@/utils/helpers";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/CustomBadge";
 import { Clock, CalendarDays } from "lucide-react";
 
 interface MealCardProps {

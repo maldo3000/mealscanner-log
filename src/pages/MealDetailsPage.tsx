@@ -5,7 +5,7 @@ import { useMealJournal } from "@/context/MealJournalContext";
 import { MealType } from "@/types";
 import { formatDate, formatTime, getMealTypeOptions, getNutritionScoreBadgeColor } from "@/utils/helpers";
 import NutritionChart from "@/components/NutritionChart";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/CustomBadge";
 import { CalendarDays, Clock, ArrowLeft, Trash2, Edit, X, Check } from "lucide-react";
 import { toast } from "sonner";
 
