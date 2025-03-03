@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen overflow-y-auto">
       <main className="flex-grow pb-20 overflow-y-auto -webkit-overflow-scrolling-touch">
-        <div className="max-w-5xl mx-auto px-4 pt-6 pb-24 sm:px-6">
+        <div className="max-w-5xl mx-auto px-4 pt-4 pb-24 sm:px-6">
           {children}
         </div>
       </main>

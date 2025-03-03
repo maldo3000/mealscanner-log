@@ -25,6 +25,13 @@ const MealInfo: React.FC<MealInfoProps> = ({
   onMealTypeChange,
 }) => {
   const mealTypeOptions = getMealTypeOptions();
+  
+  // Calculate rows for textarea based on content length
+  const calculateRows = (text: string) => {
+    const lineBreaks = (text.match(/\n/g) || []).length;
+    const baseRows = Math.max(1, Math.ceil(text.length / 25)); // Smaller column width for mobile
+    return lineBreaks + baseRows;
+  };
 
   return (
     <div className="glass-card rounded-2xl p-6">
@@ -39,7 +46,7 @@ const MealInfo: React.FC<MealInfoProps> = ({
               value={title}
               onChange={(e) => onTitleChange(e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-border bg-background resize-none overflow-hidden"
-              rows={Math.max(1, Math.ceil(title.length / 30))}
+              rows={calculateRows(title)}
               style={{ minHeight: "40px" }}
             />
           </div>
@@ -64,16 +71,18 @@ const MealInfo: React.FC<MealInfoProps> = ({
         </div>
       ) : (
         <div>
-          <h1 className="text-2xl font-bold mb-2 break-words">{title}</h1>
+          <h1 className="text-2xl font-bold mb-3 break-words">{title}</h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mb-4">
             <Badge className="capitalize bg-primary/10 text-primary">{mealType}</Badge>
-            <div className="flex items-center">
-              <CalendarDays className="w-4 h-4 mr-1" />
-              <span>{formatDate(createdAt)}</span>
-            </div>
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-1" />
-              <span>{formatTime(createdAt)}</span>
+            <div className="flex flex-wrap items-center gap-1">
+              <div className="flex items-center mr-2">
+                <CalendarDays className="w-4 h-4 mr-1" />
+                <span>{formatDate(createdAt)}</span>
+              </div>
+              <div className="flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                <span>{formatTime(createdAt)}</span>
+              </div>
             </div>
           </div>
           <p className="text-muted-foreground">{description}</p>

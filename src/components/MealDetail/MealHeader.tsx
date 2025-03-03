@@ -1,7 +1,6 @@
-
 import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Edit, Trash2, X, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Save } from "lucide-react";
 
 interface MealHeaderProps {
   isEditing: boolean;
@@ -17,46 +16,30 @@ const MealHeader: React.FC<MealHeaderProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="flex items-center justify-between mb-6">
-      <Link to="/journal" className="flex items-center text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4 mr-1" />
-        <span>Back</span>
-      </Link>
-      
-      <div className="flex space-x-2">
-        {isEditing ? (
-          <>
-            <button
-              onClick={onEditToggle}
-              className="p-3 text-muted-foreground hover:text-foreground rounded-full"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <button
-              onClick={onSaveChanges}
-              className="p-3 text-primary hover:text-primary/80 rounded-full"
-            >
-              <Check className="h-5 w-5" />
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={onEditToggle}
-              className="p-3 text-muted-foreground hover:text-foreground rounded-full"
-            >
-              <Edit className="h-5 w-5" />
-            </button>
-            <button
-              onClick={onDelete}
-              className="p-3 text-destructive hover:text-destructive/80 rounded-full"
-              aria-label="Delete meal"
-            >
-              <Trash2 className="h-5 w-5" />
-            </button>
-          </>
-        )}
-      </div>
+    <div className="flex justify-end items-center space-x-2">
+      {isEditing ? (
+        <>
+          <Button variant="outline" size="sm" onClick={onEditToggle}>
+            <Edit className="w-4 h-4 mr-2" />
+            Cancel
+          </Button>
+          <Button size="sm" onClick={onSaveChanges}>
+            <Save className="w-4 h-4 mr-2" />
+            Save
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button variant="outline" size="sm" onClick={onEditToggle}>
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
+          </Button>
+          <Button variant="destructive" size="sm" onClick={onDelete}>
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
+          </Button>
+        </>
+      )}
     </div>
   );
 };

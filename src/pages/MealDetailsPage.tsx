@@ -47,6 +47,11 @@ const MealDetailsPage: React.FC = () => {
   
   return (
     <div className="space-y-6 pb-8 animate-fade-in">
+      {/* Title section is now separate for better organization */}
+      <div className="mb-2">
+        <h1 className="text-2xl font-bold">Meal Details</h1>
+      </div>
+      
       <MealHeader 
         isEditing={isEditing}
         onEditToggle={() => setIsEditing(!isEditing)}
