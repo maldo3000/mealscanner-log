@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { MealEntry } from "@/types";
 import { formatDate, formatTime, getNutritionScoreBadgeColor } from "@/utils/helpers";
 import { Badge } from "@/components/ui/CustomBadge";
-import { Clock, CalendarDays, Camera, Trash2 } from "lucide-react";
+import { Clock, CalendarDays, Camera, Trash2, Award } from "lucide-react";
 import { useMealJournal } from "@/context/MealJournalContext";
 import { toast } from "sonner";
 
@@ -52,18 +52,19 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                 <span>No image</span>
               </div>
             )}
-            <div className="absolute top-3 right-3">
-              <Badge 
-                className={`capitalize font-medium py-1 px-3 text-xs ${getNutritionScoreBadgeColor(meal.nutritionScore)}`}
-              >
-                {meal.nutritionScore}
-              </Badge>
-            </div>
             <div className="absolute top-3 left-3">
               <Badge 
                 className="capitalize font-medium py-1 px-3 text-xs bg-black/50 text-white backdrop-blur-xs"
               >
                 {meal.mealType}
+              </Badge>
+            </div>
+            <div className="absolute bottom-3 left-3">
+              <Badge 
+                className={`capitalize font-medium py-1 px-3 text-xs ${getNutritionScoreBadgeColor(meal.nutritionScore)} flex items-center gap-1`}
+              >
+                <Award className="w-3 h-3" />
+                {meal.nutritionScore}
               </Badge>
             </div>
           </div>
