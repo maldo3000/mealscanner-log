@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { MealEntry } from "@/types";
 import { formatDate, formatTime, getNutritionScoreBadgeColor } from "@/utils/helpers";
 import { Badge } from "@/components/ui/CustomBadge";
-import { Clock, CalendarDays } from "lucide-react";
+import { Clock, CalendarDays, Camera } from "lucide-react";
 
 interface MealCardProps {
   meal: MealEntry;
@@ -18,12 +18,19 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
     >
       <div className="glass-card glass-card-hover rounded-2xl overflow-hidden transition-all duration-300 h-full">
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
-          <img
-            src={meal.imageUrl}
-            alt={meal.title}
-            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-            loading="lazy"
-          />
+          {meal.imageUrl ? (
+            <img
+              src={meal.imageUrl}
+              alt={meal.title}
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full w-full text-muted-foreground">
+              <Camera className="w-8 h-8 mr-2" />
+              <span>No image</span>
+            </div>
+          )}
           <div className="absolute top-3 right-3">
             <Badge 
               className={`capitalize font-medium py-1 px-3 text-xs ${getNutritionScoreBadgeColor(meal.nutritionScore)}`}

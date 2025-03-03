@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MealEntry, MealType, NutritionScore } from '@/types';
 import { generateId } from '@/utils/helpers';
@@ -13,7 +12,6 @@ import {
   parseISO
 } from 'date-fns';
 
-// Define filter period types
 export type FilterPeriod = 'day' | 'week' | 'custom' | null;
 
 interface MealJournalContextType {
@@ -42,7 +40,6 @@ interface MealJournalContextType {
 const MealJournalContext = createContext<MealJournalContextType | undefined>(undefined);
 
 export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // State for meal entries
   const [meals, setMeals] = useState<MealEntry[]>(() => {
     const savedMeals = localStorage.getItem('mealJournal');
     if (savedMeals) {
@@ -60,7 +57,6 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return [];
   });
 
-  // State for filters
   const [filterDate, setFilterDate] = useState<Date | null>(null);
   const [filterMealType, setFilterMealType] = useState<MealType | null>(null);
   const [filterNutritionScore, setFilterNutritionScore] = useState<NutritionScore | null>(null);
@@ -70,13 +66,11 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     start: null,
     end: null
   });
-  
-  // Save meals to localStorage whenever they change
+
   useEffect(() => {
     localStorage.setItem('mealJournal', JSON.stringify(meals));
   }, [meals]);
 
-  // Function to add a new meal
   const addMeal = (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
     const newMeal: MealEntry = {
       ...meal,
@@ -84,11 +78,12 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
       createdAt: new Date(),
     };
     
+    console.log("Adding new meal with image:", newMeal.imageUrl ? "Image present" : "No image");
+    
     setMeals(prevMeals => [newMeal, ...prevMeals]);
     toast.success('Meal added to your journal');
   };
 
-  // Function to update an existing meal
   const updateMeal = (id: string, updates: Partial<MealEntry>) => {
     setMeals(prevMeals => 
       prevMeals.map(meal => 
@@ -98,36 +93,29 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     toast.success('Meal updated successfully');
   };
 
-  // Function to delete a meal
   const deleteMeal = (id: string) => {
     setMeals(prevMeals => prevMeals.filter(meal => meal.id !== id));
     toast.success('Meal removed from your journal');
   };
 
-  // Function to get a specific meal by ID
   const getMeal = (id: string) => {
     return meals.find(meal => meal.id === id);
   };
 
-  // Function to apply filters and search
   const getFilteredMeals = (): MealEntry[] => {
     return meals.filter(meal => {
-      // Ensure meal.createdAt is a Date object
       const mealDate = meal.createdAt instanceof Date ? meal.createdAt : new Date(meal.createdAt);
       
-      // Filter by time period if set
       if (filterPeriod === 'day') {
         const today = new Date();
-        // Use isSameDay to compare dates properly
         if (!isSameDay(mealDate, today)) {
           return false;
         }
       } else if (filterPeriod === 'week') {
         const today = new Date();
-        const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Start on Monday
+        const weekStart = startOfWeek(today, { weekStartsOn: 1 });
         const weekEnd = endOfWeek(today, { weekStartsOn: 1 });
         
-        // Check if the meal date is within the week range
         if (!isWithinInterval(mealDate, { 
           start: startOfDay(weekStart), 
           end: endOfDay(weekEnd) 
@@ -141,25 +129,20 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (!isWithinInterval(mealDate, { start, end })) {
           return false;
         }
-      }
-      // Filter by specific date (if set and not overridden by period filter)
-      else if (filterDate && filterPeriod === null) {
+      } else if (filterDate && filterPeriod === null) {
         if (!isSameDay(mealDate, filterDate)) {
           return false;
         }
       }
 
-      // Filter by meal type (if set)
       if (filterMealType && meal.mealType !== filterMealType) {
         return false;
       }
 
-      // Filter by nutrition score (if set)
       if (filterNutritionScore && meal.nutritionScore !== filterNutritionScore) {
         return false;
       }
 
-      // Filter by search term (if set)
       if (searchTerm) {
         const termLower = searchTerm.toLowerCase();
         const inTitle = meal.title.toLowerCase().includes(termLower);
@@ -179,15 +162,12 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     });
   };
 
-  // Filtered meals based on current filters
   const filteredMeals = getFilteredMeals();
   
-  // Calculate total calories for filtered meals
   const totalCalories = filteredMeals.reduce((total, meal) => {
     return total + (typeof meal.nutrition.calories === 'number' ? meal.nutrition.calories : 0);
   }, 0);
 
-  // Function to clear all filters
   const clearFilters = () => {
     setFilterDate(null);
     setFilterMealType(null);

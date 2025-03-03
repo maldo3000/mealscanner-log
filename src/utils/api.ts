@@ -21,10 +21,29 @@ const encodeImageToBase64 = async (file: File): Promise<string> => {
   });
 };
 
+// Function to store an image file in browser memory
+const storeImageLocally = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Failed to read image file"));
+      }
+    };
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+};
+
 // Analyzing meal photo using GPT-4 Vision via Supabase Edge Function
-export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise<MealAnalysisResponse> => {
+export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise<MealAnalysisResponse & { imageUrl: string }> => {
   try {
     console.log("Analyzing meal photo:", imageFile.name);
+    
+    // Store image locally
+    const imageUrl = await storeImageLocally(imageFile);
     
     // Encode the image to base64
     const base64Image = await encodeImageToBase64(imageFile);
@@ -68,13 +87,20 @@ export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise
       throw new Error(`Analysis data missing required fields: ${missingFields.join(', ')}`);
     }
     
-    return data as MealAnalysisResponse;
+    // Return the analysis data with the image URL
+    return {
+      ...data as MealAnalysisResponse,
+      imageUrl
+    };
   } catch (error) {
     console.error("Error in analyzeMealPhoto:", error);
     
     // For development/testing when Supabase integration is not available or fails
     if (process.env.NODE_ENV === 'development') {
       console.warn("Using mock data for meal analysis in development mode");
+      
+      // Store image locally for the mock data as well
+      const imageUrl = await storeImageLocally(imageFile);
       
       // Use mock data with some randomization
       return new Promise((resolve) => {
@@ -161,7 +187,8 @@ export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise
               fat: mockFat,
               carbs: mockCarbs
             },
-            nutritionScore
+            nutritionScore,
+            imageUrl
           });
         }, 2000); // Simulate 2-second API delay
       });
