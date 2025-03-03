@@ -8,7 +8,7 @@ import { MealType, MealAnalysisResponse, NutritionScore } from "@/types";
 import { formatDate, formatTime, getMealTypeOptions } from "@/utils/helpers";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { toast } from "sonner";
-import { CalendarDays, Clock, Plus } from "lucide-react";
+import { CalendarDays, Clock, Plus, RefreshCw } from "lucide-react";
 
 const CapturePage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ const CapturePage: React.FC = () => {
     setIsAnalyzing(false);
   };
   
-  const handleAnalyze = async () => {
+  const handleAnalyze = async (includeNotes = false) => {
     if (!selectedFile) {
       toast.error("Please select a photo first");
       return;
@@ -39,7 +39,8 @@ const CapturePage: React.FC = () => {
       setIsAnalyzing(true);
       toast.info("Analyzing your meal photo...");
       
-      const result = await analyzeMealPhoto(selectedFile);
+      // Pass notes as context if requested
+      const result = await analyzeMealPhoto(selectedFile, includeNotes ? notes : undefined);
       setAnalysisResult(result);
       setTitle(result.title);
       
@@ -93,7 +94,7 @@ const CapturePage: React.FC = () => {
       {selectedFile && !isAnalyzing && !analysisResult && (
         <div className="flex justify-center mt-6">
           <button
-            onClick={handleAnalyze}
+            onClick={() => handleAnalyze(false)}
             className="bg-primary text-white py-2 px-6 rounded-full font-medium flex items-center"
           >
             <Plus className="h-4 w-4 mr-1" />
@@ -171,6 +172,17 @@ const CapturePage: React.FC = () => {
                   rows={3}
                   placeholder="Add any additional notes about this meal..."
                 />
+              </div>
+              
+              <div className="flex justify-end">
+                <button
+                  onClick={() => handleAnalyze(true)}
+                  className="flex items-center gap-1 text-sm px-4 py-2 bg-secondary/60 hover:bg-secondary/80 rounded-lg transition-colors"
+                  disabled={isAnalyzing}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Re-analyze with notes
+                </button>
               </div>
             </div>
           </div>

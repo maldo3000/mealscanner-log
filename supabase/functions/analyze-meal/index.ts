@@ -1,8 +1,8 @@
 
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
-// CORS headers to allow requests from our frontend
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -15,105 +15,108 @@ serve(async (req) => {
   }
   
   try {
-    // Parse the request body
-    const { imageData } = await req.json();
+    // Get the request body
+    const { imageData, notes } = await req.json();
     
     if (!imageData) {
-      throw new Error('No image data provided');
+      return new Response(
+        JSON.stringify({ error: 'No image data provided' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
-    console.log("Received request to analyze meal image");
+    // Get OpenAI API key from environment variable
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     
-    // Get the OpenAI API key from environment variables
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!openAIApiKey) {
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API key not configured' }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
-    // Call OpenAI API to analyze the image
+    console.log('Analyzing food image with OpenAI...');
+    
+    // Prepare the system prompt
+    let systemPrompt = `You are a nutritional analysis AI. Analyze the food in the image and provide the following information in JSON format:
+1. A concise title for the meal (property: title)
+2. A short description of the meal (property: description)
+3. A list of identified food items (property: foodItems as string array)
+4. Estimated nutrition information (property: nutrition with calories, protein in grams, fat in grams, and carbs in grams)
+5. A nutritional score (property: nutritionScore) which must be one of: "very healthy", "healthy", "moderate", "unhealthy", or "not healthy"
+
+Your response must be valid JSON with these exact property names.`;
+
+    // Add the notes into the system prompt if provided
+    if (notes && notes.trim().length > 0) {
+      systemPrompt += `\n\nAdditional context from the user: "${notes}"\nPlease take this context into account when analyzing the image.`;
+    }
+    
+    // Make the OpenAI API request
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`
+        'Authorization': `Bearer ${openAIApiKey}`,
       },
       body: JSON.stringify({
         model: 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: `You are a nutritionist AI that analyzes food images. 
-                     Extract and return ONLY a JSON object with the following structure:
-                     {
-                        "title": "Brief descriptive title of the meal",
-                        "description": "Detailed description of what's in the image",
-                        "foodItems": ["Array of all identifiable food items"],
-                        "nutrition": {
-                          "calories": estimated calories (number),
-                          "protein": estimated protein in grams (number),
-                          "fat": estimated fat in grams (number),
-                          "carbs": estimated carbs in grams (number)
-                        },
-                        "nutritionScore": "very healthy" | "healthy" | "moderate" | "unhealthy" | "not healthy"
-                     }`
+            content: systemPrompt,
           },
           {
             role: 'user',
             content: [
               {
-                type: 'text',
-                text: 'Analyze this meal image and provide nutritional information.'
-              },
-              {
                 type: 'image_url',
                 image_url: {
-                  url: `data:image/jpeg;base64,${imageData}`
-                }
-              }
-            ]
-          }
+                  url: `data:image/jpeg;base64,${imageData}`,
+                },
+              },
+            ],
+          },
         ],
-        max_tokens: 1000
-      })
+        max_tokens: 800,
+      }),
     });
     
-    const result = await response.json();
-    console.log("OpenAI API response received");
+    const responseData = await response.json();
     
-    // Extract and parse the JSON from the content
-    let parsedContent;
-    try {
-      parsedContent = JSON.parse(result.choices[0].message.content);
-      console.log("Successfully parsed OpenAI response", parsedContent.title);
-    } catch (e) {
-      console.error("Failed to parse OpenAI response", e);
-      console.error("Raw response content:", result.choices[0].message.content);
-      throw new Error("Invalid response format from GPT-4 Vision");
+    if (!response.ok) {
+      console.error('OpenAI API error:', responseData);
+      return new Response(
+        JSON.stringify({ error: 'Failed to analyze image with OpenAI' }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
     
-    // Return the analysis result
-    return new Response(
-      JSON.stringify(parsedContent),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json' 
-        } 
-      }
-    );
+    // Extract the content from the response
+    const content = responseData.choices[0].message.content;
+    console.log('OpenAI Response:', content);
     
+    try {
+      // Parse the JSON from the content
+      const analysisResult = JSON.parse(content);
+      
+      // Return the analysis result
+      return new Response(
+        JSON.stringify(analysisResult),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    } catch (jsonError) {
+      console.error('Error parsing OpenAI response as JSON:', jsonError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid response format from OpenAI' }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
   } catch (error) {
-    console.error("Error in analyze-meal function:", error);
-    
+    console.error('Error in analyze-meal function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json' 
-        } 
-      }
+      JSON.stringify({ error: error.message }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

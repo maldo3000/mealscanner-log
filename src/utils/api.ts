@@ -21,7 +21,7 @@ const encodeImageToBase64 = async (file: File): Promise<string> => {
 };
 
 // Analyzing meal photo using GPT-4 Vision via Supabase Edge Function
-export const analyzeMealPhoto = async (imageFile: File): Promise<MealAnalysisResponse> => {
+export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise<MealAnalysisResponse> => {
   try {
     console.log("Analyzing meal photo:", imageFile.name);
     
@@ -30,7 +30,10 @@ export const analyzeMealPhoto = async (imageFile: File): Promise<MealAnalysisRes
     
     // Call the Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('analyze-meal', {
-      body: { imageData: base64Image }
+      body: { 
+        imageData: base64Image,
+        notes: notes || ""
+      }
     });
     
     if (error) {
@@ -95,10 +98,40 @@ export const analyzeMealPhoto = async (imageFile: File): Promise<MealAnalysisRes
           else if (mockCalories < 900) nutritionScore = "unhealthy";
           else nutritionScore = "not healthy";
           
+          // If notes were provided, make small modifications to the mockup data
+          let title = mockTitles[randomIndex];
+          let description = mockDescriptions[randomIndex];
+          let foodItems = [...mockFoodItems[randomIndex]];
+          
+          if (notes && notes.trim().length > 0) {
+            console.log("Using notes for analysis:", notes);
+            
+            // Simple logic for mock implementation to simulate using notes
+            if (notes.toLowerCase().includes("homemade")) {
+              title = "Homemade " + title;
+              description = "Homemade version of " + description;
+            }
+            
+            if (notes.toLowerCase().includes("protein")) {
+              foodItems.push("Extra protein");
+              nutritionScore = "healthy";
+            }
+            
+            if (notes.toLowerCase().includes("vegan") || notes.toLowerCase().includes("vegetarian")) {
+              title = title + " (Plant-based)";
+              foodItems = foodItems.map(item => {
+                if (item.toLowerCase().includes("chicken") || item.toLowerCase().includes("beef")) {
+                  return "Plant-based " + item;
+                }
+                return item;
+              });
+            }
+          }
+          
           resolve({
-            title: mockTitles[randomIndex],
-            description: mockDescriptions[randomIndex],
-            foodItems: mockFoodItems[randomIndex],
+            title,
+            description,
+            foodItems,
             nutrition: {
               calories: mockCalories,
               protein: mockProtein,
