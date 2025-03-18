@@ -2,6 +2,7 @@
 import React from 'react';
 import MealCard from '@/components/MealCard';
 import { MealEntry } from '@/types';
+import { EmptyJournal } from './EmptyJournal';
 
 interface MealsListProps {
   meals: MealEntry[];
@@ -10,16 +11,7 @@ interface MealsListProps {
 
 export const MealsList: React.FC<MealsListProps> = ({ meals, areFiltersActive }) => {
   if (meals.length === 0) {
-    return (
-      <div className="glass-card rounded-2xl py-12 px-4 text-center mt-8">
-        <p className="text-muted-foreground mb-2">No meals found</p>
-        <p className="text-sm text-muted-foreground">
-          {areFiltersActive 
-            ? "Try adjusting your filters or search term"
-            : "Start capturing your meals to build your journal"}
-        </p>
-      </div>
-    );
+    return <EmptyJournal areFiltersActive={areFiltersActive} />;
   }
   
   return (

@@ -9,9 +9,11 @@ export const loadMealsFromSupabase = async (userId: string): Promise<MealEntry[]
     const { data, error } = await supabase
       .from('meals')
       .select('*')
+      .eq('user_id', userId) // Explicitly filter by the current user's ID
       .order('created_at', { ascending: false });
       
     if (error) {
+      console.error('Error fetching meals from Supabase:', error);
       throw error;
     }
     
@@ -85,13 +87,17 @@ export const saveMealToSupabase = async (meal: MealEntry, userId: string): Promi
     if (error) {
       console.error('Error saving meal to Supabase:', error);
       toast.error('Failed to save meal to the server');
+      throw error;
     }
+    
+    console.log('Meal saved successfully to Supabase');
   } catch (error) {
     console.error('Exception saving meal to Supabase:', error);
+    throw error;
   }
 };
 
-export const updateMealInSupabase = async (id: string, updates: Partial<MealEntry>): Promise<void> => {
+export const updateMealInSupabase = async (id: string, updates: Partial<MealEntry>, userId: string): Promise<void> => {
   try {
     const supabaseUpdates: any = {};
     
@@ -109,30 +115,40 @@ export const updateMealInSupabase = async (id: string, updates: Partial<MealEntr
     const { error } = await supabase
       .from('meals')
       .update(supabaseUpdates)
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId); // Ensure we're updating the user's own meal
     
     if (error) {
       console.error('Error updating meal in Supabase:', error);
       toast.error('Failed to update meal on the server');
+      throw error;
     }
+    
+    console.log('Meal updated successfully in Supabase');
   } catch (error) {
     console.error('Exception updating meal in Supabase:', error);
+    throw error;
   }
 };
 
-export const deleteMealFromSupabase = async (id: string): Promise<void> => {
+export const deleteMealFromSupabase = async (id: string, userId: string): Promise<void> => {
   try {
     const { error } = await supabase
       .from('meals')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId); // Ensure we're deleting the user's own meal
     
     if (error) {
       console.error('Error deleting meal from Supabase:', error);
       toast.error('Failed to delete meal from the server');
+      throw error;
     }
+    
+    console.log('Meal deleted successfully from Supabase');
   } catch (error) {
     console.error('Exception deleting meal from Supabase:', error);
+    throw error;
   }
 };
 

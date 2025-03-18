@@ -18,6 +18,7 @@ const MealJournalContext = createContext<MealJournalContextType | undefined>(und
 
 export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [meals, setMeals] = useState<MealEntry[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
   const [filterDate, setFilterDate] = useState<Date | null>(null);
@@ -30,65 +31,100 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     end: null
   });
 
+  // Load meals when auth state changes
   useEffect(() => {
     const loadMeals = async () => {
-      if (isAuthenticated && user) {
-        try {
+      try {
+        if (isAuthenticated && user) {
+          console.log('Loading meals for authenticated user:', user.id);
           const supabaseMeals = await loadMealsFromSupabase(user.id);
           setMeals(supabaseMeals);
-        } catch (error) {
-          console.error('Error fetching meals from Supabase:', error);
+        } else {
+          console.log('User not authenticated, loading from localStorage');
           const localMeals = loadMealsFromLocalStorage();
           setMeals(localMeals);
         }
-      } else {
-        const localMeals = loadMealsFromLocalStorage();
-        setMeals(localMeals);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error loading meals:', error);
+        toast.error('Failed to load your meal data');
+        // Fallback to localStorage if Supabase fails
+        if (isAuthenticated) {
+          const localMeals = loadMealsFromLocalStorage();
+          setMeals(localMeals);
+        }
+        setIsInitialized(true);
       }
     };
     
     loadMeals();
   }, [isAuthenticated, user]);
 
+  // Save non-authenticated user meals to localStorage
   useEffect(() => {
-    if (meals.length > 0) {
+    if (!isAuthenticated && meals.length > 0 && isInitialized) {
+      console.log('Saving meals to localStorage');
       localStorage.setItem('mealJournal', JSON.stringify(meals));
     }
-  }, [meals]);
+  }, [meals, isAuthenticated, isInitialized]);
 
   const addMeal = async (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
     const newMeal = createNewMeal(meal);
     
     console.log("Adding new meal with image:", newMeal.imageUrl ? "Image present" : "No image");
     
+    // Update local state immediately for responsiveness
     setMeals(prevMeals => [newMeal, ...prevMeals]);
     
+    // Then persist to Supabase if authenticated
     if (isAuthenticated && user) {
-      await saveMealToSupabase(newMeal, user.id);
+      try {
+        await saveMealToSupabase(newMeal, user.id);
+        console.log('Meal saved to Supabase');
+      } catch (error) {
+        console.error('Failed to save meal to Supabase:', error);
+        // The meal is already in local state, so the user won't lose it
+      }
     }
     
     toast.success('Meal added to your journal');
   };
 
   const updateMeal = async (id: string, updates: Partial<MealEntry>) => {
+    // Update local state immediately
     setMeals(prevMeals => 
       prevMeals.map(meal => 
         meal.id === id ? { ...meal, ...updates } : meal
       )
     );
     
+    // Then update in Supabase if authenticated
     if (isAuthenticated && user) {
-      await updateMealInSupabase(id, updates);
+      try {
+        await updateMealInSupabase(id, updates, user.id);
+        console.log('Meal updated in Supabase');
+      } catch (error) {
+        console.error('Failed to update meal in Supabase:', error);
+        // The meal update is already in local state
+      }
     }
     
     toast.success('Meal updated successfully');
   };
 
   const deleteMeal = async (id: string) => {
+    // Remove from local state immediately
     setMeals(prevMeals => prevMeals.filter(meal => meal.id !== id));
     
+    // Then delete from Supabase if authenticated
     if (isAuthenticated && user) {
-      await deleteMealFromSupabase(id);
+      try {
+        await deleteMealFromSupabase(id, user.id);
+        console.log('Meal deleted from Supabase');
+      } catch (error) {
+        console.error('Failed to delete meal from Supabase:', error);
+        // The meal is already removed from local state
+      }
     }
     
     toast.success('Meal removed from your journal');
