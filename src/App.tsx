@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MealJournalProvider } from "@/context/MealJournalContext";
 import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/layout/Layout";
@@ -80,7 +80,10 @@ const App = () => {
               <Toaster />
               <Sonner />
               <Routes>
+                {/* Public route for authentication */}
                 <Route path="/auth" element={<AuthPage />} />
+                
+                {/* Protected routes that require authentication */}
                 <Route path="/" element={
                   <ProtectedRoute>
                     <Layout><HomePage /></Layout>
@@ -101,6 +104,8 @@ const App = () => {
                     <Layout><MealDetailsPage /></Layout>
                   </ProtectedRoute>
                 } />
+                
+                {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </MealJournalProvider>

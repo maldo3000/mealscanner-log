@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -10,6 +10,10 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
+  
+  console.log("ProtectedRoute - Current path:", location.pathname);
+  console.log("ProtectedRoute - Auth state:", { isLoading, isAuthenticated: !!user });
 
   if (isLoading) {
     return (
@@ -20,9 +24,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
+    console.log("ProtectedRoute - Redirecting to /auth");
     return <Navigate to="/auth" replace />;
   }
 
+  console.log("ProtectedRoute - Rendering children");
   return <>{children}</>;
 };
 
