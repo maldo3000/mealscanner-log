@@ -3,19 +3,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MealJournalProvider } from "@/context/MealJournalContext";
-import { AuthProvider } from "@/context/AuthContext";
 import Layout from "@/components/layout/Layout";
 import { useEffect } from "react";
-import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Pages
 import HomePage from "./pages/HomePage";
 import CapturePage from "./pages/CapturePage";
 import JournalPage from "./pages/JournalPage";
 import MealDetailsPage from "./pages/MealDetailsPage";
-import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -74,43 +71,19 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <MealJournalProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                {/* Public route for authentication */}
-                <Route path="/auth" element={<AuthPage />} />
-                
-                {/* Protected routes that require authentication */}
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Layout><HomePage /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/capture" element={
-                  <ProtectedRoute>
-                    <Layout><CapturePage /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/journal" element={
-                  <ProtectedRoute>
-                    <Layout><JournalPage /></Layout>
-                  </ProtectedRoute>
-                } />
-                <Route path="/meal/:id" element={
-                  <ProtectedRoute>
-                    <Layout><MealDetailsPage /></Layout>
-                  </ProtectedRoute>
-                } />
-                
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </MealJournalProvider>
-          </AuthProvider>
-        </BrowserRouter>
+        <MealJournalProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout><HomePage /></Layout>} />
+              <Route path="/capture" element={<Layout><CapturePage /></Layout>} />
+              <Route path="/journal" element={<Layout><JournalPage /></Layout>} />
+              <Route path="/meal/:id" element={<Layout><MealDetailsPage /></Layout>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </MealJournalProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
