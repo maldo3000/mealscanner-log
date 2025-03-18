@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MealEntry, MealType, NutritionScore } from '@/types';
 import { generateId } from '@/utils/helpers';
@@ -74,12 +75,13 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
               description: meal.description,
               mealType: meal.meal_type as MealType,
               foodItems: meal.food_items,
-              imageUrl: meal.image_url,
+              imageUrl: meal.image_url || '',
               nutrition: typeof meal.nutrition === 'string' 
                 ? JSON.parse(meal.nutrition) 
                 : meal.nutrition,
               nutritionScore: meal.nutrition_score as NutritionScore,
               notes: meal.notes || '',
+              timestamp: meal.timestamp,
               createdAt: new Date(meal.created_at)
             }));
             
@@ -125,10 +127,12 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [meals]);
 
   const addMeal = async (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
+    const now = new Date();
     const newMeal: MealEntry = {
       ...meal,
       id: generateId(),
-      createdAt: new Date(),
+      createdAt: now,
+      timestamp: now.toISOString(),
     };
     
     console.log("Adding new meal with image:", newMeal.imageUrl ? "Image present" : "No image");
@@ -137,6 +141,9 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     
     if (isAuthenticated && user) {
       try {
+        // Convert nutrition object to JSON string for Supabase
+        const nutritionJson = JSON.stringify(newMeal.nutrition);
+        
         const { error } = await supabase.from('meals').insert({
           id: newMeal.id,
           title: newMeal.title,
@@ -144,9 +151,10 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
           meal_type: newMeal.mealType,
           food_items: newMeal.foodItems,
           image_url: newMeal.imageUrl,
-          nutrition: newMeal.nutrition,
+          nutrition: nutritionJson,
           nutrition_score: newMeal.nutritionScore,
           notes: newMeal.notes,
+          timestamp: newMeal.timestamp,
           created_at: newMeal.createdAt.toISOString(),
           user_id: user.id
         });
@@ -179,9 +187,10 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (updates.mealType) supabaseUpdates.meal_type = updates.mealType;
         if (updates.foodItems) supabaseUpdates.food_items = updates.foodItems;
         if (updates.imageUrl) supabaseUpdates.image_url = updates.imageUrl;
-        if (updates.nutrition) supabaseUpdates.nutrition = updates.nutrition;
+        if (updates.nutrition) supabaseUpdates.nutrition = JSON.stringify(updates.nutrition);
         if (updates.nutritionScore) supabaseUpdates.nutrition_score = updates.nutritionScore;
         if (updates.notes !== undefined) supabaseUpdates.notes = updates.notes;
+        if (updates.timestamp) supabaseUpdates.timestamp = updates.timestamp;
         if (updates.createdAt) supabaseUpdates.created_at = updates.createdAt.toISOString();
         
         const { error } = await supabase

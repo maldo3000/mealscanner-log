@@ -20,7 +20,7 @@ export interface MealEntry {
   imageUrl: string;
   mealType: MealType;
   notes?: string;
-  timestamp: string;
+  timestamp?: string;
   createdAt: Date;
 }
 
