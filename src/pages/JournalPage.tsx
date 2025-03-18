@@ -71,6 +71,13 @@ const JournalPage: React.FC = () => {
   
   const areFiltersActive = !!(filterDate || filterMealType || filterNutritionScore || searchTerm || filterPeriod || (customDateRange.start && customDateRange.end));
   
+  const handleQuickFilter = (period: FilterPeriod) => {
+    // Clear other filters when using quick filters
+    setFilterDate(null);
+    setCustomDateRange({ start: null, end: null });
+    setFilterPeriod(period);
+  };
+  
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="mb-6">
@@ -103,16 +110,38 @@ const JournalPage: React.FC = () => {
           </div>
           
           <div className="flex justify-between">
-            <button
-              onClick={toggleFilters}
-              className={`flex items-center space-x-1 text-sm ${
-                areFiltersActive ? "text-primary font-medium" : "text-muted-foreground"
-              }`}
-            >
-              <Filter className="h-4 w-4" />
-              <span>Filters</span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleFilters}
+                className={`flex items-center space-x-1 text-sm ${
+                  areFiltersActive ? "text-primary font-medium" : "text-muted-foreground"
+                }`}
+              >
+                <Filter className="h-4 w-4" />
+                <span>Filters</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+              </button>
+              
+              {/* Quick filter buttons */}
+              <div className="flex items-center space-x-2 ml-4">
+                <button
+                  onClick={() => handleQuickFilter('day')}
+                  className={`px-3 py-1 text-xs rounded-full border ${
+                    filterPeriod === 'day' ? 'bg-primary text-primary-foreground border-primary' : 'border-border'
+                  }`}
+                >
+                  Today
+                </button>
+                <button
+                  onClick={() => handleQuickFilter('week')}
+                  className={`px-3 py-1 text-xs rounded-full border ${
+                    filterPeriod === 'week' ? 'bg-primary text-primary-foreground border-primary' : 'border-border'
+                  }`}
+                >
+                  This Week
+                </button>
+              </div>
+            </div>
             
             {areFiltersActive && (
               <button
