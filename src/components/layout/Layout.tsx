@@ -1,7 +1,8 @@
 
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Camera, BookOpen, Home, Leaf } from "lucide-react";
+import { Camera, BookOpen, Home, Leaf, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const { signOut, user } = useAuth();
 
   // Enable scrolling on iOS devices
   useEffect(() => {
@@ -35,8 +37,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return location.pathname === path;
   };
 
+  const handleSignOut = () => {
+    signOut();
+  };
+
   return (
     <div className="flex flex-col min-h-screen overflow-y-auto">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+        <div className="container flex h-14 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Leaf className="h-5 w-5 text-primary" />
+            <span className="font-medium">NutriJournal</span>
+          </div>
+          
+          {user && (
+            <button 
+              onClick={handleSignOut}
+              className="flex items-center text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4 mr-1" />
+              <span className="text-sm">Sign Out</span>
+            </button>
+          )}
+        </div>
+      </header>
+      
       <main className="flex-grow pb-20 overflow-y-auto -webkit-overflow-scrolling-touch">
         <div className="max-w-5xl mx-auto px-4 pt-4 pb-24 sm:px-6">
           {children}

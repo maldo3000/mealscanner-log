@@ -9,8 +9,9 @@ import {
   endOfWeek, 
   isWithinInterval, 
   isSameDay,
-  parseISO
 } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
 
 export type FilterPeriod = 'day' | 'week' | 'custom' | null;
 
@@ -40,22 +41,8 @@ interface MealJournalContextType {
 const MealJournalContext = createContext<MealJournalContextType | undefined>(undefined);
 
 export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [meals, setMeals] = useState<MealEntry[]>(() => {
-    const savedMeals = localStorage.getItem('mealJournal');
-    if (savedMeals) {
-      try {
-        const parsedMeals = JSON.parse(savedMeals);
-        return parsedMeals.map((meal: any) => ({
-          ...meal,
-          createdAt: new Date(meal.createdAt)
-        }));
-      } catch (error) {
-        console.error('Failed to parse saved meals:', error);
-        return [];
-      }
-    }
-    return [];
-  });
+  const [meals, setMeals] = useState<MealEntry[]>([]);
+  const { user, isAuthenticated } = useAuth();
 
   const [filterDate, setFilterDate] = useState<Date | null>(null);
   const [filterMealType, setFilterMealType] = useState<MealType | null>(null);
@@ -68,10 +55,76 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   });
 
   useEffect(() => {
-    localStorage.setItem('mealJournal', JSON.stringify(meals));
+    const loadMeals = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const { data, error } = await supabase
+            .from('meals')
+            .select('*')
+            .order('created_at', { ascending: false });
+            
+          if (error) {
+            throw error;
+          }
+          
+          if (data) {
+            const transformedData: MealEntry[] = data.map(meal => ({
+              id: meal.id,
+              title: meal.title,
+              description: meal.description,
+              mealType: meal.meal_type as MealType,
+              foodItems: meal.food_items,
+              imageUrl: meal.image_url,
+              nutrition: typeof meal.nutrition === 'string' 
+                ? JSON.parse(meal.nutrition) 
+                : meal.nutrition,
+              nutritionScore: meal.nutrition_score as NutritionScore,
+              notes: meal.notes || '',
+              createdAt: new Date(meal.created_at)
+            }));
+            
+            setMeals(transformedData);
+            console.log("Loaded meals from Supabase:", transformedData.length);
+          }
+        } catch (error) {
+          console.error('Error fetching meals from Supabase:', error);
+          loadFromLocalStorage();
+        }
+      } else {
+        loadFromLocalStorage();
+      }
+    };
+    
+    const loadFromLocalStorage = () => {
+      const savedMeals = localStorage.getItem('mealJournal');
+      if (savedMeals) {
+        try {
+          const parsedMeals = JSON.parse(savedMeals);
+          const formattedMeals = parsedMeals.map((meal: any) => ({
+            ...meal,
+            createdAt: new Date(meal.createdAt)
+          }));
+          setMeals(formattedMeals);
+          console.log("Loaded meals from localStorage:", formattedMeals.length);
+        } catch (error) {
+          console.error('Failed to parse saved meals:', error);
+          setMeals([]);
+        }
+      } else {
+        setMeals([]);
+      }
+    };
+    
+    loadMeals();
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (meals.length > 0) {
+      localStorage.setItem('mealJournal', JSON.stringify(meals));
+    }
   }, [meals]);
 
-  const addMeal = (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
+  const addMeal = async (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
     const newMeal: MealEntry = {
       ...meal,
       id: generateId(),
@@ -81,20 +134,92 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     console.log("Adding new meal with image:", newMeal.imageUrl ? "Image present" : "No image");
     
     setMeals(prevMeals => [newMeal, ...prevMeals]);
+    
+    if (isAuthenticated && user) {
+      try {
+        const { error } = await supabase.from('meals').insert({
+          id: newMeal.id,
+          title: newMeal.title,
+          description: newMeal.description,
+          meal_type: newMeal.mealType,
+          food_items: newMeal.foodItems,
+          image_url: newMeal.imageUrl,
+          nutrition: newMeal.nutrition,
+          nutrition_score: newMeal.nutritionScore,
+          notes: newMeal.notes,
+          created_at: newMeal.createdAt.toISOString(),
+          user_id: user.id
+        });
+        
+        if (error) {
+          console.error('Error saving meal to Supabase:', error);
+          toast.error('Failed to save meal to the server');
+        }
+      } catch (error) {
+        console.error('Exception saving meal to Supabase:', error);
+      }
+    }
+    
     toast.success('Meal added to your journal');
   };
 
-  const updateMeal = (id: string, updates: Partial<MealEntry>) => {
+  const updateMeal = async (id: string, updates: Partial<MealEntry>) => {
     setMeals(prevMeals => 
       prevMeals.map(meal => 
         meal.id === id ? { ...meal, ...updates } : meal
       )
     );
+    
+    if (isAuthenticated && user) {
+      try {
+        const supabaseUpdates: any = {};
+        
+        if (updates.title) supabaseUpdates.title = updates.title;
+        if (updates.description) supabaseUpdates.description = updates.description;
+        if (updates.mealType) supabaseUpdates.meal_type = updates.mealType;
+        if (updates.foodItems) supabaseUpdates.food_items = updates.foodItems;
+        if (updates.imageUrl) supabaseUpdates.image_url = updates.imageUrl;
+        if (updates.nutrition) supabaseUpdates.nutrition = updates.nutrition;
+        if (updates.nutritionScore) supabaseUpdates.nutrition_score = updates.nutritionScore;
+        if (updates.notes !== undefined) supabaseUpdates.notes = updates.notes;
+        if (updates.createdAt) supabaseUpdates.created_at = updates.createdAt.toISOString();
+        
+        const { error } = await supabase
+          .from('meals')
+          .update(supabaseUpdates)
+          .eq('id', id);
+        
+        if (error) {
+          console.error('Error updating meal in Supabase:', error);
+          toast.error('Failed to update meal on the server');
+        }
+      } catch (error) {
+        console.error('Exception updating meal in Supabase:', error);
+      }
+    }
+    
     toast.success('Meal updated successfully');
   };
 
-  const deleteMeal = (id: string) => {
+  const deleteMeal = async (id: string) => {
     setMeals(prevMeals => prevMeals.filter(meal => meal.id !== id));
+    
+    if (isAuthenticated && user) {
+      try {
+        const { error } = await supabase
+          .from('meals')
+          .delete()
+          .eq('id', id);
+        
+        if (error) {
+          console.error('Error deleting meal from Supabase:', error);
+          toast.error('Failed to delete meal from the server');
+        }
+      } catch (error) {
+        console.error('Exception deleting meal from Supabase:', error);
+      }
+    }
+    
     toast.success('Meal removed from your journal');
   };
 

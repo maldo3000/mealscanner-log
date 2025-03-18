@@ -22,6 +22,7 @@ export type Database = {
           nutrition_score: string
           timestamp: string
           title: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -35,6 +36,7 @@ export type Database = {
           nutrition_score: string
           timestamp?: string
           title: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -48,6 +50,28 @@ export type Database = {
           nutrition_score?: string
           timestamp?: string
           title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -56,7 +80,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          username: string | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
