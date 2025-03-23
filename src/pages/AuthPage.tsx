@@ -66,7 +66,7 @@ const AuthPage: React.FC = () => {
           <div className="flex items-center justify-center p-3 rounded-full bg-primary/10 mb-4">
             <Leaf className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-semibold">NutriJournal</h1>
+          <h1 className="text-2xl font-semibold">MealScanner</h1>
           <h2 className="text-xl font-medium text-primary mt-4">
             {isLogin ? 'Sign In' : 'Sign Up'}
           </h2>

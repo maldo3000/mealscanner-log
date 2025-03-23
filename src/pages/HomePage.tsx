@@ -38,7 +38,7 @@ const HomePage: React.FC = () => {
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold mb-2 flex items-center justify-center">
             <Leaf className="h-6 w-6 text-primary mr-2" />
-            alimento
+            MealScanner
           </h1>
           <p className="text-muted-foreground">
             Capture, analyze, and track your meals
