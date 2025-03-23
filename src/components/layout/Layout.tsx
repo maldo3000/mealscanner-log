@@ -49,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({
   };
   return <div className="flex flex-col min-h-screen overflow-y-auto">
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-        <div className="container flex h-14 items-center justify-between my-0 py-0">
+        <div className="container flex h-14 items-center justify-between py-0 my-[12px]">
           <div className="flex items-center gap-2">
             <Leaf className="h-5 w-5 text-primary" />
             <span className="font-medium">NutriJournal</span>
