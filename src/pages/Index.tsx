@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, CheckCircle, Zap, ChevronRight, UtensilsCrossed } from 'lucide-react';
+import { CheckCircle, Zap, ChevronRight, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 
@@ -23,8 +23,9 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center">
             <div className="flex items-center glass-card px-6 py-3 rounded-full backdrop-blur-md bg-card/30 border border-primary/30 shadow-lg">
-              <UtensilsCrossed className="h-7 w-7 text-primary mr-3" />
-              <Leaf className="h-8 w-8 text-primary mr-3" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 mr-3">
+                <UtensilsCrossed className="h-6 w-6 text-primary" />
+              </div>
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
                 MealScanner
               </span>
@@ -39,7 +40,7 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center justify-center p-2 rounded-full bg-primary/10 backdrop-blur-sm mb-4">
-                <Leaf className="h-5 w-5 text-primary mr-2" />
+                <UtensilsCrossed className="h-5 w-5 text-primary mr-2" />
                 <span className="text-sm font-medium text-primary">AI-Powered Nutrition Tracking</span>
               </div>
               
@@ -144,7 +145,7 @@ const features = [
     description: "Simply take a picture of your meal, and our AI will analyze what's on your plate."
   },
   {
-    icon: <Leaf className="h-6 w-6 text-primary" />,
+    icon: <UtensilsCrossed className="h-6 w-6 text-primary" />,
     title: "Get Nutritional Data",
     description: "Instantly receive detailed nutritional information about your food's calories, macros, and more."
   },
