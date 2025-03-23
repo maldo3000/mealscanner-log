@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Zap, ChevronRight, UtensilsCrossed } from 'lucide-react';
@@ -36,7 +35,7 @@ const LandingPage = () => {
                 <Link to="/home">Go to App <ChevronRight className="ml-1 h-4 w-4" /></Link>
               </Button>
             ) : (
-              <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button asChild variant="outline">
                 <Link to="/auth">Sign In <ChevronRight className="ml-1 h-4 w-4" /></Link>
               </Button>
             )}
