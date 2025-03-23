@@ -20,6 +20,8 @@ const AuthPage: React.FC = () => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [showVerificationAlert, setShowVerificationAlert] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
   const { signIn, signUp, loading, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -40,6 +42,7 @@ const AuthPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError(null);
     
     if (!isLogin) {
       // Signup validation
@@ -57,7 +60,23 @@ const AuthPage: React.FC = () => {
       // We'll let the signUp function handle the navigation and message
     } else {
       // Login flow
-      await signIn(email, password);
+      if (loginAttempts >= 5) {
+        setAuthError('Too many login attempts. Please try again later.');
+        toast.error('Too many login attempts. Please try again later.');
+        return;
+      }
+      
+      const result = await signIn(email, password);
+      if (result.error) {
+        setLoginAttempts(prev => prev + 1);
+        if (result.error.message === 'Invalid login credentials') {
+          setAuthError('Incorrect email or password');
+        } else if (result.error.message?.includes('rate limit')) {
+          setAuthError('Too many login attempts. Please try again later.');
+        } else {
+          setAuthError(result.error.message || 'Error signing in');
+        }
+      }
     }
   };
 
@@ -66,6 +85,8 @@ const AuthPage: React.FC = () => {
     setPassword('');
     setConfirmPassword('');
     setAcceptedTerms(false);
+    setAuthError(null);
+    setLoginAttempts(0);
   };
 
   // Redirect if already authenticated
@@ -89,6 +110,16 @@ const AuthPage: React.FC = () => {
           <AlertCircle className="h-4 w-4 text-primary mr-2" />
           <AlertDescription className="text-sm">
             Please check your email for a verification link. You need to verify your account before signing in.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {/* Authentication error alert */}
+      {authError && (
+        <Alert className="mb-6 max-w-md border-destructive/30 bg-destructive/10">
+          <AlertCircle className="h-4 w-4 text-destructive mr-2" />
+          <AlertDescription className="text-sm text-destructive">
+            {authError}
           </AlertDescription>
         </Alert>
       )}
@@ -174,7 +205,9 @@ const AuthPage: React.FC = () => {
             <Button 
               type="submit" 
               className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-              disabled={loading || (!isLogin && (!passwordsMatch || !acceptedTerms))}
+              disabled={loading || 
+                (!isLogin && (!passwordsMatch || !acceptedTerms)) || 
+                (isLogin && loginAttempts >= 5)}
             >
               {loading ? (
                 <LoadingSpinner size="small" className="mr-2" />

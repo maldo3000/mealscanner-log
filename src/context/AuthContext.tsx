@@ -9,7 +9,7 @@ interface AuthContextProps {
   session: Session | null;
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ error: any | null }>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
@@ -53,9 +53,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       toast.success('Successfully signed in');
       navigate('/home');
+      return { error: null };
     } catch (error: any) {
-      toast.error(error.message || 'Error signing in');
+      let errorMessage = 'Error signing in';
+      
+      // Handle specific error types
+      if (error.message === 'Invalid login credentials') {
+        errorMessage = 'Incorrect email or password';
+      } else if (error.message?.includes('rate limit')) {
+        errorMessage = 'Too many login attempts. Please try again later.';
+      }
+      
+      toast.error(errorMessage);
       console.error('Error signing in:', error);
+      return { error };
     } finally {
       setLoading(false);
     }
