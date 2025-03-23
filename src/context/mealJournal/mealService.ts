@@ -183,7 +183,7 @@ export const createNewMeal = (meal: Omit<MealEntry, 'id' | 'createdAt'>): MealEn
     ...meal,
     id: uuidv4(), // Use UUID for more reliable ID generation
     createdAt: now,
-    timestamp: now.toISOString(),
+    timestamp: meal.timestamp || now.toISOString(),
     // Ensure nutritionScore is valid
     nutritionScore: validateNutritionScore(meal.nutritionScore as string)
   };

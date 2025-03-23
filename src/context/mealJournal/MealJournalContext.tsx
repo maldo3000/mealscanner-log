@@ -1,13 +1,16 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Meal, MealTag, MealFilterOptions } from './types';
-import { mealService } from './mealService';
+import { MealJournalContextType, FilterPeriod } from './types';
+import * as mealService from './mealService';
+import * as mealFilterUtils from './mealFilterUtils';
 import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
+import { MealEntry, MealType, NutritionScore } from '@/types';
 
 const MealJournalContext = createContext<MealJournalContextType | undefined>(undefined);
 
 export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [meals, setMeals] = useState<Meal[]>([]);
+  const [meals, setMeals] = useState<MealEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const { user, isAuthenticated } = useAuth();
@@ -58,7 +61,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, [meals, isAuthenticated, isInitialized]);
 
-  const addMeal = async (meal: Omit<Meal, 'id' | 'createdAt'>) => {
+  const addMeal = async (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
     const newMeal = mealService.createNewMeal(meal);
     
     console.log("Adding new meal:", newMeal.title);
@@ -77,7 +80,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     toast.success('Meal added to your journal');
   };
 
-  const updateMeal = async (id: string, updates: Partial<Meal>) => {
+  const updateMeal = async (id: string, updates: Partial<MealEntry>) => {
     setMeals(prevMeals => 
       prevMeals.map(meal => 
         meal.id === id ? { ...meal, ...updates } : meal
@@ -115,7 +118,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return meals.find(meal => meal.id === id);
   };
 
-  const filteredMeals = mealService.getFilteredMeals(
+  const filteredMeals = mealFilterUtils.getFilteredMeals(
     meals,
     filterDate,
     filterMealType,
@@ -125,7 +128,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     customDateRange
   );
   
-  const totalCalories = mealService.calculateTotalCalories(filteredMeals);
+  const totalCalories = mealFilterUtils.calculateTotalCalories(filteredMeals);
 
   const clearFilters = () => {
     setFilterDate(null);
