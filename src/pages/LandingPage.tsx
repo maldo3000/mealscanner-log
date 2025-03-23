@@ -25,7 +25,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="px-4 md:px-6 py-5 border-b border-border">
+      <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto flex flex-col sm:flex-row items-center">
           <div className="flex items-center justify-between w-full mb-4 sm:mb-0">
             <Link to="/" className="flex items-center text-lg font-semibold">
