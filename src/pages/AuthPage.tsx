@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Leaf } from 'lucide-react';
+import { Leaf, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { Navigate } from 'react-router-dom';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,6 +19,7 @@ const AuthPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [showVerificationAlert, setShowVerificationAlert] = useState(false);
   const { signIn, signUp, loading, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -25,6 +27,16 @@ const AuthPage: React.FC = () => {
       setPasswordsMatch(confirmPassword === password || confirmPassword === '');
     }
   }, [password, confirmPassword, isLogin]);
+
+  // Check if we should show the verification message based on URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('signup') === 'success') {
+      setShowVerificationAlert(true);
+      // Remove the query param to avoid showing the message after page refreshes
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +54,7 @@ const AuthPage: React.FC = () => {
       }
       
       await signUp(email, password);
+      // We'll let the signUp function handle the navigation and message
     } else {
       // Login flow
       await signIn(email, password);
@@ -69,6 +82,16 @@ const AuthPage: React.FC = () => {
       {/* Decorative circles */}
       <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
       <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
+      
+      {/* Email verification message alert */}
+      {isLogin && showVerificationAlert && (
+        <Alert className="mb-6 max-w-md border-primary/30 bg-primary/10">
+          <AlertCircle className="h-4 w-4 text-primary mr-2" />
+          <AlertDescription className="text-sm">
+            Please check your email for a verification link. You need to verify your account before signing in.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Card className="w-full max-w-md glass-card border-border/30 backdrop-blur-md bg-card/60 animate-fade-in">
         <CardHeader className="pb-2 text-center">

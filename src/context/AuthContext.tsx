@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,8 +71,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data.user) {
-        toast.success('Registration successful! Check your email for confirmation.');
-        navigate('/onboarding');
+        toast.success('Registration successful! Please check your email for the verification link and then return to sign in.', {
+          duration: 6000, // Show for 6 seconds to ensure it's seen
+        });
+        navigate('/auth');
       } else {
         toast.error('Something went wrong during signup');
       }
