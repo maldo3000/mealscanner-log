@@ -17,7 +17,7 @@ import { MealJournalProvider } from './context/mealJournal';
 import { Toaster } from "./components/ui/toaster";
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import SubscriptionPage from './pages/SubscriptionPage';
-import AdminPage from './pages/AdminPage';
+import AdminPage from './pages/admin';
 import OnboardingPage from './pages/OnboardingPage';
 
 function App() {
