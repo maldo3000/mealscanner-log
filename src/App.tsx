@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
@@ -8,10 +9,10 @@ import MealDetailsPage from './pages/MealDetailsPage';
 import NotFound from './pages/NotFound';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import { ThemeProvider } from "@/components/ui/theme-provider"
+import { ThemeProvider } from "./components/ui/theme-provider";
 import { AuthProvider } from './context/AuthContext';
-import { MealJournalProvider } from './context/MealJournal/MealJournalContext';
-import { Toaster } from "@/components/ui/toaster"
+import { MealJournalProvider } from './context/mealJournal';
+import { Toaster } from "./components/ui/toaster";
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import SubscriptionPage from './pages/SubscriptionPage';
 import AdminPage from './pages/AdminPage';
