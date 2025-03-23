@@ -75,7 +75,8 @@ export const analyzeMealPhoto = async (
     const { data, error } = await supabase.functions.invoke('analyze-meal', {
       body: { 
         imageData: base64,
-        notes
+        notes,
+        type: 'photo'
       }
     });
     
@@ -91,12 +92,47 @@ export const analyzeMealPhoto = async (
     // Add the permanent image URL to the analysis result
     const result: MealAnalysisResponse = {
       ...data,
-      imageUrl // Use the URL from Storage instead of the data URL
+      imageUrl: imageUrl // Use the URL from Storage instead of the data URL
     };
     
     return result;
   } catch (error) {
     console.error('Error analyzing meal photo:', error);
+    throw error;
+  }
+};
+
+// Analyze a meal text description using the Supabase Edge Function
+export const analyzeMealText = async (description: string): Promise<MealAnalysisResponse> => {
+  try {
+    console.log("Analyzing meal description:", description);
+    
+    // Call the Supabase Edge Function for meal analysis
+    const { data, error } = await supabase.functions.invoke('analyze-meal', {
+      body: { 
+        description,
+        type: 'text'
+      }
+    });
+    
+    if (error) {
+      console.error('Error calling analyze-meal function for text analysis:', error);
+      throw new Error(`Analysis failed: ${error.message}`);
+    }
+    
+    if (!data) {
+      throw new Error('No data returned from meal text analysis');
+    }
+    
+    // For text analysis, we'll use a placeholder image
+    const result: MealAnalysisResponse = {
+      ...data,
+      imageUrl: data.imageUrl || '/placeholder.svg' // Use placeholder if no image URL is provided
+    };
+    
+    return result;
+  } catch (error) {
+    console.error('Error analyzing meal description:', error);
     throw error;
   }
 };

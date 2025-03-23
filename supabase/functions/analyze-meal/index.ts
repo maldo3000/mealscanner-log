@@ -19,16 +19,7 @@ const handleCors = (req: Request) => {
 };
 
 // Validate request data and environment variables
-const validateRequest = (imageData: string | undefined) => {
-  if (!imageData) {
-    console.error('No image data provided');
-    return { 
-      isValid: false, 
-      error: 'No image data provided', 
-      status: 400 
-    };
-  }
-
+const validateRequest = (requestData: any) => {
   if (!openAIApiKey) {
     console.error('OpenAI API key not found');
     return { 
@@ -38,15 +29,33 @@ const validateRequest = (imageData: string | undefined) => {
     };
   }
 
+  if (requestData.type === 'photo' && !requestData.imageData) {
+    console.error('No image data provided');
+    return { 
+      isValid: false, 
+      error: 'No image data provided', 
+      status: 400 
+    };
+  }
+
+  if (requestData.type === 'text' && !requestData.description) {
+    console.error('No meal description provided');
+    return { 
+      isValid: false, 
+      error: 'No meal description provided', 
+      status: 400 
+    };
+  }
+
   return { isValid: true };
 };
 
 // Create the system prompt with optional user notes
-const createSystemPrompt = (notes?: string) => {
-  let systemPrompt = `You are a nutritional analysis AI. Analyze the food in the image and provide the following information in JSON format:
+const createSystemPrompt = (requestType: string, notes?: string) => {
+  let systemPrompt = `You are a nutritional analysis AI. ${requestType === 'photo' ? 'Analyze the food in the image' : 'Analyze the food description'} and provide the following information in JSON format:
 1. "title": A concise title for this meal (just the food name)
-2. "description": A detailed description of what you see in the image
-3. "foodItems": An array of individual food items visible in the image
+2. "description": A detailed description of ${requestType === 'photo' ? 'what you see in the image' : 'the meal based on the description'}
+3. "foodItems": An array of individual food items ${requestType === 'photo' ? 'visible in the image' : 'mentioned in the description'}
 4. "nutrition": An object containing estimated nutritional information with these numeric properties:
    - "calories": Total calories
    - "protein": Protein in grams
@@ -54,7 +63,7 @@ const createSystemPrompt = (notes?: string) => {
    - "carbs": Carbohydrates in grams
 5. "nutritionScore": Overall healthiness rating (one of: "very healthy", "healthy", "moderate", "unhealthy", "not healthy")
 
-Your analysis must be accurate to what is visible in the image. Provide your best estimate for nutrition values.
+Your analysis must be accurate to ${requestType === 'photo' ? 'what is visible in the image' : 'the information provided in the description'}. Provide your best estimate for nutrition values.
 Your response MUST be valid JSON without any extra text, markdown, or explanations.`;
 
   if (notes && notes.trim().length > 0) {
@@ -64,8 +73,8 @@ Your response MUST be valid JSON without any extra text, markdown, or explanatio
   return systemPrompt;
 };
 
-// Create the OpenAI API request payload
-const createOpenAIRequest = (systemPrompt: string, imageData: string) => {
+// Create the OpenAI API request payload for image analysis
+const createImageOpenAIRequest = (systemPrompt: string, imageData: string) => {
   return {
     model: "gpt-4o",
     messages: [
@@ -87,6 +96,24 @@ const createOpenAIRequest = (systemPrompt: string, imageData: string) => {
             }
           }
         ]
+      }
+    ],
+    max_tokens: 1500
+  };
+};
+
+// Create the OpenAI API request payload for text analysis
+const createTextOpenAIRequest = (systemPrompt: string, description: string) => {
+  return {
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: systemPrompt
+      },
+      {
+        role: "user",
+        content: `Analyze this meal description and provide nutritional information in the exact JSON format specified: "${description}"`
       }
     ],
     max_tokens: 1500
@@ -191,6 +218,13 @@ const normalizeNutritionFields = (analysisResult: any) => {
   return analysisResult;
 };
 
+// Generate a simple placeholder image URL for text-based analysis
+const generatePlaceholderImage = (foodTitle: string) => {
+  // You could implement logic here to generate a more specific placeholder
+  // For now, we'll just use a simple placeholder URL
+  return `/placeholder.svg`;
+};
+
 // Main handler function
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -198,13 +232,14 @@ serve(async (req) => {
   if (corsResponse) return corsResponse;
 
   try {
-    console.log('Received request to analyze meal image');
+    console.log('Received request to analyze meal');
     
     // Parse the request body
-    const { imageData, notes } = await req.json();
+    const requestData = await req.json();
+    console.log('Request type:', requestData.type);
     
     // Validate input
-    const validation = validateRequest(imageData);
+    const validation = validateRequest(requestData);
     if (!validation.isValid) {
       return new Response(
         JSON.stringify({ error: validation.error }), 
@@ -212,13 +247,23 @@ serve(async (req) => {
       );
     }
 
+    let openAIRequest;
+    const requestType = requestData.type || 'photo';
+    
     // Create the system prompt
-    const systemPrompt = createSystemPrompt(notes);
+    const systemPrompt = createSystemPrompt(
+      requestType, 
+      requestType === 'photo' ? requestData.notes : undefined
+    );
     
-    console.log('Analyzing food image with OpenAI Vision API...');
+    console.log(`Analyzing food ${requestType === 'photo' ? 'image' : 'description'} with OpenAI...`);
     
-    // Create the OpenAI API request
-    const openAIRequest = createOpenAIRequest(systemPrompt, imageData);
+    // Create the OpenAI API request based on request type
+    if (requestType === 'photo') {
+      openAIRequest = createImageOpenAIRequest(systemPrompt, requestData.imageData);
+    } else {
+      openAIRequest = createTextOpenAIRequest(systemPrompt, requestData.description);
+    }
 
     // Call the OpenAI API
     const openAIResult = await callOpenAI(openAIRequest);
@@ -264,11 +309,16 @@ serve(async (req) => {
       // Normalize nutrition fields
       const normalizedResult = normalizeNutritionFields(analysisResult);
       
-      // Set the imageUrl to the data URL
-      normalizedResult.imageUrl = `data:image/jpeg;base64,${imageData}`;
+      // Set the imageUrl based on request type
+      if (requestType === 'photo') {
+        // For photo analysis, use the provided image data as a data URL
+        normalizedResult.imageUrl = `data:image/jpeg;base64,${requestData.imageData}`;
+      } else {
+        // For text analysis, generate a placeholder image URL
+        normalizedResult.imageUrl = generatePlaceholderImage(normalizedResult.title);
+      }
       
       console.log('Successfully parsed and validated meal analysis data');
-      console.log('Analysis result:', JSON.stringify(normalizedResult, null, 2));
       
       // Return the analysis result
       return new Response(
