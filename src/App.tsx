@@ -1,6 +1,8 @@
+
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Index from './pages/Index';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import CapturePage from './pages/Capture';
 import JournalPage from './pages/JournalPage';
@@ -25,13 +27,27 @@ function App() {
           <SubscriptionProvider>
             <MealJournalProvider>
               <Routes>
-                <Route path="/" element={<Index />} />
+                {/* Public routes */}
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<AuthPage />} />
+                
+                {/* Protected routes */}
                 <Route
                   path="/onboarding"
                   element={
                     <ProtectedRoute>
                       <OnboardingPage />
+                    </ProtectedRoute>
+                  }
+                />
+                
+                <Route
+                  path="/home"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <HomePage />
+                      </Layout>
                     </ProtectedRoute>
                   }
                 />

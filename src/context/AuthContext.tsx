@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       toast.success('Successfully signed in');
-      navigate('/');
+      navigate('/home');
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
       console.error('Error signing in:', error);
@@ -74,7 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.success('Registration successful! Please check your email for the verification link and then return to sign in.', {
           duration: 6000, // Show for 6 seconds to ensure it's seen
         });
-        navigate('/auth');
+        // Add a URL parameter so we can show the verification alert
+        navigate('/auth?signup=success');
       } else {
         toast.error('Something went wrong during signup');
       }
@@ -96,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       toast.success('Successfully signed out');
-      navigate('/auth');
+      navigate('/');
     } catch (error: any) {
       toast.error(error.message || 'Error signing out');
       console.error('Error signing out:', error);
