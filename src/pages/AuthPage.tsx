@@ -11,6 +11,7 @@ import {
   AuthHeader
 } from '@/components/auth';
 import { useAuthForm } from '@/hooks/useAuthForm';
+import PasswordResetForm from '@/components/auth/PasswordResetForm';
 
 const AuthPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -22,6 +23,7 @@ const AuthPage: React.FC = () => {
     acceptedTerms,
     passwordsMatch,
     showVerificationAlert,
+    showResetPasswordForm,
     authError,
     loginAttempts,
     loading,
@@ -30,7 +32,10 @@ const AuthPage: React.FC = () => {
     setConfirmPassword,
     setAcceptedTerms,
     toggleAuthMode,
-    handleSubmit
+    handleSubmit,
+    handlePasswordReset,
+    showPasswordResetForm,
+    hidePasswordResetForm
   } = useAuthForm();
 
   // Redirect if already authenticated
@@ -58,7 +63,15 @@ const AuthPage: React.FC = () => {
         </CardHeader>
 
         <CardContent className="pt-4">
-          {isLogin ? (
+          {showResetPasswordForm ? (
+            <PasswordResetForm
+              email={email}
+              setEmail={setEmail}
+              loading={loading}
+              onSubmit={handlePasswordReset}
+              onCancel={hidePasswordResetForm}
+            />
+          ) : isLogin ? (
             <SignInForm
               email={email}
               setEmail={setEmail}
@@ -66,6 +79,7 @@ const AuthPage: React.FC = () => {
               setPassword={setPassword}
               loading={loading}
               onSubmit={handleSubmit}
+              onForgotPassword={showPasswordResetForm}
               disabled={loginAttempts >= 5}
             />
           ) : (
@@ -85,15 +99,17 @@ const AuthPage: React.FC = () => {
           )}
         </CardContent>
 
-        <CardFooter className="flex justify-center pt-0">
-          <button
-            type="button"
-            className="text-primary hover:text-primary/90 hover:underline text-sm transition-colors"
-            onClick={toggleAuthMode}
-          >
-            {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-          </button>
-        </CardFooter>
+        {!showResetPasswordForm && (
+          <CardFooter className="flex justify-center pt-0">
+            <button
+              type="button"
+              className="text-primary hover:text-primary/90 hover:underline text-sm transition-colors"
+              onClick={toggleAuthMode}
+            >
+              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+            </button>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );

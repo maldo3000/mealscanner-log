@@ -12,6 +12,7 @@ interface SignInFormProps {
   setPassword: (password: string) => void;
   loading: boolean;
   onSubmit: (e: React.FormEvent) => Promise<void>;
+  onForgotPassword: () => void;
   disabled: boolean;
 }
 
@@ -22,6 +23,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
   setPassword,
   loading,
   onSubmit,
+  onForgotPassword,
   disabled
 }) => {
   return (
@@ -40,7 +42,16 @@ const SignInForm: React.FC<SignInFormProps> = ({
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-foreground/90">Password</Label>
+        <div className="flex justify-between items-center">
+          <Label htmlFor="password" className="text-foreground/90">Password</Label>
+          <button 
+            type="button" 
+            onClick={onForgotPassword}
+            className="text-xs text-primary hover:text-primary/80 hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
         <Input
           id="password"
           type="password"

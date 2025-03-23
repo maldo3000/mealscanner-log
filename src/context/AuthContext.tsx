@@ -10,8 +10,9 @@ interface AuthContextProps {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any | null }>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<{ error: any | null, userExists?: boolean }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any | null }>;
   isAuthenticated: boolean;
 }
 
@@ -78,6 +79,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error, data } = await supabase.auth.signUp({ email, password });
       
       if (error) {
+        // Check if the error is due to the user already existing
+        if (error.message?.includes('User already registered')) {
+          toast.error('An account with this email already exists. Please sign in or reset your password.');
+          return { error, userExists: true };
+        }
         throw error;
       }
       
@@ -90,9 +96,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         toast.error('Something went wrong during signup');
       }
+      return { error: null };
     } catch (error: any) {
       toast.error(error.message || 'Error signing up');
       console.error('Error signing up:', error);
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Password reset link sent to your email', {
+        duration: 6000,
+      });
+      return { error: null };
+    } catch (error: any) {
+      toast.error(error.message || 'Error sending password reset link');
+      console.error('Error sending password reset link:', error);
+      return { error };
     } finally {
       setLoading(false);
     }
@@ -124,6 +156,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
+    resetPassword,
     isAuthenticated: !!session
   };
 

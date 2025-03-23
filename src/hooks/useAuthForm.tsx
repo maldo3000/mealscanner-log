@@ -12,6 +12,7 @@ interface UseAuthFormResult {
   acceptedTerms: boolean;
   passwordsMatch: boolean;
   showVerificationAlert: boolean;
+  showResetPasswordForm: boolean;
   authError: string | null;
   loginAttempts: number;
   loading: boolean;
@@ -21,6 +22,9 @@ interface UseAuthFormResult {
   setAcceptedTerms: (accepted: boolean) => void;
   toggleAuthMode: () => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
+  handlePasswordReset: (e: React.FormEvent) => Promise<void>;
+  showPasswordResetForm: () => void;
+  hidePasswordResetForm: () => void;
 }
 
 export const useAuthForm = (): UseAuthFormResult => {
@@ -31,9 +35,10 @@ export const useAuthForm = (): UseAuthFormResult => {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [showVerificationAlert, setShowVerificationAlert] = useState(false);
+  const [showResetPasswordForm, setShowResetPasswordForm] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [loginAttempts, setLoginAttempts] = useState(0);
-  const { signIn, signUp, loading } = useAuth();
+  const { signIn, signUp, resetPassword, loading } = useAuth();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -47,6 +52,13 @@ export const useAuthForm = (): UseAuthFormResult => {
     if (searchParams.get('signup') === 'success') {
       setShowVerificationAlert(true);
       // Remove the query param to avoid showing the message after page refreshes
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Check if we're coming back from a password reset
+    if (searchParams.get('reset') === 'true') {
+      toast.success('You can now create a new password by signing in with the link in your email.');
+      // Remove the query param
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [searchParams]);
@@ -67,8 +79,15 @@ export const useAuthForm = (): UseAuthFormResult => {
         return;
       }
       
-      await signUp(email, password);
-      // We'll let the signUp function handle the navigation and message
+      const result = await signUp(email, password);
+      if (result.error) {
+        // If the user already exists, show a helpful message
+        if (result.userExists) {
+          setAuthError('An account with this email already exists. Sign in or reset your password.');
+        } else {
+          setAuthError(result.error.message || 'Error signing up');
+        }
+      }
     } else {
       // Login flow
       if (loginAttempts >= 5) {
@@ -91,6 +110,20 @@ export const useAuthForm = (): UseAuthFormResult => {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    
+    const result = await resetPassword(email);
+    if (!result.error) {
+      // Hide the password reset form after successful submission
+      setShowResetPasswordForm(false);
+    }
+  };
+
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
     setPassword('');
@@ -98,6 +131,16 @@ export const useAuthForm = (): UseAuthFormResult => {
     setAcceptedTerms(false);
     setAuthError(null);
     setLoginAttempts(0);
+    setShowResetPasswordForm(false);
+  };
+
+  const showPasswordResetForm = () => {
+    setShowResetPasswordForm(true);
+    setAuthError(null);
+  };
+
+  const hidePasswordResetForm = () => {
+    setShowResetPasswordForm(false);
   };
 
   return {
@@ -108,6 +151,7 @@ export const useAuthForm = (): UseAuthFormResult => {
     acceptedTerms,
     passwordsMatch,
     showVerificationAlert,
+    showResetPasswordForm,
     authError,
     loginAttempts,
     loading,
@@ -116,6 +160,9 @@ export const useAuthForm = (): UseAuthFormResult => {
     setConfirmPassword,
     setAcceptedTerms,
     toggleAuthMode,
-    handleSubmit
+    handleSubmit,
+    handlePasswordReset,
+    showPasswordResetForm,
+    hidePasswordResetForm
   };
 };
