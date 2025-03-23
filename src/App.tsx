@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
@@ -16,6 +15,7 @@ import { Toaster } from "./components/ui/toaster";
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import SubscriptionPage from './pages/SubscriptionPage';
 import AdminPage from './pages/AdminPage';
+import OnboardingPage from './pages/OnboardingPage';
 
 function App() {
   return (
@@ -27,6 +27,14 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route
+                  path="/onboarding"
+                  element={
+                    <ProtectedRoute>
+                      <OnboardingPage />
+                    </ProtectedRoute>
+                  }
+                />
                 
                 <Route
                   path="/capture"

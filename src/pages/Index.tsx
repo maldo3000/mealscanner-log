@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { CheckCircle, Zap, ChevronRight, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+
 const Index = () => {
   const {
     isAuthenticated
   } = useAuth();
+  
   return <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
       {/* Gradient overlays for background effect */}
       <div className="absolute inset-0 bg-gradient-radial from-primary/5 to-transparent opacity-70"></div>
@@ -56,7 +58,7 @@ const Index = () => {
                       <Link to="/capture">Scan Your Meal <ChevronRight className="ml-1 h-4 w-4" /></Link>
                     </Button>
                     <Button asChild variant="outline" size="lg">
-                      <Link to="/journal">View Journal</Link>
+                      <Link to="/onboarding">View Onboarding <ChevronRight className="ml-1 h-4 w-4" /></Link>
                     </Button>
                   </> : <>
                     <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">

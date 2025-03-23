@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -64,13 +63,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error, data } = await supabase.auth.signUp({ email, password });
       
       if (error) {
         throw error;
       }
       
-      toast.success('Registration successful! Check your email for confirmation.');
+      if (data.user) {
+        toast.success('Registration successful! Check your email for confirmation.');
+        navigate('/onboarding');
+      } else {
+        toast.error('Something went wrong during signup');
+      }
     } catch (error: any) {
       toast.error(error.message || 'Error signing up');
       console.error('Error signing up:', error);
