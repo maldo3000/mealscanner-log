@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { analyzeMealPhoto, analyzeMealText } from "@/utils/api";
@@ -11,10 +10,13 @@ import MealDetailsForm from "./components/MealDetailsForm";
 import TextInputSection from "./components/TextInputSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const CapturePage: React.FC = () => {
   const navigate = useNavigate();
   const { addMeal } = useMealJournal();
+  const isMobile = useIsMobile();
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -54,7 +56,6 @@ const CapturePage: React.FC = () => {
       setAnalysisResult(result);
       setTitle(result.title);
       
-      // Determine meal type based on time of day if it's set to random
       setMealTypeBasedOnTime();
       
       toast.success("Analysis complete!");
@@ -83,7 +84,6 @@ const CapturePage: React.FC = () => {
       setAnalysisResult(result);
       setTitle(result.title);
       
-      // Determine meal type based on time of day if it's set to random
       setMealTypeBasedOnTime();
       
       toast.success("Analysis complete!");
@@ -137,7 +137,6 @@ const CapturePage: React.FC = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    // Reset analysis state when switching tabs
     setAnalysisResult(null);
     setAnalysisError(null);
     setIsAnalyzing(false);
@@ -145,8 +144,8 @@ const CapturePage: React.FC = () => {
   };
   
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="mb-6">
+    <div className={cn("space-y-6 animate-fade-in", isMobile && isAnalyzing ? "pt-0" : "")}>
+      <div className={cn("mb-6", isMobile && isAnalyzing ? "hidden" : "")}>
         <h1 className="text-2xl font-bold mb-1">Capture Meal</h1>
         <p className="text-muted-foreground">
           Take a photo or describe your meal for automatic nutrition analysis
@@ -154,7 +153,7 @@ const CapturePage: React.FC = () => {
       </div>
       
       <Tabs defaultValue="photo" value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid grid-cols-2 mb-6">
+        <TabsList className={cn("grid grid-cols-2 mb-6", isMobile && isAnalyzing ? "hidden" : "")}>
           <TabsTrigger value="photo">Photo</TabsTrigger>
           <TabsTrigger value="text">Text Description</TabsTrigger>
         </TabsList>

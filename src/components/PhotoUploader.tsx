@@ -1,8 +1,8 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Camera, Upload, X, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PhotoUploaderProps {
   onPhotoSelected: (file: File) => void;
@@ -20,6 +20,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const isMobile = useIsMobile();
 
   // Effect to handle video initialization when stream is set
   useEffect(() => {
@@ -92,10 +93,21 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         return;
       }
       
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" },
-        audio: false 
-      });
+      // For mobile, explicitly request portrait orientation
+      const constraints = isMobile 
+        ? { 
+            video: { 
+              facingMode: "environment",
+              aspectRatio: 3/4 // Portrait aspect ratio (height > width)
+            },
+            audio: false 
+          }
+        : { 
+            video: { facingMode: "environment" },
+            audio: false 
+          };
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       
       console.log("Camera access granted, setting up stream");
       setStream(mediaStream);
@@ -169,7 +181,11 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           "relative w-full rounded-2xl overflow-hidden transition-all duration-300",
           "border-2 border-dashed border-border focus-within:border-primary",
           isDragging ? "border-primary bg-primary/5" : "",
-          previewUrl ? "" : isCapturing ? "aspect-[4/3]" : "aspect-[4/3]",
+          previewUrl ? "" : isCapturing 
+            ? isMobile 
+              ? "aspect-[3/4] h-[70vh] max-h-[800px]" // Portrait and taller on mobile
+              : "aspect-[4/3]" 
+            : "aspect-[4/3]",
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -198,9 +214,15 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               autoPlay
               playsInline
               muted
-              className="w-full h-full object-cover rounded-2xl"
+              className={cn(
+                "object-cover rounded-2xl",
+                isMobile ? "w-full h-full" : "w-full h-full"
+              )}
             />
-            <div className="absolute bottom-4 inset-x-0 flex justify-center space-x-4">
+            <div className={cn(
+              "absolute inset-x-0 flex justify-center space-x-4",
+              isMobile ? "bottom-10" : "bottom-4"
+            )}>
               <button 
                 onClick={capturePhoto}
                 className="bg-primary text-white p-4 rounded-full"
