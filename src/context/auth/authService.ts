@@ -42,11 +42,37 @@ export const authService = {
   signUp: async (
     email: string, 
     password: string, 
+    inviteCode: string = '',
     navigate: NavigateFunction, 
     setLoading: (loading: boolean) => void
   ) => {
     try {
       setLoading(true);
+      
+      // First, check if we need to validate an invite code
+      const { data: settings } = await supabase
+        .from('app_settings')
+        .select('invite_only_registration')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      const inviteRequired = settings?.invite_only_registration;
+      
+      // If invite is required, validate the code before sign up
+      if (inviteRequired && inviteCode) {
+        const { data: isValid, error: validationError } = await supabase.rpc(
+          'validate_invite_code', 
+          { code_to_check: inviteCode }
+        );
+        
+        if (validationError || !isValid) {
+          toast.error('Invalid or expired invite code');
+          return { error: new Error('Invalid or expired invite code') };
+        }
+      }
+      
+      // Proceed with sign up
       const { error, data } = await supabase.auth.signUp({ email, password });
       
       if (error) {
@@ -56,6 +82,14 @@ export const authService = {
           return { error, userExists: true };
         }
         throw error;
+      }
+      
+      // If signup was successful and invite code was provided, mark it as used
+      if (data.user && inviteRequired && inviteCode) {
+        await supabase.rpc('use_invite_code', {
+          code_to_use: inviteCode,
+          user_email: email
+        });
       }
       
       if (data.user) {

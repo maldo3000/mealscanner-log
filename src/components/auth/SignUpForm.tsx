@@ -13,10 +13,14 @@ interface SignUpFormProps {
   setPassword: (password: string) => void;
   confirmPassword: string;
   setConfirmPassword: (confirmPassword: string) => void;
+  inviteCode: string;
+  setInviteCode: (inviteCode: string) => void;
   acceptedTerms: boolean;
   setAcceptedTerms: (accepted: boolean) => void;
   passwordsMatch: boolean;
   loading: boolean;
+  inviteCodeError: string | null;
+  inviteRequired: boolean;
   onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
@@ -27,10 +31,14 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   setPassword,
   confirmPassword,
   setConfirmPassword,
+  inviteCode,
+  setInviteCode,
   acceptedTerms,
   setAcceptedTerms,
   passwordsMatch,
   loading,
+  inviteCodeError,
+  inviteRequired,
   onSubmit
 }) => {
   return (
@@ -47,6 +55,24 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
           className="bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50"
         />
       </div>
+      
+      {inviteRequired && (
+        <div className="space-y-2">
+          <Label htmlFor="inviteCode" className="text-foreground/90">Invite Code</Label>
+          <Input
+            id="inviteCode"
+            type="text"
+            placeholder="Enter your invite code"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            required
+            className={`bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50 ${inviteCodeError ? "border-destructive" : ""}`}
+          />
+          {inviteCodeError && (
+            <p className="text-destructive text-sm mt-1">{inviteCodeError}</p>
+          )}
+        </div>
+      )}
       
       <div className="space-y-2">
         <Label htmlFor="password" className="text-foreground/90">Password</Label>
@@ -94,7 +120,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
       <Button 
         type="submit" 
         className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-        disabled={loading || !passwordsMatch || !acceptedTerms}
+        disabled={loading || !passwordsMatch || !acceptedTerms || (inviteRequired && !inviteCode)}
       >
         {loading ? (
           <LoadingSpinner size="small" className="mr-2" />

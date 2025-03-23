@@ -53,8 +53,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return authService.signIn(email, password, navigate, setLoading);
   };
 
-  const signUp = async (email: string, password: string) => {
-    return authService.signUp(email, password, navigate, setLoading);
+  const signUp = async (email: string, password: string, inviteCode: string = '') => {
+    return authService.signUp(email, password, inviteCode, navigate, setLoading);
   };
 
   const resetPassword = async (email: string) => {

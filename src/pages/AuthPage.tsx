@@ -20,16 +20,20 @@ const AuthPage: React.FC = () => {
     email,
     password,
     confirmPassword,
+    inviteCode,
     acceptedTerms,
     passwordsMatch,
     showVerificationAlert,
     showResetPasswordForm,
     authError,
+    inviteCodeError,
+    inviteRequired,
     loginAttempts,
     loading,
     setEmail,
     setPassword,
     setConfirmPassword,
+    setInviteCode,
     setAcceptedTerms,
     toggleAuthMode,
     handleSubmit,
@@ -90,10 +94,14 @@ const AuthPage: React.FC = () => {
               setPassword={setPassword}
               confirmPassword={confirmPassword}
               setConfirmPassword={setConfirmPassword}
+              inviteCode={inviteCode}
+              setInviteCode={setInviteCode}
               acceptedTerms={acceptedTerms}
               setAcceptedTerms={setAcceptedTerms}
               passwordsMatch={passwordsMatch}
               loading={loading}
+              inviteCodeError={inviteCodeError}
+              inviteRequired={inviteRequired}
               onSubmit={handleSubmit}
             />
           )}

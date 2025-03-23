@@ -14,6 +14,7 @@ export type Database = {
           created_at: string
           free_tier_limit: number
           id: string
+          invite_only_registration: boolean | null
           paywall_enabled: boolean
           updated_at: string
         }
@@ -21,6 +22,7 @@ export type Database = {
           created_at?: string
           free_tier_limit?: number
           id?: string
+          invite_only_registration?: boolean | null
           paywall_enabled?: boolean
           updated_at?: string
         }
@@ -28,8 +30,42 @@ export type Database = {
           created_at?: string
           free_tier_limit?: number
           id?: string
+          invite_only_registration?: boolean | null
           paywall_enabled?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      invite_codes: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          email: string | null
+          expires_at: string | null
+          id: string
+          used: boolean | null
+          used_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          used?: boolean | null
+          used_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          used?: boolean | null
+          used_at?: string | null
         }
         Relationships: []
       }
@@ -180,6 +216,19 @@ export type Database = {
         Args: {
           target_user_id: string
           new_role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      use_invite_code: {
+        Args: {
+          code_to_use: string
+          user_email: string
+        }
+        Returns: boolean
+      }
+      validate_invite_code: {
+        Args: {
+          code_to_check: string
         }
         Returns: boolean
       }

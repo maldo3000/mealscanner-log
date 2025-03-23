@@ -6,7 +6,7 @@ export interface AuthContextProps {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: any | null, userExists?: boolean }>;
+  signUp: (email: string, password: string, inviteCode?: string) => Promise<{ error: any | null, userExists?: boolean }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any | null }>;
   isAuthenticated: boolean;
