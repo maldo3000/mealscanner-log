@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { analyzeMealPhoto, analyzeMealText } from "@/utils/api";
 import { useMealJournal } from "@/context/MealJournalContext";
+import { useSubscription } from "@/context/SubscriptionContext";
 import { MealType, MealAnalysisResponse } from "@/types";
 import PhotoUploadSection from "./components/PhotoUploadSection";
 import AnalysisInProgress from "./components/AnalysisInProgress";
@@ -12,10 +13,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
 
 const CapturePage: React.FC = () => {
   const navigate = useNavigate();
   const { addMeal } = useMealJournal();
+  const { incrementScanCount, canScan, remainingScans, paywallEnabled, loadingSubscription } = useSubscription();
   const isMobile = useIsMobile();
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -29,6 +32,13 @@ const CapturePage: React.FC = () => {
   const [mealDescription, setMealDescription] = useState("");
   const [activeTab, setActiveTab] = useState("photo");
   
+  useEffect(() => {
+    if (!loadingSubscription && !canScan && paywallEnabled) {
+      toast.error("You've reached your free scan limit. Please subscribe to continue.");
+      navigate('/subscription');
+    }
+  }, [canScan, loadingSubscription, navigate, paywallEnabled]);
+  
   const handlePhotoSelected = (file: File) => {
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
@@ -40,6 +50,12 @@ const CapturePage: React.FC = () => {
   const handleAnalyzePhoto = async (includeNotes = false) => {
     if (!selectedFile) {
       toast.error("Please select a photo first");
+      return;
+    }
+    
+    const canProceed = await incrementScanCount();
+    if (!canProceed) {
+      navigate('/subscription');
       return;
     }
     
@@ -71,6 +87,12 @@ const CapturePage: React.FC = () => {
   const handleAnalyzeText = async () => {
     if (!mealDescription || mealDescription.trim() === "") {
       toast.error("Please describe your meal first");
+      return;
+    }
+    
+    const canProceed = await incrementScanCount();
+    if (!canProceed) {
+      navigate('/subscription');
       return;
     }
     
@@ -143,6 +165,17 @@ const CapturePage: React.FC = () => {
     setNotes("");
   };
   
+  if (loadingSubscription) {
+    return (
+      <div className="flex justify-center items-center h-[50vh]">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-8 w-32 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 w-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className={cn("space-y-6 animate-fade-in", isMobile && isAnalyzing ? "pt-0" : "")}>
       <div className={cn("mb-6", isMobile && isAnalyzing ? "hidden" : "")}>
@@ -150,6 +183,26 @@ const CapturePage: React.FC = () => {
         <p className="text-muted-foreground">
           Take a photo or describe your meal for automatic nutrition analysis
         </p>
+        
+        {paywallEnabled && (
+          <div className="mt-4 bg-primary/5 p-3 rounded-lg flex items-start gap-2 text-sm">
+            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-foreground">
+                {remainingScans > 0 
+                  ? `You have ${remainingScans} free scans remaining` 
+                  : "You've reached your free scan limit"}
+              </p>
+              {remainingScans <= 10 && (
+                <p className="text-muted-foreground mt-1">
+                  {remainingScans > 0 
+                    ? "Subscribe to unlock unlimited scans" 
+                    : "Visit the subscription page to continue scanning meals"}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
       
       <Tabs defaultValue="photo" value={activeTab} onValueChange={handleTabChange} className="w-full">

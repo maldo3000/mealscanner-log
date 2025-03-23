@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          created_at: string
+          free_tier_limit: number
+          id: string
+          paywall_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          free_tier_limit?: number
+          id?: string
+          paywall_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          free_tier_limit?: number
+          id?: string
+          paywall_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       meals: {
         Row: {
           created_at: string
@@ -72,6 +96,39 @@ export type Database = {
           created_at?: string
           id?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          is_subscribed: boolean
+          scan_count: number
+          subscription_end: string | null
+          subscription_start: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_subscribed?: boolean
+          scan_count?: number
+          subscription_end?: string | null
+          subscription_start?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_subscribed?: boolean
+          scan_count?: number
+          subscription_end?: string | null
+          subscription_start?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
