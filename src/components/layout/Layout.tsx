@@ -51,8 +51,8 @@ const Layout: React.FC<LayoutProps> = ({
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
         <div className="container flex h-14 items-center justify-between py-0 my-[12px]">
           <div className="flex items-center gap-2">
-            <Leaf className="h-5 w-5 text-primary" />
-            <span className="font-bold">MealScanner</span>
+            <Leaf className="h-6 w-6 text-primary" />
+            <span className="font-bold text-lg">MealScanner</span>
           </div>
           
           {user && <button onClick={handleSignOut} className="flex items-center text-muted-foreground hover:text-foreground">
