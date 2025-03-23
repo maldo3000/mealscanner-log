@@ -79,6 +79,20 @@ const escapeCsvValue = (value: string): string => {
 };
 
 /**
+ * Type guard for checking if navigator has msSaveBlob method (IE specific)
+ */
+interface NavigatorWithMsSaveBlob extends Navigator {
+  msSaveBlob: (blob: Blob, defaultName: string) => boolean;
+}
+
+/**
+ * Checks if the navigator has the msSaveBlob method
+ */
+const hasIESaveBlob = (nav: Navigator): nav is NavigatorWithMsSaveBlob => {
+  return 'msSaveBlob' in nav;
+};
+
+/**
  * Triggers a download of the provided content as a CSV file
  */
 export const downloadCSV = (csvContent: string, filename: string): void => {
@@ -89,7 +103,7 @@ export const downloadCSV = (csvContent: string, filename: string): void => {
   const link = document.createElement('a');
   
   // Set up the download link
-  if (navigator.msSaveBlob) { // For IE 10+
+  if (hasIESaveBlob(navigator)) { // For IE 10+
     navigator.msSaveBlob(blob, filename);
   } else {
     // For modern browsers
