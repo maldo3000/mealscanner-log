@@ -10,6 +10,7 @@ import MealDetailsPage from './pages/MealDetailsPage';
 import NotFound from './pages/NotFound';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute';
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { AuthProvider } from './context/AuthContext';
 import { MealJournalProvider } from './context/mealJournal';
@@ -99,11 +100,11 @@ function App() {
                 <Route
                   path="/admin"
                   element={
-                    <ProtectedRoute>
+                    <AdminRoute>
                       <Layout>
                         <AdminPage />
                       </Layout>
-                    </ProtectedRoute>
+                    </AdminRoute>
                   }
                 />
                 

@@ -14,6 +14,8 @@ interface AuthContextProps {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any | null }>;
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  checkUserRole: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -22,7 +24,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+
+  // Function to check if the current user has admin role
+  const checkUserRole = async () => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('has_role', { 
+        _role: 'admin' 
+      });
+
+      if (error) {
+        console.error('Error checking user role:', error);
+        setIsAdmin(false);
+        return;
+      }
+
+      setIsAdmin(data || false);
+    } catch (error) {
+      console.error('Failed to check user role:', error);
+      setIsAdmin(false);
+    }
+  };
 
   useEffect(() => {
     // Check for active session
@@ -42,6 +70,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Check admin role whenever the user changes
+  useEffect(() => {
+    if (user) {
+      checkUserRole();
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -157,7 +194,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     resetPassword,
-    isAuthenticated: !!session
+    isAuthenticated: !!session,
+    isAdmin,
+    checkUserRole
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -16,7 +15,7 @@ const AdminPage: React.FC = () => {
   const [freeTierLimit, setFreeTierLimit] = useState(80);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
   // Load current settings
@@ -52,7 +51,7 @@ const AdminPage: React.FC = () => {
   }, []);
 
   const saveSettings = async () => {
-    if (!user) {
+    if (!isAdmin) {
       toast.error('You must be logged in to perform this action');
       return;
     }
@@ -94,8 +93,8 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  // Simple admin check - in a real app you would have proper role-based auth
-  if (!user || user.email !== 'admin@example.com') {
+  // Simple admin check now uses the isAdmin state from context
+  if (!isAdmin) {
     return (
       <div className="container py-10">
         <Alert variant="destructive">
