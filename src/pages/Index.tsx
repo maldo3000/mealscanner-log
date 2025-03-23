@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, CheckCircle, Zap, ChevronRight } from 'lucide-react';
+import { Leaf, CheckCircle, Zap, ChevronRight, UtensilsCrossed } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 
@@ -18,8 +18,23 @@ const Index = () => {
       <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
       <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
       
+      {/* Header with prominent logo */}
+      <header className="relative z-10 w-full pt-6 pb-4 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center glass-card px-6 py-3 rounded-full backdrop-blur-md bg-card/30 border border-primary/30 shadow-lg">
+              <UtensilsCrossed className="h-7 w-7 text-primary mr-3" />
+              <Leaf className="h-8 w-8 text-primary mr-3" />
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
+                MealScanner
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+      
       {/* Hero Section */}
-      <section className="relative pt-20 pb-12 md:pt-32 md:pb-24 px-4">
+      <section className="relative pt-12 pb-12 md:pt-20 md:pb-24 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="flex-1 text-center lg:text-left">
