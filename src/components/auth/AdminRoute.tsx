@@ -17,9 +17,10 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     console.log("AdminRoute - isAdmin:", isAdmin);
     // Refresh the role check
     if (user) {
+      console.log("AdminRoute - Checking admin role");
       checkUserRole();
     }
-  }, [user, checkUserRole]);
+  }, [user, checkUserRole, isAdmin]);
 
   if (loading) {
     return (

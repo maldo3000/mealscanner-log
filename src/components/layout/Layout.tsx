@@ -10,13 +10,19 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { signOut, user, isAdmin } = useAuth();
+  const { signOut, user, isAdmin, checkUserRole } = useAuth();
 
   // For debugging
   useEffect(() => {
     console.log("Layout rendering - isAdmin:", isAdmin);
     console.log("Current user:", user?.email);
-  }, [isAdmin, user]);
+    
+    // Force a role check when the layout mounts or user changes
+    if (user) {
+      console.log("Checking admin role from Layout component");
+      checkUserRole();
+    }
+  }, [isAdmin, user, checkUserRole]);
 
   // Enable scrolling on iOS devices
   useEffect(() => {
