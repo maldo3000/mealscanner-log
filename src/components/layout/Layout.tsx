@@ -74,10 +74,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {isAdmin && (
               <Link 
                 to="/admin" 
-                className="flex items-center text-muted-foreground hover:text-foreground"
+                className="flex items-center text-primary hover:text-primary/90 font-medium mr-2"
+                data-testid="admin-link"
               >
-                <ShieldCheck className="h-4 w-4 mr-1" />
-                <span className="text-sm">Admin</span>
+                <ShieldCheck className="h-5 w-5 mr-1" />
+                <span>Admin</span>
               </Link>
             )}
             
