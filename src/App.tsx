@@ -12,7 +12,7 @@ import { useEffect } from "react";
 
 // Pages
 import HomePage from "./pages/HomePage";
-import CapturePage from "./pages/CapturePage";
+import CapturePage from "./pages/Capture";
 import JournalPage from "./pages/JournalPage";
 import MealDetailsPage from "./pages/MealDetailsPage";
 import AuthPage from "./pages/AuthPage";
