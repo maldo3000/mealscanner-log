@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
 
 interface SubscriptionContextType {

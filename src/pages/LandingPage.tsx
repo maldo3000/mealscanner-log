@@ -1,164 +1,138 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { CheckCircle, Zap, ChevronRight, UtensilsCrossed } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/context/auth';
+import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock } from 'lucide-react';
 
-const LandingPage = () => {
+const LandingPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  
+  const navigate = useNavigate();
+
+  // If authenticated, redirect to app home
+  if (isAuthenticated) {
+    navigate('/home');
+    return null; // Return null to prevent rendering anything else
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
-      {/* Gradient overlays for background effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-primary/5 to-transparent opacity-70"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10"></div>
-      
-      {/* Decorative circles */}
-      <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
-      <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
-      
-      {/* Header with prominent logo and auth buttons */}
-      <header className="relative z-10 w-full pt-6 pb-4 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center glass-card px-6 rounded-full backdrop-blur-md bg-card/30 border border-primary/30 shadow-lg py-[18px]">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 mr-3">
-                <UtensilsCrossed className="h-6 w-6 text-primary" />
-              </div>
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
-                MealScanner
-              </span>
-            </div>
-            
-            {isAuthenticated ? (
-              <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link to="/home">Go to App <ChevronRight className="ml-1 h-4 w-4" /></Link>
-              </Button>
-            ) : (
-              <Button asChild variant="outline">
-                <Link to="/auth">Sign In <ChevronRight className="ml-1 h-4 w-4" /></Link>
-              </Button>
-            )}
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="px-6 py-4 border-b border-border">
+        <div className="container max-w-5xl mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center text-lg font-semibold">
+            <Zap className="mr-2 h-5 w-5" />
+            MealScanner
+          </Link>
+          <div>
+            <Button asChild variant="secondary">
+              <Link to="/auth">
+                Get Started <ChevronRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
-      
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-12 md:pt-20 md:pb-24 px-4 py-[50px]">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-12 items-center">
-            <div className="flex-1 text-center lg:text-left">
-              <div className="inline-flex items-center justify-center p-2 rounded-full bg-primary/10 backdrop-blur-sm mb-4">
-                <UtensilsCrossed className="h-5 w-5 text-primary mr-2" />
-                <span className="text-sm font-medium text-primary">AI-Powered Meal Journal</span>
-              </div>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-foreground">
-                Snap. Analyze. <span className="text-primary">Eat Smarter.</span>
-              </h1>
-              
-              <p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto lg:mx-0">
-                MealScanner uses AI to easily log what you're eating and keep track of your calories and macros.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                {isAuthenticated ? (
-                  <>
-                    <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                      <Link to="/home">Go to App <ChevronRight className="ml-1 h-4 w-4" /></Link>
-                    </Button>
-                    <Button asChild variant="outline" size="lg">
-                      <Link to="/onboarding">View Onboarding <ChevronRight className="ml-1 h-4 w-4" /></Link>
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                      <Link to="/auth">Start Tracking <ChevronRight className="ml-1 h-4 w-4" /></Link>
-                    </Button>
-                    <Button asChild variant="outline" size="lg">
-                      <Link to="#features">Learn More</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex-1 glass-card p-1 rounded-2xl border border-border/30 backdrop-blur-md bg-card/40 shadow-xl">
-              <div className="rounded-xl overflow-hidden bg-gradient-to-br from-primary/5 to-secondary/5">
-                <img src="/placeholder.svg" alt="MealScanner app interface" className="w-full h-auto object-cover" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Features Section */}
-      <section id="features" className="relative py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 text-foreground">How MealScanner Works</h2>
-            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-              Our AI-powered app makes tracking your nutrition simple and effortless
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="glass-card glass-card-hover p-6 rounded-xl backdrop-blur-sm bg-card/30 border border-border/30">
-                <div className="flex items-center justify-center p-3 rounded-full bg-primary/10 w-12 h-12 mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">{feature.title}</h3>
-                <p className="text-foreground/70">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="relative py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center glass-card p-8 rounded-2xl backdrop-blur-md bg-primary/10 border border-primary/30">
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Ready to transform your nutrition habits?</h2>
-          <p className="text-lg text-foreground/80 mb-6">
-            Join thousands of users who are taking control of their health with MealScanner.
+
+      <main className="flex-grow flex items-center justify-center px-6 py-12">
+        <div className="container max-w-5xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            Unlock the Power of <span className="text-primary">Smarter Eating</span>
+          </h1>
+          <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-2xl mx-auto">
+            Effortlessly track your nutrition, discover healthier choices, and achieve your wellness goals with our AI-powered meal analysis.
           </p>
-          
-          {!isAuthenticated && (
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link to="/auth">Start Tracking Today <ChevronRight className="ml-1 h-4 w-4" /></Link>
+          <div className="space-x-4">
+            <Button asChild size="lg">
+              <Link to="/auth">Start Scanning</Link>
             </Button>
-          )}
-          
-          {isAuthenticated && (
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link to="/home">Go to App <ChevronRight className="ml-1 h-4 w-4" /></Link>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/auth">Learn More</Link>
             </Button>
-          )}
+          </div>
+        </div>
+      </main>
+
+      <section className="py-16 bg-secondary/50">
+        <div className="container max-w-5xl mx-auto">
+          <h2 className="text-3xl font-semibold text-center mb-8">Key Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center text-center">
+              <HeartPulse className="h-10 w-10 text-primary mb-3" />
+              <h3 className="font-semibold text-lg mb-2">Personalized Nutrition Insights</h3>
+              <p className="text-muted-foreground">Get detailed analysis of your meals, tailored to your dietary needs and preferences.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <PieChart className="h-10 w-10 text-primary mb-3" />
+              <h3 className="font-semibold text-lg mb-2">Macro Tracking Made Easy</h3>
+              <p className="text-muted-foreground">Automatically track your macronutrient intake with every meal, simplifying your diet management.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <Camera className="h-10 w-10 text-primary mb-3" />
+              <h3 className="font-semibold text-lg mb-2">AI-Powered Meal Recognition</h3>
+              <p className="text-muted-foreground">Simply snap a photo of your meal, and let our AI identify the ingredients and nutritional content.</p>
+            </div>
+          </div>
         </div>
       </section>
+
+      <section className="py-16">
+        <div className="container max-w-5xl mx-auto">
+          <h2 className="text-3xl font-semibold text-center mb-8">Why Choose MealScanner?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-2xl font-semibold mb-4">Achieve Your Health Goals</h3>
+              <p className="text-muted-foreground mb-4">
+                Whether you're aiming to lose weight, build muscle, or simply eat healthier, MealScanner provides the insights you need to succeed.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-primary mr-2" />
+                  Track calories and macros effortlessly
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-primary mr-2" />
+                  Discover nutritious alternatives
+                </li>
+                <li className="flex items-center">
+                  <Check className="h-5 w-5 text-primary mr-2" />
+                  Personalized recommendations
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-2xl font-semibold mb-4">Privacy and Security</h3>
+              <p className="text-muted-foreground mb-4">
+                Your data is safe with us. We prioritize your privacy and ensure that your meal information is securely stored and never shared.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center">
+                  <Lock className="h-5 w-5 text-primary mr-2" />
+                  End-to-end encryption
+                </li>
+                <li className="flex items-center">
+                  <Lock className="h-5 w-5 text-primary mr-2" />
+                  Anonymous data options
+                </li>
+                <li className="flex items-center">
+                  <Lock className="h-5 w-5 text-primary mr-2" />
+                  Full control over your data
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="py-8 border-t border-border">
+        <div className="container max-w-5xl mx-auto text-center text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} MealScanner. All rights reserved.</p>
+          <p className="mt-2">
+            <Link to="/terms" className="hover:underline">Terms of Service</Link> &middot; <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
-
-// Feature data
-const features = [
-  {
-    icon: <Zap className="h-6 w-6 text-primary" />,
-    title: "Snap a Photo",
-    description: "Simply take a picture of your meal, and our AI will analyze what's on your plate."
-  }, 
-  {
-    icon: <UtensilsCrossed className="h-6 w-6 text-primary" />,
-    title: "Get Nutritional Data",
-    description: "Instantly receive detailed nutritional information about your food's calories, macros, and more."
-  }, 
-  {
-    icon: <CheckCircle className="h-6 w-6 text-primary" />,
-    title: "Track Your Progress",
-    description: "Build a comprehensive journal of your eating habits and track improvements over time."
-  }
-];
 
 export default LandingPage;

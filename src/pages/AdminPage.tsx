@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
@@ -18,7 +18,6 @@ const AdminPage: React.FC = () => {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Load current settings
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -58,14 +57,12 @@ const AdminPage: React.FC = () => {
 
     setIsSaving(true);
     try {
-      // Get the current session for the auth token
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error('Authentication required');
         return;
       }
 
-      // Call the edge function to update settings
       const response = await fetch(`${window.location.origin}/functions/v1/toggle-paywall`, {
         method: 'POST',
         headers: {
@@ -93,7 +90,6 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  // Simple admin check now uses the isAdmin state from context
   if (!isAdmin) {
     return (
       <div className="container py-10">

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/context/SubscriptionContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth';
 import { CreditCard, Check, Leaf, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,23 +1,13 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { MealEntry, MealType, NutritionScore } from '@/types';
+import { Meal, MealTag, MealFilterOptions } from './types';
+import { mealService } from './mealService';
+import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
-import { useAuth } from '../AuthContext';
-import { MealJournalContextType, FilterPeriod } from './types';
-import { getFilteredMeals, calculateTotalCalories } from './mealFilterUtils';
-import { 
-  loadMealsFromSupabase, 
-  loadMealsFromLocalStorage, 
-  saveMealToSupabase, 
-  updateMealInSupabase, 
-  deleteMealFromSupabase,
-  createNewMeal
-} from './mealService';
 
 const MealJournalContext = createContext<MealJournalContextType | undefined>(undefined);
 
 export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [meals, setMeals] = useState<MealEntry[]>([]);
+  const [meals, setMeals] = useState<Meal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const { user, isAuthenticated } = useAuth();
@@ -32,26 +22,24 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     end: null
   });
 
-  // Load meals when auth state changes
   useEffect(() => {
     const loadMeals = async () => {
       setIsLoading(true);
       try {
         if (isAuthenticated && user) {
           console.log('Loading meals for authenticated user:', user.id);
-          const supabaseMeals = await loadMealsFromSupabase(user.id);
+          const supabaseMeals = await mealService.loadMealsFromSupabase(user.id);
           setMeals(supabaseMeals);
         } else {
           console.log('User not authenticated, loading from localStorage');
-          const localMeals = loadMealsFromLocalStorage();
+          const localMeals = mealService.loadMealsFromLocalStorage();
           setMeals(localMeals);
         }
       } catch (error) {
         console.error('Error loading meals:', error);
         toast.error('Failed to load your meal data');
-        // Fallback to localStorage if Supabase fails
         if (isAuthenticated) {
-          const localMeals = loadMealsFromLocalStorage();
+          const localMeals = mealService.loadMealsFromLocalStorage();
           setMeals(localMeals);
         }
       } finally {
@@ -63,7 +51,6 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     loadMeals();
   }, [isAuthenticated, user]);
 
-  // Save non-authenticated user meals to localStorage
   useEffect(() => {
     if (!isAuthenticated && meals.length > 0 && isInitialized) {
       console.log('Saving meals to localStorage');
@@ -71,44 +58,38 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, [meals, isAuthenticated, isInitialized]);
 
-  const addMeal = async (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
-    const newMeal = createNewMeal(meal);
+  const addMeal = async (meal: Omit<Meal, 'id' | 'createdAt'>) => {
+    const newMeal = mealService.createNewMeal(meal);
     
     console.log("Adding new meal:", newMeal.title);
     
-    // Update local state immediately for responsiveness
     setMeals(prevMeals => [newMeal, ...prevMeals]);
     
-    // Then persist to Supabase if authenticated
     if (isAuthenticated && user) {
       try {
-        await saveMealToSupabase(newMeal, user.id);
+        await mealService.saveMealToSupabase(newMeal, user.id);
         console.log('Meal saved to Supabase');
       } catch (error) {
         console.error('Failed to save meal to Supabase:', error);
-        // The meal is already in local state, so the user won't lose it
       }
     }
     
     toast.success('Meal added to your journal');
   };
 
-  const updateMeal = async (id: string, updates: Partial<MealEntry>) => {
-    // Update local state immediately
+  const updateMeal = async (id: string, updates: Partial<Meal>) => {
     setMeals(prevMeals => 
       prevMeals.map(meal => 
         meal.id === id ? { ...meal, ...updates } : meal
       )
     );
     
-    // Then update in Supabase if authenticated
     if (isAuthenticated && user) {
       try {
-        await updateMealInSupabase(id, updates, user.id);
+        await mealService.updateMealInSupabase(id, updates, user.id);
         console.log('Meal updated in Supabase');
       } catch (error) {
         console.error('Failed to update meal in Supabase:', error);
-        // The meal update is already in local state
       }
     }
     
@@ -116,17 +97,14 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const deleteMeal = async (id: string) => {
-    // Remove from local state immediately
     setMeals(prevMeals => prevMeals.filter(meal => meal.id !== id));
     
-    // Then delete from Supabase if authenticated
     if (isAuthenticated && user) {
       try {
-        await deleteMealFromSupabase(id, user.id);
+        await mealService.deleteMealFromSupabase(id, user.id);
         console.log('Meal deleted from Supabase');
       } catch (error) {
         console.error('Failed to delete meal from Supabase:', error);
-        // The meal is already removed from local state
       }
     }
     
@@ -137,7 +115,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return meals.find(meal => meal.id === id);
   };
 
-  const filteredMeals = getFilteredMeals(
+  const filteredMeals = mealService.getFilteredMeals(
     meals,
     filterDate,
     filterMealType,
@@ -147,7 +125,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
     customDateRange
   );
   
-  const totalCalories = calculateTotalCalories(filteredMeals);
+  const totalCalories = mealService.calculateTotalCalories(filteredMeals);
 
   const clearFilters = () => {
     setFilterDate(null);
