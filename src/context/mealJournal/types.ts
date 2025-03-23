@@ -24,4 +24,5 @@ export interface MealJournalContextType {
   customDateRange: { start: Date | null; end: Date | null };
   setCustomDateRange: (range: { start: Date | null; end: Date | null }) => void;
   totalCalories: number;
+  isLoading: boolean;
 }

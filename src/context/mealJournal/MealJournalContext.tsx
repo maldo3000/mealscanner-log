@@ -18,6 +18,7 @@ const MealJournalContext = createContext<MealJournalContextType | undefined>(und
 
 export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [meals, setMeals] = useState<MealEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
@@ -34,6 +35,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Load meals when auth state changes
   useEffect(() => {
     const loadMeals = async () => {
+      setIsLoading(true);
       try {
         if (isAuthenticated && user) {
           console.log('Loading meals for authenticated user:', user.id);
@@ -44,7 +46,6 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
           const localMeals = loadMealsFromLocalStorage();
           setMeals(localMeals);
         }
-        setIsInitialized(true);
       } catch (error) {
         console.error('Error loading meals:', error);
         toast.error('Failed to load your meal data');
@@ -53,6 +54,8 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
           const localMeals = loadMealsFromLocalStorage();
           setMeals(localMeals);
         }
+      } finally {
+        setIsLoading(false);
         setIsInitialized(true);
       }
     };
@@ -71,7 +74,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const addMeal = async (meal: Omit<MealEntry, 'id' | 'createdAt'>) => {
     const newMeal = createNewMeal(meal);
     
-    console.log("Adding new meal with image:", newMeal.imageUrl ? "Image present" : "No image");
+    console.log("Adding new meal:", newMeal.title);
     
     // Update local state immediately for responsiveness
     setMeals(prevMeals => [newMeal, ...prevMeals]);
@@ -178,6 +181,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
         customDateRange,
         setCustomDateRange,
         totalCalories,
+        isLoading,
       }}
     >
       {children}

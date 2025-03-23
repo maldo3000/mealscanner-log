@@ -1,15 +1,17 @@
 
 import { MealEntry } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
-import { generateId } from '@/utils/helpers';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 export const loadMealsFromSupabase = async (userId: string): Promise<MealEntry[]> => {
   try {
+    console.log('Loading meals from Supabase for user:', userId);
+    
     const { data, error } = await supabase
       .from('meals')
       .select('*')
-      .eq('user_id', userId) // Explicitly filter by the current user's ID
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
       
     if (error) {
@@ -18,6 +20,7 @@ export const loadMealsFromSupabase = async (userId: string): Promise<MealEntry[]
     }
     
     if (!data) {
+      console.log('No meals found in Supabase');
       return [];
     }
     
@@ -25,13 +28,13 @@ export const loadMealsFromSupabase = async (userId: string): Promise<MealEntry[]
       id: meal.id,
       title: meal.title,
       description: meal.description,
-      mealType: meal.meal_type as any,
+      mealType: meal.meal_type,
       foodItems: meal.food_items,
       imageUrl: meal.image_url || '',
       nutrition: typeof meal.nutrition === 'string' 
         ? JSON.parse(meal.nutrition) 
         : meal.nutrition,
-      nutritionScore: meal.nutrition_score as any,
+      nutritionScore: meal.nutrition_score,
       notes: meal.notes || '',
       timestamp: meal.timestamp,
       createdAt: new Date(meal.created_at)
@@ -66,21 +69,29 @@ export const loadMealsFromLocalStorage = (): MealEntry[] => {
 
 export const saveMealToSupabase = async (meal: MealEntry, userId: string): Promise<void> => {
   try {
+    console.log('Saving meal to Supabase for user:', userId);
+    
+    // Ensure meal has correct user_id before saving
+    const mealToSave = {
+      ...meal,
+      user_id: userId
+    };
+    
     // Convert nutrition object to JSON string for Supabase
-    const nutritionJson = JSON.stringify(meal.nutrition);
+    const nutritionJson = JSON.stringify(mealToSave.nutrition);
     
     const { error } = await supabase.from('meals').insert({
-      id: meal.id,
-      title: meal.title,
-      description: meal.description,
-      meal_type: meal.mealType,
-      food_items: meal.foodItems,
-      image_url: meal.imageUrl,
+      id: mealToSave.id,
+      title: mealToSave.title,
+      description: mealToSave.description,
+      meal_type: mealToSave.mealType,
+      food_items: mealToSave.foodItems,
+      image_url: mealToSave.imageUrl,
       nutrition: nutritionJson,
-      nutrition_score: meal.nutritionScore,
-      notes: meal.notes,
-      timestamp: meal.timestamp,
-      created_at: meal.createdAt.toISOString(),
+      nutrition_score: mealToSave.nutritionScore,
+      notes: mealToSave.notes,
+      timestamp: mealToSave.timestamp,
+      created_at: mealToSave.createdAt.toISOString(),
       user_id: userId
     });
     
@@ -99,13 +110,15 @@ export const saveMealToSupabase = async (meal: MealEntry, userId: string): Promi
 
 export const updateMealInSupabase = async (id: string, updates: Partial<MealEntry>, userId: string): Promise<void> => {
   try {
+    console.log('Updating meal in Supabase:', id, 'for user:', userId);
+    
     const supabaseUpdates: any = {};
     
     if (updates.title) supabaseUpdates.title = updates.title;
     if (updates.description) supabaseUpdates.description = updates.description;
     if (updates.mealType) supabaseUpdates.meal_type = updates.mealType;
     if (updates.foodItems) supabaseUpdates.food_items = updates.foodItems;
-    if (updates.imageUrl) supabaseUpdates.image_url = updates.imageUrl;
+    if (updates.imageUrl !== undefined) supabaseUpdates.image_url = updates.imageUrl;
     if (updates.nutrition) supabaseUpdates.nutrition = JSON.stringify(updates.nutrition);
     if (updates.nutritionScore) supabaseUpdates.nutrition_score = updates.nutritionScore;
     if (updates.notes !== undefined) supabaseUpdates.notes = updates.notes;
@@ -116,7 +129,7 @@ export const updateMealInSupabase = async (id: string, updates: Partial<MealEntr
       .from('meals')
       .update(supabaseUpdates)
       .eq('id', id)
-      .eq('user_id', userId); // Ensure we're updating the user's own meal
+      .eq('user_id', userId);
     
     if (error) {
       console.error('Error updating meal in Supabase:', error);
@@ -133,11 +146,13 @@ export const updateMealInSupabase = async (id: string, updates: Partial<MealEntr
 
 export const deleteMealFromSupabase = async (id: string, userId: string): Promise<void> => {
   try {
+    console.log('Deleting meal from Supabase:', id, 'for user:', userId);
+    
     const { error } = await supabase
       .from('meals')
       .delete()
       .eq('id', id)
-      .eq('user_id', userId); // Ensure we're deleting the user's own meal
+      .eq('user_id', userId);
     
     if (error) {
       console.error('Error deleting meal from Supabase:', error);
@@ -156,7 +171,7 @@ export const createNewMeal = (meal: Omit<MealEntry, 'id' | 'createdAt'>): MealEn
   const now = new Date();
   return {
     ...meal,
-    id: generateId(),
+    id: uuidv4(), // Use UUID for more reliable ID generation
     createdAt: now,
     timestamp: now.toISOString(),
   };

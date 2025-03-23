@@ -25,6 +25,7 @@ const JournalPage: React.FC = () => {
     customDateRange,
     setCustomDateRange,
     totalCalories,
+    isLoading,
   } = useMealJournal();
   
   const [showFilters, setShowFilters] = useState(false);
@@ -105,7 +106,7 @@ const JournalPage: React.FC = () => {
         )}
         
         {/* Total calories for filtered meals */}
-        {filteredMeals.length > 0 && (
+        {filteredMeals.length > 0 && !isLoading && (
           <StatsCard
             totalCalories={totalCalories}
             filterPeriod={filterPeriod}
@@ -118,6 +119,7 @@ const JournalPage: React.FC = () => {
         <MealsList
           meals={filteredMeals}
           areFiltersActive={areFiltersActive}
+          isLoading={isLoading}
         />
       </div>
     </div>

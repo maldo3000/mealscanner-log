@@ -3,13 +3,27 @@ import React from 'react';
 import MealCard from '@/components/MealCard';
 import { MealEntry } from '@/types';
 import { EmptyJournal } from './EmptyJournal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface MealsListProps {
   meals: MealEntry[];
   areFiltersActive: boolean;
+  isLoading?: boolean;
 }
 
-export const MealsList: React.FC<MealsListProps> = ({ meals, areFiltersActive }) => {
+export const MealsList: React.FC<MealsListProps> = ({ 
+  meals, 
+  areFiltersActive, 
+  isLoading = false 
+}) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <LoadingSpinner size="large" />
+      </div>
+    );
+  }
+  
   if (meals.length === 0) {
     return <EmptyJournal areFiltersActive={areFiltersActive} />;
   }
