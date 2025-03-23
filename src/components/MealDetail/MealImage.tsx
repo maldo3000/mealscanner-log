@@ -19,6 +19,11 @@ const MealImage: React.FC<MealImageProps> = ({ imageUrl, title, nutritionScore }
           src={imageUrl}
           alt={title}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            // Handle image loading errors by replacing with fallback
+            console.error("Image failed to load:", imageUrl);
+            (e.target as HTMLImageElement).src = "/placeholder.svg";
+          }}
         />
       ) : (
         <div className="flex items-center justify-center h-full w-full text-muted-foreground">

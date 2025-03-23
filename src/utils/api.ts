@@ -2,6 +2,7 @@
 import { MealAnalysisResponse } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from 'uuid';
 
 // Function to encode an image file to base64
 const encodeImageToBase64 = async (file: File): Promise<string> => {
@@ -21,20 +22,51 @@ const encodeImageToBase64 = async (file: File): Promise<string> => {
   });
 };
 
-// Function to store an image file in browser memory
-const storeImageLocally = async (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-      } else {
-        reject(new Error("Failed to read image file"));
-      }
-    };
-    reader.onerror = error => reject(error);
-    reader.readAsDataURL(file);
-  });
+// Function to upload an image to Supabase Storage
+export const uploadImageToStorage = async (file: File, userId?: string): Promise<string> => {
+  try {
+    // Create a unique file name
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${uuidv4()}.${fileExt}`;
+    const filePath = userId 
+      ? `${userId}/${fileName}`  // If logged in, store in user's folder
+      : `public/${fileName}`;    // Otherwise, store in public folder
+    
+    // Upload to the 'meal-images' bucket
+    const { data, error } = await supabase.storage
+      .from('meal-images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type
+      });
+    
+    if (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+    
+    // Get public URL for the uploaded image
+    const { data: urlData } = supabase.storage
+      .from('meal-images')
+      .getPublicUrl(filePath);
+    
+    return urlData.publicUrl;
+  } catch (error) {
+    console.error("Error uploading image to storage:", error);
+    
+    // For development/testing fallback: store locally if upload fails
+    if (process.env.NODE_ENV === 'development') {
+      const reader = new FileReader();
+      return new Promise((resolve, reject) => {
+        reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject();
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+    
+    throw error;
+  }
 };
 
 // Analyzing meal photo using GPT-4 Vision via Supabase Edge Function
@@ -42,8 +74,12 @@ export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise
   try {
     console.log("Analyzing meal photo:", imageFile.name);
     
-    // Store image locally
-    const imageUrl = await storeImageLocally(imageFile);
+    // Get user ID if authenticated
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id;
+    
+    // Upload image to Supabase Storage
+    const imageUrl = await uploadImageToStorage(imageFile, userId);
     
     // Encode the image to base64
     const base64Image = await encodeImageToBase64(imageFile);
@@ -99,8 +135,23 @@ export const analyzeMealPhoto = async (imageFile: File, notes?: string): Promise
     if (process.env.NODE_ENV === 'development') {
       console.warn("Using mock data for meal analysis in development mode");
       
-      // Store image locally for the mock data as well
-      const imageUrl = await storeImageLocally(imageFile);
+      // Upload image even in mock mode to get a persistent URL
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
+      
+      // Try to upload, but fall back to local storage if that fails
+      let imageUrl;
+      try {
+        imageUrl = await uploadImageToStorage(imageFile, userId);
+      } catch (err) {
+        // Fall back to local URL if upload fails
+        imageUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject();
+          reader.onerror = reject;
+          reader.readAsDataURL(imageFile);
+        });
+      }
       
       // Use mock data with some randomization
       return new Promise((resolve) => {

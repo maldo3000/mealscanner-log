@@ -15,6 +15,7 @@ interface MealCardProps {
 const MealCard: React.FC<MealCardProps> = ({ meal }) => {
   const { deleteMeal } = useMealJournal();
   const [showDeleteButton, setShowDeleteButton] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,12 +40,13 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
       >
         <div className="glass-card glass-card-hover rounded-2xl overflow-hidden transition-all duration-300 h-full">
           <div className="relative aspect-video w-full overflow-hidden bg-muted">
-            {meal.imageUrl ? (
+            {meal.imageUrl && !imageError ? (
               <img
                 src={meal.imageUrl}
                 alt={meal.title}
                 className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                 loading="lazy"
+                onError={() => setImageError(true)}
               />
             ) : (
               <div className="flex items-center justify-center h-full w-full text-muted-foreground">

@@ -25,6 +25,7 @@ const CapturePage: React.FC = () => {
   
   const handlePhotoSelected = (file: File) => {
     setSelectedFile(file);
+    // We'll just use a temporary URL for preview purposes
     setPreviewUrl(URL.createObjectURL(file));
     setAnalysisResult(null);
     setIsAnalyzing(false);
@@ -46,9 +47,10 @@ const CapturePage: React.FC = () => {
       const notesToUse = includeNotes ? notes : undefined;
       console.log("Analyzing with notes:", notesToUse);
       
+      // This will now upload the image to Supabase Storage and return a proper URL
       const result = await analyzeMealPhoto(selectedFile, notesToUse);
       
-      // Update the state with analysis results
+      // Update the state with analysis results and the permanent image URL
       setAnalysisResult(result);
       setTitle(result.title);
       
@@ -84,13 +86,14 @@ const CapturePage: React.FC = () => {
     
     const timestamp = new Date().toISOString();
     
+    // Use the permanent URL from the analysis result
     addMeal({
       title,
       description: analysisResult.description,
       foodItems: analysisResult.foodItems,
       nutrition: analysisResult.nutrition,
       nutritionScore: analysisResult.nutritionScore,
-      imageUrl: previewUrl!,
+      imageUrl: analysisResult.imageUrl, // Use the Supabase Storage URL
       mealType,
       notes,
       timestamp,
