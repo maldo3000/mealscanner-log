@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useMealJournal, FilterPeriod } from "@/context/MealJournalContext";
 import { MealType, NutritionScore } from "@/types";
@@ -37,7 +36,6 @@ const JournalPage: React.FC = () => {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value ? new Date(e.target.value) : null;
     setFilterDate(date);
-    // Clear period filter when selecting a specific date
     if (date) {
       setFilterPeriod(null);
     }
@@ -45,7 +43,6 @@ const JournalPage: React.FC = () => {
 
   const handlePeriodChange = (period: FilterPeriod) => {
     setFilterPeriod(period);
-    // Clear specific date when selecting a period
     if (period) {
       setFilterDate(null);
     }
@@ -68,7 +65,6 @@ const JournalPage: React.FC = () => {
   const areFiltersActive = !!(filterDate || filterMealType || filterNutritionScore || searchTerm || filterPeriod || (customDateRange.start && customDateRange.end));
   
   const handleQuickFilter = (period: FilterPeriod) => {
-    // Clear other filters when using quick filters
     setFilterDate(null);
     setCustomDateRange({ start: null, end: null });
     setFilterPeriod(period);
@@ -76,30 +72,19 @@ const JournalPage: React.FC = () => {
   
   const handleExportCsv = () => {
     try {
-      // Determine which meals to export (filtered or all)
-      const mealsToExport = filteredMeals.length > 0 ? filteredMeals : meals;
-      
-      if (mealsToExport.length === 0) {
-        toast.error("No meals to export");
+      if (filteredMeals.length === 0) {
+        toast.error("No meals to export in the selected time range");
         return;
       }
       
-      // Convert meals to CSV format
-      const csvContent = convertMealsToCSV(mealsToExport);
+      const csvContent = convertMealsToCSV(filteredMeals);
       
-      // Generate filename with current date
       const dateStr = new Date().toISOString().split('T')[0];
       const filename = `meals-export-${dateStr}.csv`;
       
-      // Trigger download
       downloadCSV(csvContent, filename);
       
-      // Show success message
-      toast.success(
-        areFiltersActive 
-          ? `Exported ${filteredMeals.length} filtered meals to CSV` 
-          : `Exported all ${meals.length} meals to CSV`
-      );
+      toast.success(`Exported ${filteredMeals.length} meals to CSV`);
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Failed to export meals");
@@ -111,12 +96,11 @@ const JournalPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <JournalHeader />
         
-        {/* Export button */}
         <button
           onClick={handleExportCsv}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
           title="Export to CSV"
-          disabled={isLoading || (meals.length === 0)}
+          disabled={isLoading || (filteredMeals.length === 0)}
         >
           <Download className="h-4 w-4" />
           <span className="hidden sm:inline">Export CSV</span>
@@ -124,7 +108,6 @@ const JournalPage: React.FC = () => {
       </div>
       
       <div className="space-y-4">
-        {/* Search and filter bar */}
         <FilterBar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -136,7 +119,6 @@ const JournalPage: React.FC = () => {
           onQuickFilter={handleQuickFilter}
         />
         
-        {/* Filter options */}
         {showFilters && (
           <FilterOptions
             filterPeriod={filterPeriod}
@@ -154,7 +136,6 @@ const JournalPage: React.FC = () => {
           />
         )}
         
-        {/* Total calories for filtered meals */}
         {filteredMeals.length > 0 && !isLoading && (
           <StatsCard
             totalCalories={totalCalories}
@@ -164,7 +145,6 @@ const JournalPage: React.FC = () => {
           />
         )}
         
-        {/* Meals grid */}
         <MealsList
           meals={filteredMeals}
           areFiltersActive={areFiltersActive}
