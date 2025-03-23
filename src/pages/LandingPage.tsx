@@ -1,13 +1,16 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth';
 import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const LandingPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // If authenticated, redirect to app home
   if (isAuthenticated) {
@@ -17,16 +20,17 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="px-6 py-4 border-b border-border">
+      <header className="px-4 md:px-6 py-5 border-b border-border">
         <div className="container max-w-5xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center text-lg font-semibold">
-            <Zap className="mr-2 h-5 w-5" />
-            MealScanner
+            <Zap className="mr-2 h-6 w-6 text-primary" />
+            <span className="text-xl">MealScanner</span>
           </Link>
           <div>
-            <Button asChild variant="secondary">
-              <Link to="/auth">
-                Get Started <ChevronRight className="ml-2 h-4 w-4" />
+            <Button asChild variant="secondary" className={isMobile ? "px-3 py-2" : ""} size={isMobile ? "sm" : "default"}>
+              <Link to="/auth" className="flex items-center">
+                <span>Get Started</span>
+                <ChevronRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
           </div>

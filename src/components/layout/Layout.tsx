@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, BookOpen, Home, Leaf, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/auth";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const { signOut, user, isAdmin, checkUserRole } = useAuth();
+  const isMobile = useIsMobile();
 
   // For debugging
   useEffect(() => {
@@ -68,23 +70,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen overflow-y-auto">
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-        <div className="container flex h-14 items-center justify-between py-0 my-[12px]">
+        <div className="container flex h-16 items-center justify-between py-0 px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Link to="/home" className="flex items-center gap-2">
               <Leaf className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg">MealScanner</span>
+              <span className="font-bold text-lg md:text-xl">MealScanner</span>
             </Link>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             {isAdmin && (
               <Link 
                 to="/admin" 
-                className="flex items-center text-primary hover:text-primary/90 font-medium mr-2"
+                className="flex items-center text-primary hover:text-primary/90 font-medium"
                 data-testid="admin-link"
               >
                 <ShieldCheck className="h-5 w-5 mr-1" />
-                <span>Admin</span>
+                <span className={isMobile ? "text-sm" : ""}>Admin</span>
               </Link>
             )}
             
