@@ -1,16 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Leaf, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Navigate } from 'react-router-dom';
-import LoadingSpinner from '@/components/LoadingSpinner';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import VerificationAlert from '@/components/auth/VerificationAlert';
+import AuthErrorAlert from '@/components/auth/AuthErrorAlert';
+import SignInForm from '@/components/auth/SignInForm';
+import SignUpForm from '@/components/auth/SignUpForm';
+import AuthHeader from '@/components/auth/AuthHeader';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -23,6 +21,7 @@ const AuthPage: React.FC = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const { signIn, signUp, loading, isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     if (!isLogin) {
@@ -32,13 +31,12 @@ const AuthPage: React.FC = () => {
 
   // Check if we should show the verification message based on URL params
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('signup') === 'success') {
+    if (searchParams.get('signup') === 'success') {
       setShowVerificationAlert(true);
       // Remove the query param to avoid showing the message after page refreshes
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, []);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,117 +102,41 @@ const AuthPage: React.FC = () => {
       <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
       <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
       
-      {/* Email verification message alert */}
-      {isLogin && showVerificationAlert && (
-        <Alert className="mb-6 max-w-md border-primary/30 bg-primary/10">
-          <AlertCircle className="h-4 w-4 text-primary mr-2" />
-          <AlertDescription className="text-sm">
-            Please check your email for a verification link. You need to verify your account before signing in.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {/* Authentication error alert */}
-      {authError && (
-        <Alert className="mb-6 max-w-md border-destructive/30 bg-destructive/10">
-          <AlertCircle className="h-4 w-4 text-destructive mr-2" />
-          <AlertDescription className="text-sm text-destructive">
-            {authError}
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Email verification and error messages */}
+      <VerificationAlert visible={isLogin && showVerificationAlert} />
+      <AuthErrorAlert error={authError} />
       
       <Card className="w-full max-w-md glass-card border-border/30 backdrop-blur-md bg-card/60 animate-fade-in">
         <CardHeader className="pb-2 text-center">
-          <div className="flex flex-col items-center space-y-2">
-            <div className="flex items-center justify-center p-3 rounded-full bg-primary/20 backdrop-blur-sm">
-              <Leaf className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="text-2xl font-semibold text-foreground">MealScanner</h1>
-            <h2 className="text-xl font-medium text-primary mt-2">
-              {isLogin ? 'Sign In' : 'Sign Up'}
-            </h2>
-            <p className="text-muted-foreground text-center">
-              {isLogin ? 'Sign in to your account' : 'Create a new account'}
-            </p>
-          </div>
+          <AuthHeader isLogin={isLogin} />
         </CardHeader>
 
         <CardContent className="pt-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground/90">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground/90">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50"
-              />
-            </div>
-            
-            {!isLogin && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-foreground/90">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className={`bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50 ${!passwordsMatch ? "border-destructive" : ""}`}
-                  />
-                  {!passwordsMatch && (
-                    <p className="text-destructive text-sm mt-1">Passwords do not match</p>
-                  )}
-                </div>
-                
-                <div className="flex items-center space-x-2 mt-4">
-                  <Checkbox 
-                    id="terms" 
-                    checked={acceptedTerms}
-                    onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
-                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <Label htmlFor="terms" className="text-sm font-normal leading-none cursor-pointer text-foreground/80">
-                    I understand and agree to the Terms of Service
-                  </Label>
-                </div>
-              </>
-            )}
-            
-            <Button 
-              type="submit" 
-              className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-              disabled={loading || 
-                (!isLogin && (!passwordsMatch || !acceptedTerms)) || 
-                (isLogin && loginAttempts >= 5)}
-            >
-              {loading ? (
-                <LoadingSpinner size="small" className="mr-2" />
-              ) : null}
-              {isLogin ? 'Sign In' : 'Sign Up'}
-            </Button>
-          </form>
+          {isLogin ? (
+            <SignInForm
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+              loading={loading}
+              onSubmit={handleSubmit}
+              disabled={loginAttempts >= 5}
+            />
+          ) : (
+            <SignUpForm
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+              confirmPassword={confirmPassword}
+              setConfirmPassword={setConfirmPassword}
+              acceptedTerms={acceptedTerms}
+              setAcceptedTerms={setAcceptedTerms}
+              passwordsMatch={passwordsMatch}
+              loading={loading}
+              onSubmit={handleSubmit}
+            />
+          )}
         </CardContent>
 
         <CardFooter className="flex justify-center pt-0">
