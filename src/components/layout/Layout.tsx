@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, BookOpen, Home, Leaf, LogOut, ShieldCheck } from "lucide-react";
@@ -44,15 +45,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   ];
 
-  // Add admin link for admin users
-  if (isAdmin) {
-    navItems.push({
-      path: "/admin",
-      label: "Admin",
-      icon: <ShieldCheck className="w-6 h-6" />
-    });
-  }
-
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -72,15 +64,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Link>
           </div>
           
-          {user && (
-            <button 
-              onClick={handleSignOut} 
-              className="flex items-center text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="h-4 w-4 mr-1" />
-              <span className="text-sm">Sign Out</span>
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            {isAdmin && (
+              <Link 
+                to="/admin" 
+                className="flex items-center text-muted-foreground hover:text-foreground"
+              >
+                <ShieldCheck className="h-4 w-4 mr-1" />
+                <span className="text-sm">Admin</span>
+              </Link>
+            )}
+            
+            {user && (
+              <button 
+                onClick={handleSignOut} 
+                className="flex items-center text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                <span className="text-sm">Sign Out</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
       
