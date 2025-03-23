@@ -1,6 +1,6 @@
 
 import React from "react";
-import PhotoUploader from "@/components/PhotoUploader";
+import PhotoUploader from "@/components/photo-uploader";
 import { Plus } from "lucide-react";
 import { MealAnalysisResponse } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
