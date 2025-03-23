@@ -1,8 +1,16 @@
 
-import { MealEntry } from '@/types';
+import { MealEntry, MealType, NutritionScore } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+
+// Helper function to validate nutritionScore
+const validateNutritionScore = (score: string): NutritionScore => {
+  const validScores: NutritionScore[] = ['very healthy', 'healthy', 'moderate', 'unhealthy', 'not healthy'];
+  return validScores.includes(score as NutritionScore) 
+    ? (score as NutritionScore) 
+    : 'moderate'; // Default to moderate if invalid
+};
 
 export const loadMealsFromSupabase = async (userId: string): Promise<MealEntry[]> => {
   try {
@@ -28,13 +36,13 @@ export const loadMealsFromSupabase = async (userId: string): Promise<MealEntry[]
       id: meal.id,
       title: meal.title,
       description: meal.description,
-      mealType: meal.meal_type,
+      mealType: meal.meal_type as MealType,
       foodItems: meal.food_items,
       imageUrl: meal.image_url || '',
       nutrition: typeof meal.nutrition === 'string' 
         ? JSON.parse(meal.nutrition) 
         : meal.nutrition,
-      nutritionScore: meal.nutrition_score,
+      nutritionScore: validateNutritionScore(meal.nutrition_score),
       notes: meal.notes || '',
       timestamp: meal.timestamp,
       createdAt: new Date(meal.created_at)
@@ -55,7 +63,9 @@ export const loadMealsFromLocalStorage = (): MealEntry[] => {
       const parsedMeals = JSON.parse(savedMeals);
       const formattedMeals = parsedMeals.map((meal: any) => ({
         ...meal,
-        createdAt: new Date(meal.createdAt)
+        createdAt: new Date(meal.createdAt),
+        // Ensure nutritionScore is valid
+        nutritionScore: validateNutritionScore(meal.nutritionScore)
       }));
       console.log("Loaded meals from localStorage:", formattedMeals.length);
       return formattedMeals;
@@ -174,5 +184,7 @@ export const createNewMeal = (meal: Omit<MealEntry, 'id' | 'createdAt'>): MealEn
     id: uuidv4(), // Use UUID for more reliable ID generation
     createdAt: now,
     timestamp: now.toISOString(),
+    // Ensure nutritionScore is valid
+    nutritionScore: validateNutritionScore(meal.nutritionScore as string)
   };
 };
