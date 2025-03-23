@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, BookOpen, Home, Leaf, LogOut } from "lucide-react";
@@ -53,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="container flex h-14 items-center justify-between py-0 my-[12px]">
           <div className="flex items-center gap-2">
             <Leaf className="h-5 w-5 text-primary" />
-            <span className="font-medium">MealScanner</span>
+            <span className="font-bold">MealScanner</span>
           </div>
           
           {user && <button onClick={handleSignOut} className="flex items-center text-muted-foreground hover:text-foreground">
