@@ -7,6 +7,9 @@ import { FilterBar } from "@/components/Journal/FilterBar";
 import { FilterOptions } from "@/components/Journal/FilterOptions";
 import { StatsCard } from "@/components/Journal/StatsCard";
 import { MealsList } from "@/components/Journal/MealsList";
+import { toast } from "sonner";
+import { Download } from "lucide-react";
+import { convertMealsToCSV, downloadCSV } from "@/utils/exportUtils";
 
 const JournalPage: React.FC = () => {
   const {
@@ -26,6 +29,7 @@ const JournalPage: React.FC = () => {
     setCustomDateRange,
     totalCalories,
     isLoading,
+    meals,
   } = useMealJournal();
   
   const [showFilters, setShowFilters] = useState(false);
@@ -70,9 +74,54 @@ const JournalPage: React.FC = () => {
     setFilterPeriod(period);
   };
   
+  const handleExportCsv = () => {
+    try {
+      // Determine which meals to export (filtered or all)
+      const mealsToExport = filteredMeals.length > 0 ? filteredMeals : meals;
+      
+      if (mealsToExport.length === 0) {
+        toast.error("No meals to export");
+        return;
+      }
+      
+      // Convert meals to CSV format
+      const csvContent = convertMealsToCSV(mealsToExport);
+      
+      // Generate filename with current date
+      const dateStr = new Date().toISOString().split('T')[0];
+      const filename = `meals-export-${dateStr}.csv`;
+      
+      // Trigger download
+      downloadCSV(csvContent, filename);
+      
+      // Show success message
+      toast.success(
+        areFiltersActive 
+          ? `Exported ${filteredMeals.length} filtered meals to CSV` 
+          : `Exported all ${meals.length} meals to CSV`
+      );
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export meals");
+    }
+  };
+  
   return (
     <div className="space-y-6 animate-fade-in">
-      <JournalHeader />
+      <div className="flex justify-between items-center">
+        <JournalHeader />
+        
+        {/* Export button */}
+        <button
+          onClick={handleExportCsv}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+          title="Export to CSV"
+          disabled={isLoading || (meals.length === 0)}
+        >
+          <Download className="h-4 w-4" />
+          <span className="hidden sm:inline">Export CSV</span>
+        </button>
+      </div>
       
       <div className="space-y-4">
         {/* Search and filter bar */}
