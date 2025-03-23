@@ -12,6 +12,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const { signOut, user, isAdmin } = useAuth();
 
+  // For debugging
+  useEffect(() => {
+    console.log("Layout rendering - isAdmin:", isAdmin);
+    console.log("Current user:", user?.email);
+  }, [isAdmin, user]);
+
   // Enable scrolling on iOS devices
   useEffect(() => {
     // Prevent only horizontal scrolling and allow vertical scrolling

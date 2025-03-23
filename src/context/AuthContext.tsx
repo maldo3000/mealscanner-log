@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      console.log("Checking if user has admin role:", user.email);
       const { data, error } = await supabase.rpc('has_role', { 
         _role: 'admin' 
       });
@@ -45,6 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      console.log("Admin role check result:", data);
       setIsAdmin(data || false);
     } catch (error) {
       console.error('Failed to check user role:', error);
@@ -74,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check admin role whenever the user changes
   useEffect(() => {
     if (user) {
+      console.log("User changed, checking role for:", user.email);
       checkUserRole();
     } else {
       setIsAdmin(false);

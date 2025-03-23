@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -9,7 +9,17 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, user, checkUserRole } = useAuth();
+
+  // Force a role check when the component mounts
+  useEffect(() => {
+    console.log("AdminRoute - Current user:", user?.email);
+    console.log("AdminRoute - isAdmin:", isAdmin);
+    // Refresh the role check
+    if (user) {
+      checkUserRole();
+    }
+  }, [user, checkUserRole]);
 
   if (loading) {
     return (
@@ -20,9 +30,11 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   }
 
   if (!isAdmin) {
+    console.log("Access denied - user is not an admin");
     return <Navigate to="/home" replace />;
   }
 
+  console.log("Access granted - user is an admin");
   return <>{children}</>;
 };
 
