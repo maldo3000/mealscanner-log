@@ -81,11 +81,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     : "text-muted-foreground hover:text-primary"
                 }`}
               >
-                <div className="relative">
+                <div>
                   {item.icon}
-                  {isActive(item.path) && (
-                    <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-                  )}
                 </div>
                 <span className="text-xs mt-1">{item.label}</span>
               </Link>
