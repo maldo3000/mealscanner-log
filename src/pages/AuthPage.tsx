@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Navigate } from 'react-router-dom';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from 'sonner';
+import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -60,101 +61,116 @@ const AuthPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-background">
-      <div className="w-full max-w-md glass-card p-8 rounded-2xl">
-        <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center justify-center p-3 rounded-full bg-primary/10 mb-4">
-            <Leaf className="h-8 w-8 text-primary" />
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-background relative overflow-hidden">
+      {/* Gradient overlays for background effect */}
+      <div className="absolute inset-0 bg-gradient-radial from-primary/5 to-transparent opacity-70"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10"></div>
+      
+      {/* Decorative circles */}
+      <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
+      <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
+      
+      <Card className="w-full max-w-md glass-card border-border/30 backdrop-blur-md bg-card/60 animate-fade-in">
+        <CardHeader className="pb-2 text-center">
+          <div className="flex flex-col items-center space-y-2">
+            <div className="flex items-center justify-center p-3 rounded-full bg-primary/20 backdrop-blur-sm">
+              <Leaf className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-semibold text-foreground">MealScanner</h1>
+            <h2 className="text-xl font-medium text-primary mt-2">
+              {isLogin ? 'Sign In' : 'Sign Up'}
+            </h2>
+            <p className="text-muted-foreground text-center">
+              {isLogin ? 'Sign in to your account' : 'Create a new account'}
+            </p>
           </div>
-          <h1 className="text-2xl font-semibold">MealScanner</h1>
-          <h2 className="text-xl font-medium text-primary mt-4">
-            {isLogin ? 'Sign In' : 'Sign Up'}
-          </h2>
-          <p className="text-muted-foreground mt-2 text-center">
-            {isLogin ? 'Sign in to your account' : 'Create a new account'}
-          </p>
-        </div>
+        </CardHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
-          </div>
-          
-          {!isLogin && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className={!passwordsMatch ? "border-destructive" : ""}
-                />
-                {!passwordsMatch && (
-                  <p className="text-destructive text-sm mt-1">Passwords do not match</p>
-                )}
-              </div>
-              
-              <div className="flex items-center space-x-2 mt-4">
-                <Checkbox 
-                  id="terms" 
-                  checked={acceptedTerms}
-                  onCheckedChange={(checked) => setAcceptedTerms(checked === true)} 
-                />
-                <Label htmlFor="terms" className="text-sm font-normal leading-none cursor-pointer">
-                  I understand and agree to the Terms of Service
-                </Label>
-              </div>
-            </>
-          )}
-          
-          <Button 
-            type="submit" 
-            className="w-full mt-6" 
-            disabled={loading || (!isLogin && (!passwordsMatch || !acceptedTerms))}
-          >
-            {loading ? (
-              <LoadingSpinner size="small" className="mr-2" />
-            ) : null}
-            {isLogin ? 'Sign In' : 'Sign Up'}
-          </Button>
-        </form>
+        <CardContent className="pt-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-foreground/90">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-foreground/90">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50"
+              />
+            </div>
+            
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-foreground/90">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className={`bg-background/50 border-border/50 backdrop-blur-sm focus:border-primary/50 ${!passwordsMatch ? "border-destructive" : ""}`}
+                  />
+                  {!passwordsMatch && (
+                    <p className="text-destructive text-sm mt-1">Passwords do not match</p>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2 mt-4">
+                  <Checkbox 
+                    id="terms" 
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                    className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
+                  <Label htmlFor="terms" className="text-sm font-normal leading-none cursor-pointer text-foreground/80">
+                    I understand and agree to the Terms of Service
+                  </Label>
+                </div>
+              </>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+              disabled={loading || (!isLogin && (!passwordsMatch || !acceptedTerms))}
+            >
+              {loading ? (
+                <LoadingSpinner size="small" className="mr-2" />
+              ) : null}
+              {isLogin ? 'Sign In' : 'Sign Up'}
+            </Button>
+          </form>
+        </CardContent>
 
-        <div className="mt-6 text-center">
+        <CardFooter className="flex justify-center pt-0">
           <button
             type="button"
-            className="text-primary hover:underline text-sm"
+            className="text-primary hover:text-primary/90 hover:underline text-sm transition-colors"
             onClick={toggleAuthMode}
           >
             {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
           </button>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
