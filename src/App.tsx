@@ -12,7 +12,7 @@ import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import { ThemeProvider } from "./components/ui/theme-provider";
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './context/auth';
 import { MealJournalProvider } from './context/mealJournal';
 import { Toaster } from "./components/ui/toaster";
 import { SubscriptionProvider } from './context/SubscriptionContext';

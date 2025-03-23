@@ -1,89 +1,15 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { NavigateFunction } from 'react-router-dom';
 
-interface AuthContextProps {
-  session: Session | null;
-  user: User | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: any | null, userExists?: boolean }>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: any | null }>;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  checkUserRole: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const navigate = useNavigate();
-
-  // Function to check if the current user has admin role
-  const checkUserRole = async () => {
-    if (!user) {
-      setIsAdmin(false);
-      return;
-    }
-
-    try {
-      console.log("Checking if user has admin role:", user.email);
-      const { data, error } = await supabase.rpc('has_role', { 
-        _role: 'admin' 
-      });
-
-      if (error) {
-        console.error('Error checking user role:', error);
-        setIsAdmin(false);
-        return;
-      }
-
-      console.log("Admin role check result:", data);
-      setIsAdmin(data || false);
-    } catch (error) {
-      console.error('Failed to check user role:', error);
-      setIsAdmin(false);
-    }
-  };
-
-  useEffect(() => {
-    // Check for active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", _event);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Check admin role whenever the user changes
-  useEffect(() => {
-    if (user) {
-      console.log("User changed, checking role for:", user.email);
-      checkUserRole();
-    } else {
-      setIsAdmin(false);
-    }
-  }, [user]);
-
-  const signIn = async (email: string, password: string) => {
+export const authService = {
+  signIn: async (
+    email: string, 
+    password: string, 
+    navigate: NavigateFunction, 
+    setLoading: (loading: boolean) => void
+  ) => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -111,9 +37,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  },
 
-  const signUp = async (email: string, password: string) => {
+  signUp: async (
+    email: string, 
+    password: string, 
+    navigate: NavigateFunction, 
+    setLoading: (loading: boolean) => void
+  ) => {
     try {
       setLoading(true);
       const { error, data } = await supabase.auth.signUp({ email, password });
@@ -144,9 +75,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  },
 
-  const resetPassword = async (email: string) => {
+  resetPassword: async (
+    email: string, 
+    setLoading: (loading: boolean) => void
+  ) => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -168,9 +102,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  },
 
-  const signOut = async () => {
+  signOut: async (
+    setLoading: (loading: boolean) => void,
+    setUser: (user: null) => void,
+    setSession: (session: null) => void,
+    setIsAdmin: (isAdmin: boolean) => void,
+    navigate: NavigateFunction
+  ) => {
     try {
       setLoading(true);
       
@@ -208,28 +148,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  },
 
-  const value = {
-    session,
-    user,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword,
-    isAuthenticated: !!session,
-    isAdmin,
-    checkUserRole
-  };
+  checkUserRole: async (
+    user: any, 
+    setIsAdmin: (isAdmin: boolean) => void
+  ) => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+    try {
+      console.log("Checking if user has admin role:", user.email);
+      const { data, error } = await supabase.rpc('has_role', { 
+        _role: 'admin' 
+      });
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+      if (error) {
+        console.error('Error checking user role:', error);
+        setIsAdmin(false);
+        return;
+      }
+
+      console.log("Admin role check result:", data);
+      setIsAdmin(data || false);
+    } catch (error) {
+      console.error('Failed to check user role:', error);
+      setIsAdmin(false);
+    }
   }
-  return context;
 };
