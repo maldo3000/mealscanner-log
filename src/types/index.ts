@@ -30,4 +30,5 @@ export interface MealAnalysisResponse {
   foodItems: string[];
   nutrition: NutritionInfo;
   nutritionScore: NutritionScore;
+  imageUrl: string; // Added this property to fix the TypeScript error
 }

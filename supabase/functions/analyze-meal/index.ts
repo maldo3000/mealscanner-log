@@ -187,6 +187,9 @@ Your response MUST be valid JSON without any extra text, markdown, or explanatio
         }
       });
       
+      // Set the imageUrl to the data URL
+      analysisResult.imageUrl = `data:image/jpeg;base64,${imageData}`;
+      
       console.log('Successfully parsed and validated meal analysis data');
       console.log('Analysis result:', JSON.stringify(analysisResult, null, 2));
       
