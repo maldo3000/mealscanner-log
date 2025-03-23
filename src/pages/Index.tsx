@@ -41,15 +41,15 @@ const Index = () => {
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center justify-center p-2 rounded-full bg-primary/10 backdrop-blur-sm mb-4">
                 <UtensilsCrossed className="h-5 w-5 text-primary mr-2" />
-                <span className="text-sm font-medium text-primary">AI-Powered Nutrition Tracking</span>
+                <span className="text-sm font-medium text-primary">AI-Powered Meal Journal</span>
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight text-foreground">
-                Your Personal <span className="text-primary">Nutrition</span> Assistant
+                Snap. Analyze. <span className="text-primary">Eat Smarter.</span>
               </h1>
               
               <p className="text-xl text-foreground/80 mb-8 max-w-2xl mx-auto lg:mx-0">
-                MealScanner uses AI to analyze your meals, track nutrition, and help you develop healthier eating habits - all from a simple photo of your food.
+                MealScanner uses AI to easily log what you're eating and keep track of your calories and macros.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
