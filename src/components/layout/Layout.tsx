@@ -1,7 +1,6 @@
-
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Camera, BookOpen, Home, Leaf, LogOut } from "lucide-react";
+import { Camera, BookOpen, Home, Leaf, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 interface LayoutProps {
@@ -10,7 +9,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { signOut, user } = useAuth();
+  const { signOut, user, isAdmin } = useAuth();
 
   // Enable scrolling on iOS devices
   useEffect(() => {
@@ -44,6 +43,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: <BookOpen className="w-6 h-6" />
     }
   ];
+
+  // Add admin link for admin users
+  if (isAdmin) {
+    navItems.push({
+      path: "/admin",
+      label: "Admin",
+      icon: <ShieldCheck className="w-6 h-6" />
+    });
+  }
 
   const isActive = (path: string) => {
     return location.pathname === path;
