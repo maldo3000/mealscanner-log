@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Upload, FileText, ChevronRight, ChevronLeft, BarChart4, FileExport } from 'lucide-react';
+import { Camera, Upload, FileText, ChevronRight, ChevronLeft, BarChart4, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -88,7 +88,7 @@ const OnboardingPage: React.FC = () => {
     {
       title: "Export Your Logs Anytime",
       subtitle: "Own Your Data. No Lock-In.",
-      icon: <FileExport className="h-16 w-16 text-primary" />,
+      icon: <FileDown className="h-16 w-16 text-primary" />,
       content: (
         <div className="space-y-4">
           <p className="text-foreground/80">
