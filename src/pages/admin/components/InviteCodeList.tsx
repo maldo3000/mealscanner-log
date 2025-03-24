@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Clipboard, Trash2, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdmin } from '../context/AdminContext';
 
 interface InviteCode {
   id: string;
@@ -17,19 +18,8 @@ interface InviteCode {
   expires_at: string | null;
 }
 
-interface InviteCodeListProps {
-  inviteCodes: InviteCode[];
-  isLoadingCodes: boolean;
-  session: any;
-  loadInviteCodes: () => Promise<void>;
-}
-
-const InviteCodeList: React.FC<InviteCodeListProps> = ({
-  inviteCodes,
-  isLoadingCodes,
-  session,
-  loadInviteCodes
-}) => {
+const InviteCodeList: React.FC = () => {
+  const { inviteCodes, isLoadingCodes, session, loadInviteCodes } = useAdmin();
   const [deletingCodes, setDeletingCodes] = useState<Record<string, boolean>>({});
 
   const copyToClipboard = (code: string) => {

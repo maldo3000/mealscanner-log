@@ -8,16 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdmin } from '../context/AdminContext';
 
-interface InviteCodeGeneratorProps {
-  session: any;
-  loadInviteCodes: () => Promise<void>;
-}
-
-const InviteCodeGenerator: React.FC<InviteCodeGeneratorProps> = ({
-  session,
-  loadInviteCodes
-}) => {
+const InviteCodeGenerator: React.FC = () => {
+  const { session, loadInviteCodes } = useAdmin();
   const [specificEmail, setSpecificEmail] = useState('');
   const [selectedExpiry, setSelectedExpiry] = useState('never');
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);

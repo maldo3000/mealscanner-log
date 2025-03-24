@@ -7,26 +7,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Save, Loader2 } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
 
-interface PaywallSettingsProps {
-  paywallEnabled: boolean;
-  setPaywallEnabled: (enabled: boolean) => void;
-  freeTierLimit: number;
-  setFreeTierLimit: (limit: number) => void;
-  session: any;
-  isSaving: boolean;
-  setIsSaving: (saving: boolean) => void;
-}
+const PaywallSettings: React.FC = () => {
+  const {
+    paywallEnabled,
+    setPaywallEnabled,
+    freeTierLimit,
+    setFreeTierLimit,
+    session,
+    isSaving,
+    setIsSaving
+  } = useAdmin();
 
-const PaywallSettings: React.FC<PaywallSettingsProps> = ({
-  paywallEnabled,
-  setPaywallEnabled,
-  freeTierLimit,
-  setFreeTierLimit,
-  session,
-  isSaving,
-  setIsSaving
-}) => {
   // Local state for tracking UI changes without immediately updating parent
   const [localPaywallEnabled, setLocalPaywallEnabled] = useState(paywallEnabled);
   const [localFreeTierLimit, setLocalFreeTierLimit] = useState(freeTierLimit);

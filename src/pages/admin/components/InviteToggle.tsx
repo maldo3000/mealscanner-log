@@ -7,22 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Save, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdmin } from '../context/AdminContext';
 
-interface InviteToggleProps {
-  inviteOnlyEnabled: boolean;
-  setInviteOnlyEnabled: (enabled: boolean) => void;
-  session: any;
-  isSaving: boolean;
-  setIsSaving: (saving: boolean) => void;
-}
+const InviteToggle: React.FC = () => {
+  const {
+    inviteOnlyEnabled,
+    setInviteOnlyEnabled,
+    session,
+    isSaving,
+    setIsSaving
+  } = useAdmin();
 
-const InviteToggle: React.FC<InviteToggleProps> = ({
-  inviteOnlyEnabled,
-  setInviteOnlyEnabled,
-  session,
-  isSaving,
-  setIsSaving
-}) => {
   // Track local state to avoid UI jumping during saving
   const [localInviteOnlyState, setLocalInviteOnlyState] = useState(inviteOnlyEnabled);
   const [hasChanges, setHasChanges] = useState(false);
