@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { CreditCard, CheckCircle, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/context/auth';
-import { useSubscription } from '@/context/SubscriptionContext';
+import { useSubscription } from '@/context/subscription';
+
 const ProfilePage: React.FC = () => {
   const {
     user,

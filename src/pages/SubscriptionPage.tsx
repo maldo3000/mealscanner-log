@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSubscription } from '@/context/SubscriptionContext';
+import { useSubscription } from '@/context/subscription';
 import { useAuth } from '@/context/auth';
 import { CreditCard, Check, Leaf, Lock, ArrowRight, Zap, X, CalendarCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -231,3 +230,4 @@ const SubscriptionPage: React.FC = () => {
 };
 
 export default SubscriptionPage;
+

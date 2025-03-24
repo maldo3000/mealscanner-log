@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { analyzeMealPhoto, analyzeMealText } from "@/utils/api";
 import { useMealJournal } from "@/context/MealJournalContext";
-import { useSubscription } from "@/context/SubscriptionContext";
+import { useSubscription } from "@/context/subscription";
 import { MealType, MealAnalysisResponse } from "@/types";
 import PhotoUploadSection from "./components/PhotoUploadSection";
 import AnalysisInProgress from "./components/AnalysisInProgress";
