@@ -78,9 +78,15 @@ serve(async (req) => {
     }
 
     // Parse the request body to get the new settings
-    const { paywallEnabled, freeTierLimit } = await req.json();
+    const { 
+      paywallEnabled, 
+      freeTierLimit, 
+      monthlyPrice,
+      yearlyPrice,
+      yearlyDiscountPercent 
+    } = await req.json();
     
-    console.log(`Updating app settings: paywallEnabled=${paywallEnabled}, freeTierLimit=${freeTierLimit}`);
+    console.log(`Updating app settings: paywallEnabled=${paywallEnabled}, freeTierLimit=${freeTierLimit}, prices=${monthlyPrice}/${yearlyPrice}, discount=${yearlyDiscountPercent}`);
 
     // Update the app settings
     const { data, error } = await supabaseAdmin
@@ -88,6 +94,9 @@ serve(async (req) => {
       .update({ 
         paywall_enabled: paywallEnabled, 
         free_tier_limit: freeTierLimit,
+        monthly_price: monthlyPrice,
+        yearly_price: yearlyPrice,
+        yearly_discount_percent: yearlyDiscountPercent,
         updated_at: new Date().toISOString()
       })
       .eq('id', (
@@ -115,7 +124,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Paywall ${paywallEnabled ? 'enabled' : 'disabled'} with free tier limit of ${freeTierLimit} scans` 
+        message: `Settings updated successfully: Paywall ${paywallEnabled ? 'enabled' : 'disabled'}, free tier limit: ${freeTierLimit}, pricing: $${monthlyPrice}/$${yearlyPrice}` 
       }), 
       { 
         headers: { 

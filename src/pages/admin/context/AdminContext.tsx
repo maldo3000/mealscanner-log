@@ -23,6 +23,12 @@ interface AdminContextType {
   setInviteOnlyEnabled: (value: boolean) => void;
   freeTierLimit: number;
   setFreeTierLimit: (value: number) => void;
+  monthlyPrice: number;
+  setMonthlyPrice: (value: number) => void;
+  yearlyPrice: number;
+  setYearlyPrice: (value: number) => void;
+  yearlyDiscountPercent: number;
+  setYearlyDiscountPercent: (value: number) => void;
   isLoading: boolean;
   isSaving: boolean;
   setIsSaving: (value: boolean) => void;
@@ -49,6 +55,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; session: any }
   const [paywallEnabled, setPaywallEnabled] = useState(false);
   const [inviteOnlyEnabled, setInviteOnlyEnabled] = useState(true);
   const [freeTierLimit, setFreeTierLimit] = useState(80);
+  const [monthlyPrice, setMonthlyPrice] = useState(4.99);
+  const [yearlyPrice, setYearlyPrice] = useState(49.99);
+  const [yearlyDiscountPercent, setYearlyDiscountPercent] = useState(15);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
@@ -60,7 +69,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; session: any }
       setIsLoading(true);
       const { data, error } = await supabase
         .from('app_settings')
-        .select('paywall_enabled, free_tier_limit, invite_only_registration')
+        .select('paywall_enabled, free_tier_limit, invite_only_registration, monthly_price, yearly_price, yearly_discount_percent')
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -74,6 +83,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; session: any }
         console.log('Loaded app settings:', data[0]);
         setPaywallEnabled(data[0].paywall_enabled);
         setFreeTierLimit(data[0].free_tier_limit);
+        
+        // Load pricing information
+        setMonthlyPrice(data[0].monthly_price || 4.99);
+        setYearlyPrice(data[0].yearly_price || 49.99);
+        setYearlyDiscountPercent(data[0].yearly_discount_percent || 15);
         
         // Be explicit about the boolean value
         const inviteOnly = !!data[0].invite_only_registration;
@@ -129,6 +143,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; session: any }
     setInviteOnlyEnabled,
     freeTierLimit,
     setFreeTierLimit,
+    monthlyPrice,
+    setMonthlyPrice,
+    yearlyPrice,
+    setYearlyPrice,
+    yearlyDiscountPercent,
+    setYearlyDiscountPercent,
     isLoading,
     isSaving,
     setIsSaving,

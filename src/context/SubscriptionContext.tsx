@@ -4,6 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
 
+interface PricingInfo {
+  monthlyPrice: number;
+  yearlyPrice: number;
+  yearlyDiscountPercent: number;
+}
+
 interface SubscriptionContextType {
   scanCount: number;
   isSubscribed: boolean;
@@ -14,6 +20,7 @@ interface SubscriptionContextType {
   incrementScanCount: () => Promise<boolean>;
   subscriptionEndDate: Date | null;
   loadingSubscription: boolean;
+  pricing: PricingInfo | null;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
@@ -26,6 +33,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [paywallEnabled, setPaywallEnabled] = useState<boolean>(false);
   const [subscriptionEndDate, setSubscriptionEndDate] = useState<Date | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState<boolean>(true);
+  const [pricing, setPricing] = useState<PricingInfo | null>(null);
 
   // Computed properties
   const remainingScans = Math.max(0, freeTierLimit - scanCount);
@@ -49,6 +57,13 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (data && data.length > 0) {
           setPaywallEnabled(data[0].paywall_enabled);
           setFreeTierLimit(data[0].free_tier_limit);
+          
+          // Load pricing information
+          setPricing({
+            monthlyPrice: data[0].monthly_price || 4.99,
+            yearlyPrice: data[0].yearly_price || 49.99,
+            yearlyDiscountPercent: data[0].yearly_discount_percent || 15
+          });
         }
       } catch (error) {
         console.error('Failed to load app settings:', error);
@@ -190,7 +205,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         canScan,
         incrementScanCount,
         subscriptionEndDate,
-        loadingSubscription
+        loadingSubscription,
+        pricing
       }}
     >
       {children}

@@ -15,24 +15,33 @@ export type Database = {
           free_tier_limit: number
           id: string
           invite_only_registration: boolean | null
+          monthly_price: number
           paywall_enabled: boolean
           updated_at: string
+          yearly_discount_percent: number
+          yearly_price: number
         }
         Insert: {
           created_at?: string
           free_tier_limit?: number
           id?: string
           invite_only_registration?: boolean | null
+          monthly_price?: number
           paywall_enabled?: boolean
           updated_at?: string
+          yearly_discount_percent?: number
+          yearly_price?: number
         }
         Update: {
           created_at?: string
           free_tier_limit?: number
           id?: string
           invite_only_registration?: boolean | null
+          monthly_price?: number
           paywall_enabled?: boolean
           updated_at?: string
+          yearly_discount_percent?: number
+          yearly_price?: number
         }
         Relationships: []
       }
