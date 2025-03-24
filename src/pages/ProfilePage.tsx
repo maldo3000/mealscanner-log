@@ -26,8 +26,8 @@ const ProfilePage: React.FC = () => {
       
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row items-center gap-4">
-            <Avatar className="h-16 w-16">
+          <CardHeader className="flex flex-col items-center text-center">
+            <Avatar className="h-16 w-16 mb-2">
               <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
             </Avatar>
             <div>
@@ -57,7 +57,7 @@ const ProfilePage: React.FC = () => {
         </Card>
         
         <Card>
-          <CardHeader>
+          <CardHeader className="text-center">
             <CardTitle>Subscription</CardTitle>
             <CardDescription>
               Your current plan and usage
