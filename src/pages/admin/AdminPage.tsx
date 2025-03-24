@@ -4,6 +4,7 @@ import { useAuth } from '@/context/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import AccessDenied from './components/AccessDenied';
 import PaywallSettings from './components/PaywallSettings';
 import InviteToggle from './components/InviteToggle';
