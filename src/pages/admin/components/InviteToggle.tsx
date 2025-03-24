@@ -31,14 +31,13 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
     setIsSaving(true);
     try {
       // Save invite-only settings
-      const inviteResponse = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
+      const inviteResponse = await fetch(`${window.location.origin}/functions/v1/toggle-invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          action: 'update_settings',
           inviteOnly: inviteOnlyEnabled
         })
       });
@@ -48,10 +47,28 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
         throw new Error(inviteResult.error || 'Failed to update invite settings');
       }
 
-      toast.success('Settings saved successfully');
+      const result = await inviteResponse.json();
+      toast.success(result.message || 'Settings saved successfully');
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save settings');
+      // In case of error, revert the UI state to match the server
+      try {
+        const { data } = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action: 'get_settings' })
+        }).then(res => res.json());
+        
+        if (data && data.invite_only_registration !== undefined) {
+          setInviteOnlyEnabled(data.invite_only_registration);
+        }
+      } catch (fetchError) {
+        console.error('Failed to get current settings:', fetchError);
+      }
     } finally {
       setIsSaving(false);
     }
