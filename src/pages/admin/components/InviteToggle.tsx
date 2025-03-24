@@ -61,12 +61,19 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
         })
       });
 
-      const result = await response.json();
-      
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to update invite settings');
+        const text = await response.text();
+        console.error('Error response:', text);
+        try {
+          const result = JSON.parse(text);
+          throw new Error(result.error || 'Failed to update invite settings');
+        } catch (e) {
+          throw new Error(`Server error: ${response.status}`);
+        }
       }
 
+      const result = await response.json();
+      
       console.log('Toggle invite response:', result);
       
       // Update parent state with the new value on success

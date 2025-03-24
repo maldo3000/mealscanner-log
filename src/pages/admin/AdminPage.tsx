@@ -49,9 +49,12 @@ const AdminPage: React.FC = () => {
         }
 
         if (data && data.length > 0) {
+          console.log('Loaded app settings:', data[0]);
           setPaywallEnabled(data[0].paywall_enabled);
           setFreeTierLimit(data[0].free_tier_limit);
           setInviteOnlyEnabled(data[0].invite_only_registration);
+        } else {
+          console.log('No app settings found');
         }
       } catch (error) {
         console.error('Failed to load app settings:', error);

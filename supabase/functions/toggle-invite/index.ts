@@ -21,6 +21,8 @@ const supabaseAdmin = createClient(
 );
 
 serve(async (req) => {
+  console.log("Toggle invite function called with method:", req.method);
+  
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
@@ -65,6 +67,7 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     
     if (authError || !user) {
+      console.error("Auth error:", authError);
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }), 
         { 
@@ -78,7 +81,8 @@ serve(async (req) => {
     }
 
     // Parse the request body to get the new settings
-    const { inviteOnly } = await req.json();
+    const requestBody = await req.json();
+    const { inviteOnly } = requestBody;
     
     console.log(`Updating app settings: inviteOnly=${inviteOnly}`);
 
@@ -89,7 +93,21 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .eq('role', 'admin');
 
-    if (roleError || !roleData || roleData.length === 0) {
+    if (roleError) {
+      console.error("Role check error:", roleError);
+      return new Response(
+        JSON.stringify({ error: 'Error checking user role', details: roleError.message }), 
+        { 
+          status: 500, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    }
+
+    if (!roleData || roleData.length === 0) {
       return new Response(
         JSON.stringify({ error: 'Admin access required' }), 
         { 
@@ -109,8 +127,22 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .limit(1);
 
-    if (settingsError || !settingsData || settingsData.length === 0) {
+    if (settingsError) {
       console.error('Error getting app settings ID:', settingsError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to get app settings', details: settingsError.message }), 
+        { 
+          status: 500, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    }
+
+    if (!settingsData || settingsData.length === 0) {
+      console.log('No settings found, creating new settings');
       // If no settings exist, create one
       const { data: newSettings, error: createError } = await supabaseAdmin
         .from('app_settings')
@@ -150,6 +182,30 @@ serve(async (req) => {
     const settingsId = settingsData[0].id;
     console.log(`Updating settings with ID ${settingsId} to invite_only_registration=${inviteOnly}`);
     
+    // Get the current settings first to verify
+    const { data: currentSettings, error: getError } = await supabaseAdmin
+      .from('app_settings')
+      .select('*')
+      .eq('id', settingsId)
+      .single();
+      
+    if (getError) {
+      console.error('Error getting current settings:', getError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to get current settings', details: getError.message }), 
+        { 
+          status: 500, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    }
+    
+    console.log('Current settings:', currentSettings);
+    
+    // Do the update
     const { data, error } = await supabaseAdmin
       .from('app_settings')
       .update({ 
@@ -173,7 +229,34 @@ serve(async (req) => {
       );
     }
 
-    console.log('Update successful:', data);
+    if (!data || data.length === 0) {
+      console.error('No data returned after update');
+      return new Response(
+        JSON.stringify({ error: 'No data returned after update' }), 
+        { 
+          status: 500, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    }
+
+    console.log('Update successful:', data[0]);
+    
+    // Verify update was applied correctly
+    const { data: verifySettings, error: verifyError } = await supabaseAdmin
+      .from('app_settings')
+      .select('*')
+      .eq('id', settingsId)
+      .single();
+      
+    if (verifyError) {
+      console.error('Error verifying settings update:', verifyError);
+    } else {
+      console.log('Verified settings after update:', verifySettings);
+    }
     
     return new Response(
       JSON.stringify({ 
