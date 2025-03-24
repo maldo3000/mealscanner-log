@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { useSearchParams } from 'react-router-dom';
@@ -49,19 +48,28 @@ export const useAuthForm = (): UseAuthFormResult => {
   const { signIn, signUp, resetPassword, loading } = useAuth();
   const [searchParams] = useSearchParams();
 
-  // Check if invite-only registration is enabled
   useEffect(() => {
     const checkInviteStatus = async () => {
       try {
-        const { data: settings } = await supabase
+        console.log("Checking if invite-only registration is enabled...");
+        const { data: settings, error } = await supabase
           .from('app_settings')
           .select('invite_only_registration')
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
         
+        if (error) {
+          console.error("Error fetching app settings:", error);
+          return;
+        }
+        
         if (settings) {
+          console.log("Invite-only registration setting:", settings.invite_only_registration);
           setInviteRequired(settings.invite_only_registration);
+        } else {
+          console.log("No app settings found, defaulting to require invites");
+          setInviteRequired(true); // Default to requiring invites if no settings found
         }
       } catch (error) {
         console.error('Error checking invite status:', error);
@@ -69,7 +77,7 @@ export const useAuthForm = (): UseAuthFormResult => {
     };
 
     checkInviteStatus();
-  }, []);
+  }, [isLogin]); // Re-check when toggling between login and signup
 
   useEffect(() => {
     if (!isLogin) {
@@ -77,39 +85,42 @@ export const useAuthForm = (): UseAuthFormResult => {
     }
   }, [password, confirmPassword, isLogin]);
 
-  // Check if we should show the verification message based on URL params
   useEffect(() => {
     if (searchParams.get('signup') === 'success') {
       setShowVerificationAlert(true);
-      // Remove the query param to avoid showing the message after page refreshes
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Check if we're coming back from a password reset
     if (searchParams.get('reset') === 'true') {
       toast.success('You can now create a new password by signing in with the link in your email.');
-      // Remove the query param
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [searchParams]);
 
   const validateInviteCode = async () => {
-    if (!inviteRequired) return true;
+    if (!inviteRequired) {
+      console.log("Invite code not required, skipping validation");
+      return true;
+    }
+    
     if (!inviteCode.trim()) {
+      console.log("No invite code provided");
       setInviteCodeError('Invite code is required');
       return false;
     }
 
     try {
-      // First try to validate directly through the database function
+      console.log("Validating invite code:", inviteCode);
       const { data, error } = await supabase.rpc('validate_invite_code', {
         code_to_check: inviteCode.trim()
       });
 
       if (error) {
+        console.error("Invite code validation error:", error);
         throw error;
       }
 
+      console.log("Invite code validation result:", data);
       if (!data) {
         setInviteCodeError('Invalid or expired invite code');
         return false;
@@ -130,7 +141,6 @@ export const useAuthForm = (): UseAuthFormResult => {
     setInviteCodeError(null);
     
     if (!isLogin) {
-      // Signup validation
       if (password !== confirmPassword) {
         toast.error('Passwords do not match');
         return;
@@ -141,7 +151,6 @@ export const useAuthForm = (): UseAuthFormResult => {
         return;
       }
 
-      // Validate invite code if required
       if (inviteRequired) {
         const isValid = await validateInviteCode();
         if (!isValid) return;
@@ -149,7 +158,6 @@ export const useAuthForm = (): UseAuthFormResult => {
       
       const result = await signUp(email, password, inviteCode);
       if (result.error) {
-        // If the user already exists, show a helpful message
         if (result.userExists) {
           setAuthError('An account with this email already exists. Sign in or reset your password.');
         } else {
@@ -157,7 +165,6 @@ export const useAuthForm = (): UseAuthFormResult => {
         }
       }
     } else {
-      // Login flow
       if (loginAttempts >= 5) {
         setAuthError('Too many login attempts. Please try again later.');
         toast.error('Too many login attempts. Please try again later.');
@@ -187,7 +194,6 @@ export const useAuthForm = (): UseAuthFormResult => {
     
     const result = await resetPassword(email);
     if (!result.error) {
-      // Hide the password reset form after successful submission
       setShowResetPasswordForm(false);
     }
   };

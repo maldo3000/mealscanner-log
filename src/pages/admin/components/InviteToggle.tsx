@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Save, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InviteToggleProps {
   inviteOnlyEnabled: boolean;
@@ -51,47 +52,26 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
     try {
       console.log(`Sending request to toggle invite: inviteOnly=${localInviteOnlyState}`);
       
-      // Fixed URL path - using v1/ prefix because we're calling functions directly
-      const response = await fetch(`${window.location.origin}/functions/v1/toggle-invite`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
-          inviteOnly: localInviteOnlyState
-        })
+      // Use direct Supabase function invocation instead of fetch
+      const { data, error } = await supabase.functions.invoke('toggle-invite', {
+        body: { inviteOnly: localInviteOnlyState }
       });
 
-      if (!response.ok) {
-        console.error(`Error response status: ${response.status}`, response);
-        
-        let errorMessage = `Server error: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-          console.error('Error data:', errorData);
-        } catch (parseError) {
-          console.error('Could not parse error response:', parseError);
-          const text = await response.text();
-          console.error('Error response text:', text);
-        }
-        
-        throw new Error(errorMessage);
+      if (error) {
+        console.error('Error invoking toggle-invite function:', error);
+        throw new Error(`Failed to update invite settings: ${error.message}`);
       }
-
-      const result = await response.json();
       
-      console.log('Toggle invite response:', result);
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to update invite settings');
+      if (!data || !data.success) {
+        throw new Error(data?.error || 'Failed to update invite settings');
       }
+      
+      console.log('Toggle invite response:', data);
       
       // Update parent state with the new value on success
       setInviteOnlyEnabled(localInviteOnlyState);
       setHasChanges(false);
-      toast.success(result.message || 'Settings saved successfully');
+      toast.success(data.message || 'Settings saved successfully');
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save settings');

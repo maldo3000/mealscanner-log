@@ -58,18 +58,25 @@ export const authService = {
         .single();
       
       const inviteRequired = settings?.invite_only_registration;
+      console.log("Invite required for registration:", inviteRequired);
       
       // If invite is required, validate the code before sign up
       if (inviteRequired && inviteCode) {
+        console.log("Validating invite code:", inviteCode);
         const { data: isValid, error: validationError } = await supabase.rpc(
           'validate_invite_code', 
           { code_to_check: inviteCode }
         );
         
+        console.log("Invite code validation result:", isValid, validationError);
+        
         if (validationError || !isValid) {
           toast.error('Invalid or expired invite code');
           return { error: new Error('Invalid or expired invite code') };
         }
+      } else if (inviteRequired && !inviteCode) {
+        toast.error('Invite code is required to register');
+        return { error: new Error('Invite code is required to register') };
       }
       
       // Proceed with sign up
@@ -86,10 +93,17 @@ export const authService = {
       
       // If signup was successful and invite code was provided, mark it as used
       if (data.user && inviteRequired && inviteCode) {
-        await supabase.rpc('use_invite_code', {
+        console.log("Marking invite code as used:", inviteCode, "for user:", email);
+        const { data: useResult, error: useError } = await supabase.rpc('use_invite_code', {
           code_to_use: inviteCode,
           user_email: email
         });
+        
+        if (useError) {
+          console.error("Error marking invite code as used:", useError);
+        } else {
+          console.log("Invite code marked as used:", useResult);
+        }
       }
       
       if (data.user) {
