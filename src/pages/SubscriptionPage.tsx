@@ -3,20 +3,22 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/context/SubscriptionContext';
 import { useAuth } from '@/context/auth';
-import { CreditCard, Check, Leaf, Lock } from 'lucide-react';
+import { CreditCard, Check, Leaf, Lock, ArrowRight, Zap, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 const SubscriptionPage: React.FC = () => {
   const { isSubscribed, scanCount, freeTierLimit, remainingScans, paywallEnabled } = useSubscription();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const subscribeNow = async () => {
     // In a real implementation, this would redirect to a payment processor
     // For now, we'll just show a toast that this is a demo
-    toast.info("This is a demo. In a real app, this would connect to a payment processor like Stripe.");
+    toast.info("This is a demo. In a real app, this would connect to a payment processor like Stripe.", {
+      duration: 5000,
+    });
     
     // Redirect back to the capture page after subscription UI is shown
     navigate('/capture');
@@ -89,6 +91,14 @@ const SubscriptionPage: React.FC = () => {
               <Check className="h-5 w-5 text-primary mr-2" />
               <span>Meal journaling</span>
             </div>
+            <div className="flex items-center">
+              <X className="h-5 w-5 text-muted-foreground mr-2" />
+              <span className="text-muted-foreground">Advanced nutritional insights</span>
+            </div>
+            <div className="flex items-center">
+              <X className="h-5 w-5 text-muted-foreground mr-2" />
+              <span className="text-muted-foreground">Data export options</span>
+            </div>
           </CardContent>
           <CardFooter>
             <Button variant="outline" className="w-full" disabled={true}>
@@ -97,7 +107,12 @@ const SubscriptionPage: React.FC = () => {
           </CardFooter>
         </Card>
 
-        <Card className="border-primary">
+        <Card className="border-primary relative overflow-hidden">
+          {/* Recommended badge */}
+          <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold">
+            RECOMMENDED
+          </div>
+          
           <CardHeader className="bg-primary/5">
             <CardTitle>Pro Plan</CardTitle>
             <CardDescription>Advanced features for nutrition enthusiasts</CardDescription>
@@ -120,19 +135,45 @@ const SubscriptionPage: React.FC = () => {
               <Check className="h-5 w-5 text-primary mr-2" />
               <span>Data export options</span>
             </div>
+            <div className="flex items-center">
+              <Check className="h-5 w-5 text-primary mr-2" />
+              <span>Priority support</span>
+            </div>
           </CardContent>
           <CardFooter>
             <Button className="w-full" onClick={subscribeNow}>
-              <CreditCard className="h-4 w-4 mr-2" />
-              Subscribe Now
+              <Zap className="h-4 w-4 mr-2" />
+              Upgrade Now
             </Button>
           </CardFooter>
         </Card>
       </div>
 
+      {scanCount > 0 && (
+        <div className="mt-8 max-w-md mx-auto bg-muted p-4 rounded-md">
+          <h3 className="font-medium mb-2">Your current usage</h3>
+          <div className="w-full bg-background rounded-full h-2.5">
+            <div 
+              className="bg-primary h-2.5 rounded-full" 
+              style={{ width: `${Math.min(100, (scanCount / freeTierLimit) * 100)}%` }}
+            ></div>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            {scanCount} of {freeTierLimit} free scans used ({remainingScans} remaining)
+          </p>
+        </div>
+      )}
+
       <div className="mt-10 text-center text-sm text-muted-foreground flex items-center justify-center">
         <Lock className="h-4 w-4 mr-1" />
         Secure payment processing. Cancel anytime.
+      </div>
+      
+      <div className="mt-6 text-center">
+        <Button variant="link" onClick={() => navigate('/capture')}>
+          Return to Meal Scanner
+          <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

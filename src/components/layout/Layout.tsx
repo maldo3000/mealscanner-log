@@ -1,7 +1,7 @@
 
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Camera, BookOpen, Home, Leaf, LogOut, ShieldCheck } from "lucide-react";
+import { Camera, BookOpen, Home, Leaf, LogOut, ShieldCheck, User } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -89,6 +89,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className={isMobile ? "text-sm" : ""}>Admin</span>
               </Link>
             )}
+            
+            <Link 
+              to="/profile" 
+              className="flex items-center text-muted-foreground hover:text-foreground"
+            >
+              <User className="h-4 w-4 mr-1" />
+              <span className="text-sm">Profile</span>
+            </Link>
             
             {user && (
               <button 
