@@ -52,7 +52,7 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
       console.log(`Sending request to toggle invite: inviteOnly=${localInviteOnlyState}`);
       
       // Save invite-only settings
-      const response = await fetch(`${window.location.origin}/functions/v1/toggle-invite`, {
+      const response = await fetch(`${window.location.origin}/functions/toggle-invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,14 +64,20 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
       });
 
       if (!response.ok) {
-        const text = await response.text();
-        console.error('Error response:', text);
+        console.error(`Error response status: ${response.status}`, response);
+        
+        let errorMessage = `Server error: ${response.status}`;
         try {
-          const result = JSON.parse(text);
-          throw new Error(result.error || 'Failed to update invite settings');
-        } catch (e) {
-          throw new Error(`Server error: ${response.status}`);
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+          console.error('Error data:', errorData);
+        } catch (parseError) {
+          console.error('Could not parse error response:', parseError);
+          const text = await response.text();
+          console.error('Error response text:', text);
         }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
@@ -82,13 +88,7 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
         throw new Error(result.error || 'Failed to update invite settings');
       }
       
-      // Verify the update was applied correctly
-      if (result.data?.invite_only_registration !== localInviteOnlyState) {
-        console.error('Server returned mismatched state:', result.data);
-        throw new Error('Server returned an inconsistent state');
-      }
-      
-      // Only update parent state with the new value on success
+      // Update parent state with the new value on success
       setInviteOnlyEnabled(localInviteOnlyState);
       setHasChanges(false);
       toast.success(result.message || 'Settings saved successfully');

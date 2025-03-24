@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 
 interface InviteCodeGeneratorProps {
   session: any;
@@ -34,7 +34,9 @@ const InviteCodeGenerator: React.FC<InviteCodeGeneratorProps> = ({
         expiresInDays = parseInt(selectedExpiry);
       }
 
-      const response = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
+      console.log(`Generating invite code with email: ${specificEmail || 'none'}, expires: ${expiresInDays || 'never'}`);
+
+      const response = await fetch(`${window.location.origin}/functions/invite-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,12 +50,31 @@ const InviteCodeGenerator: React.FC<InviteCodeGeneratorProps> = ({
       });
 
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || 'Failed to generate invite code');
+        console.error(`Error response status: ${response.status}`);
+        
+        let errorMessage = `Server error: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+          console.error('Error data:', errorData);
+        } catch (parseError) {
+          console.error('Could not parse error response');
+          const text = await response.text();
+          console.error('Error response text:', text);
+        }
+        
+        throw new Error(errorMessage);
       }
 
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to generate invite code');
+      }
+      
+      console.log('Generated code result:', result);
       toast.success('Invite code generated successfully');
-      loadInviteCodes(); // Refresh the list
+      await loadInviteCodes(); // Refresh the list
       setSpecificEmail('');
     } catch (error) {
       console.error('Error generating invite code:', error);
@@ -116,7 +137,10 @@ const InviteCodeGenerator: React.FC<InviteCodeGeneratorProps> = ({
           className="ml-auto"
         >
           {isGeneratingCode ? (
-            <>Generating...</>
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Generating...
+            </>
           ) : (
             <>
               <Plus className="h-4 w-4 mr-2" />

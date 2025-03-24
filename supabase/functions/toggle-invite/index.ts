@@ -33,6 +33,7 @@ serve(async (req) => {
   try {
     // Verify the request method
     if (req.method !== 'POST') {
+      console.error("Method not allowed:", req.method);
       return new Response(
         JSON.stringify({ success: false, error: 'Method not allowed' }), 
         { 
@@ -48,6 +49,7 @@ serve(async (req) => {
     // Extract the Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error("Missing Authorization header");
       return new Response(
         JSON.stringify({ success: false, error: 'Missing Authorization header' }), 
         { 
@@ -81,8 +83,8 @@ serve(async (req) => {
     }
 
     // Parse the request body to get the new settings
-    const requestBody = await req.json();
-    const { inviteOnly } = requestBody;
+    const requestData = await req.json();
+    const { inviteOnly } = requestData;
     
     console.log(`Updating app settings: inviteOnly=${inviteOnly}`);
 
@@ -108,6 +110,7 @@ serve(async (req) => {
     }
 
     if (!roleData || roleData.length === 0) {
+      console.error("User is not an admin:", user.id);
       return new Response(
         JSON.stringify({ success: false, error: 'Admin access required' }), 
         { 
@@ -182,48 +185,7 @@ serve(async (req) => {
     const settingsId = settingsData[0].id;
     console.log(`Updating settings with ID ${settingsId} to invite_only_registration=${inviteOnly}`);
     
-    // Get the current settings first
-    const { data: currentSettings, error: getError } = await supabaseAdmin
-      .from('app_settings')
-      .select('invite_only_registration')
-      .eq('id', settingsId)
-      .single();
-      
-    if (getError) {
-      console.error('Error getting current settings:', getError);
-      return new Response(
-        JSON.stringify({ success: false, error: 'Failed to get current settings', details: getError.message }), 
-        { 
-          status: 500, 
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json' 
-          } 
-        }
-      );
-    }
-    
-    console.log('Current settings:', currentSettings);
-    
-    // Check if there's an actual change to make
-    if (currentSettings.invite_only_registration === inviteOnly) {
-      console.log('No change needed, settings already match the requested value');
-      return new Response(
-        JSON.stringify({
-          success: true,
-          message: `Invite-only mode already ${inviteOnly ? 'enabled' : 'disabled'}`,
-          data: { invite_only_registration: inviteOnly }
-        }),
-        {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-    }
-    
-    // Do the update
+    // Update the app settings
     const { data, error } = await supabaseAdmin
       .from('app_settings')
       .update({ 
