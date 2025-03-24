@@ -16,7 +16,7 @@ import { AuthProvider } from './context/auth';
 import { MealJournalProvider } from './context/mealJournal';
 import { Toaster } from "./components/ui/toaster";
 import { SubscriptionProvider } from './context/subscription';
-import SubscriptionPage from './pages/SubscriptionPage';
+import SubscriptionPage from './pages/Subscription';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/admin';
 import OnboardingPage from './pages/OnboardingPage';
