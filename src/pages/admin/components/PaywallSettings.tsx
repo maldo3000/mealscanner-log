@@ -1,15 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Info, Save, Loader2, DollarSign } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import { supabase } from '@/integrations/supabase/client';
+import { PaywallToggle, FreeTierLimitSlider, PricingConfig } from './paywall-settings';
 
 const PaywallSettings: React.FC = () => {
   const {
@@ -134,125 +131,27 @@ const PaywallSettings: React.FC = () => {
       </CardHeader>
       
       <CardContent className="space-y-8">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium">Enable Paywall</h3>
-              <p className="text-sm text-muted-foreground">
-                When enabled, users will be limited to the free tier scan limit
-              </p>
-            </div>
-            <Switch 
-              checked={localPaywallEnabled} 
-              onCheckedChange={handlePaywallToggle}
-              disabled={isSaving}
-            />
-          </div>
-          
-          <Alert className={!localPaywallEnabled ? "bg-muted/50" : ""}>
-            <Info className="h-4 w-4" />
-            <AlertTitle>Paywall Status</AlertTitle>
-            <AlertDescription>
-              Paywall is currently {localPaywallEnabled ? 'enabled' : 'disabled'}. 
-              Users {localPaywallEnabled ? 'will' : 'will not'} be limited to the free tier.
-            </AlertDescription>
-          </Alert>
-        </div>
+        <PaywallToggle 
+          paywallEnabled={localPaywallEnabled} 
+          onToggle={handlePaywallToggle} 
+          disabled={isSaving} 
+        />
         
-        <div className="space-y-4">
-          <div>
-            <h3 className="font-medium">Free Tier Limit</h3>
-            <p className="text-sm text-muted-foreground mb-6">
-              Set the number of free scans before paywall is enforced
-            </p>
-            
-            <div className="px-4">
-              <Slider
-                value={[localFreeTierLimit]}
-                min={10}
-                max={200}
-                step={5}
-                onValueChange={handleFreeTierChange}
-                disabled={!localPaywallEnabled || isSaving}
-              />
-              
-              <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                <span>10</span>
-                <span className="font-medium text-base text-foreground">
-                  {localFreeTierLimit} scans
-                </span>
-                <span>200</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <FreeTierLimitSlider 
+          freeTierLimit={localFreeTierLimit} 
+          onChange={handleFreeTierChange} 
+          disabled={!localPaywallEnabled || isSaving} 
+        />
 
-        <div className="space-y-6 pt-2">
-          <h3 className="font-medium">Pricing Configuration</h3>
-          
-          <div className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="monthlyPrice">Monthly Price ($)</Label>
-              <div className="relative">
-                <DollarSign className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
-                <Input
-                  id="monthlyPrice"
-                  type="number"
-                  min="0.99"
-                  step="0.01"
-                  value={localMonthlyPrice}
-                  onChange={(e) => handleMonthlyPriceChange(e.target.value)}
-                  className="pl-9"
-                  disabled={!localPaywallEnabled || isSaving}
-                />
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="yearlyPrice">Yearly Price ($)</Label>
-              <div className="relative">
-                <DollarSign className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
-                <Input
-                  id="yearlyPrice"
-                  type="number"
-                  min="0.99"
-                  step="0.01"
-                  value={localYearlyPrice}
-                  onChange={(e) => handleYearlyPriceChange(e.target.value)}
-                  className="pl-9"
-                  disabled={!localPaywallEnabled || isSaving}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between mb-2">
-                <Label htmlFor="yearlyDiscount">Yearly Discount Percentage</Label>
-                <span className="text-sm font-medium">{localYearlyDiscount}%</span>
-              </div>
-              <Slider
-                id="yearlyDiscount"
-                value={[localYearlyDiscount]}
-                min={0}
-                max={50}
-                step={1}
-                onValueChange={handleYearlyDiscountChange}
-                disabled={!localPaywallEnabled || isSaving}
-              />
-              <div className="flex justify-between mt-1 text-xs text-muted-foreground">
-                <span>0%</span>
-                <span>25%</span>
-                <span>50%</span>
-              </div>
-              
-              {localMonthlyPrice && localYearlyPrice && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Yearly price (${localYearlyPrice.toFixed(2)}) is {Math.round((1 - (localYearlyPrice / (localMonthlyPrice * 12))) * 100)}% off monthly pricing (${(localMonthlyPrice * 12).toFixed(2)})
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        <PricingConfig 
+          monthlyPrice={localMonthlyPrice}
+          yearlyPrice={localYearlyPrice}
+          yearlyDiscountPercent={localYearlyDiscount}
+          onMonthlyPriceChange={handleMonthlyPriceChange}
+          onYearlyPriceChange={handleYearlyPriceChange}
+          onYearlyDiscountChange={handleYearlyDiscountChange}
+          disabled={!localPaywallEnabled || isSaving}
+        />
       </CardContent>
       
       <CardFooter>
