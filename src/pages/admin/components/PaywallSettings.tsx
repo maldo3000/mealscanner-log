@@ -1,13 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Info, Save } from 'lucide-react';
+import { Info, Save, Loader2 } from 'lucide-react';
 
 interface PaywallSettingsProps {
   paywallEnabled: boolean;
@@ -28,6 +27,30 @@ const PaywallSettings: React.FC<PaywallSettingsProps> = ({
   isSaving,
   setIsSaving
 }) => {
+  // Local state for tracking UI changes without immediately updating parent
+  const [localPaywallEnabled, setLocalPaywallEnabled] = useState(paywallEnabled);
+  const [localFreeTierLimit, setLocalFreeTierLimit] = useState(freeTierLimit);
+  const [hasChanges, setHasChanges] = useState(false);
+  
+  // Sync local state with props when they change from the parent
+  useEffect(() => {
+    setLocalPaywallEnabled(paywallEnabled);
+    setLocalFreeTierLimit(freeTierLimit);
+    setHasChanges(false);
+  }, [paywallEnabled, freeTierLimit]);
+  
+  // Handle toggling the paywall switch
+  const handlePaywallToggle = (checked: boolean) => {
+    setLocalPaywallEnabled(checked);
+    setHasChanges(true);
+  };
+  
+  // Handle changing the free tier limit slider
+  const handleFreeTierChange = (value: number[]) => {
+    setLocalFreeTierLimit(value[0]);
+    setHasChanges(true);
+  };
+
   const saveSettings = async () => {
     if (!session?.access_token) {
       toast.error('You must be logged in to perform this action');
@@ -36,28 +59,48 @@ const PaywallSettings: React.FC<PaywallSettingsProps> = ({
 
     setIsSaving(true);
     try {
+      console.log(`Sending request to toggle paywall: paywallEnabled=${localPaywallEnabled}, freeTierLimit=${localFreeTierLimit}`);
+      
       // Save paywall settings
-      const paywallResponse = await fetch(`${window.location.origin}/functions/v1/toggle-paywall`, {
+      const response = await fetch(`${window.location.origin}/functions/v1/toggle-paywall`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          paywallEnabled,
-          freeTierLimit
+          paywallEnabled: localPaywallEnabled,
+          freeTierLimit: localFreeTierLimit
         })
       });
 
-      if (!paywallResponse.ok) {
-        const paywallResult = await paywallResponse.json();
-        throw new Error(paywallResult.error || 'Failed to update paywall settings');
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Error response:', text);
+        try {
+          const result = JSON.parse(text);
+          throw new Error(result.error || 'Failed to update paywall settings');
+        } catch (e) {
+          throw new Error(`Server error: ${response.status}`);
+        }
       }
 
+      const result = await response.json();
+      console.log('Toggle paywall response:', result);
+      
+      // Update parent state only after successful save
+      setPaywallEnabled(localPaywallEnabled);
+      setFreeTierLimit(localFreeTierLimit);
+      setHasChanges(false);
       toast.success('Settings saved successfully');
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save settings');
+      
+      // Revert local state to match parent on error
+      setLocalPaywallEnabled(paywallEnabled);
+      setLocalFreeTierLimit(freeTierLimit);
+      setHasChanges(false);
     } finally {
       setIsSaving(false);
     }
@@ -82,17 +125,18 @@ const PaywallSettings: React.FC<PaywallSettingsProps> = ({
               </p>
             </div>
             <Switch 
-              checked={paywallEnabled} 
-              onCheckedChange={setPaywallEnabled}
+              checked={localPaywallEnabled} 
+              onCheckedChange={handlePaywallToggle}
+              disabled={isSaving}
             />
           </div>
           
-          <Alert className={!paywallEnabled ? "bg-muted/50" : ""}>
+          <Alert className={!localPaywallEnabled ? "bg-muted/50" : ""}>
             <Info className="h-4 w-4" />
             <AlertTitle>Paywall Status</AlertTitle>
             <AlertDescription>
-              Paywall is currently {paywallEnabled ? 'enabled' : 'disabled'}. 
-              Users {paywallEnabled ? 'will' : 'will not'} be limited to the free tier.
+              Paywall is currently {localPaywallEnabled ? 'enabled' : 'disabled'}. 
+              Users {localPaywallEnabled ? 'will' : 'will not'} be limited to the free tier.
             </AlertDescription>
           </Alert>
         </div>
@@ -106,18 +150,18 @@ const PaywallSettings: React.FC<PaywallSettingsProps> = ({
             
             <div className="px-4">
               <Slider
-                value={[freeTierLimit]}
+                value={[localFreeTierLimit]}
                 min={10}
                 max={200}
                 step={5}
-                onValueChange={(value) => setFreeTierLimit(value[0])}
-                disabled={!paywallEnabled}
+                onValueChange={handleFreeTierChange}
+                disabled={!localPaywallEnabled || isSaving}
               />
               
               <div className="flex justify-between mt-2 text-sm text-muted-foreground">
                 <span>10</span>
                 <span className="font-medium text-base text-foreground">
-                  {freeTierLimit} scans
+                  {localFreeTierLimit} scans
                 </span>
                 <span>200</span>
               </div>
@@ -129,11 +173,15 @@ const PaywallSettings: React.FC<PaywallSettingsProps> = ({
       <CardFooter>
         <Button 
           onClick={saveSettings} 
-          disabled={isSaving}
+          disabled={isSaving || !hasChanges}
           className="ml-auto"
+          variant={hasChanges ? "default" : "outline"}
         >
           {isSaving ? (
-            <>Saving...</>
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Saving...
+            </>
           ) : (
             <>
               <Save className="h-4 w-4 mr-2" />

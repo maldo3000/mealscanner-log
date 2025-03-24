@@ -52,7 +52,11 @@ const AdminPage: React.FC = () => {
           console.log('Loaded app settings:', data[0]);
           setPaywallEnabled(data[0].paywall_enabled);
           setFreeTierLimit(data[0].free_tier_limit);
-          setInviteOnlyEnabled(data[0].invite_only_registration);
+          
+          // Be explicit about the boolean value
+          const inviteOnly = !!data[0].invite_only_registration;
+          console.log(`Setting inviteOnlyEnabled to: ${inviteOnly}`);
+          setInviteOnlyEnabled(inviteOnly);
         } else {
           console.log('No app settings found');
         }
@@ -94,6 +98,35 @@ const AdminPage: React.FC = () => {
       toast.error('Failed to load invite codes');
     } finally {
       setIsLoadingCodes(false);
+    }
+  };
+
+  // Function to refresh app settings - can be called after saving
+  const refreshSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('paywall_enabled, free_tier_limit, invite_only_registration')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) {
+        console.error('Error refreshing app settings:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        console.log('Refreshed app settings:', data[0]);
+        setPaywallEnabled(data[0].paywall_enabled);
+        setFreeTierLimit(data[0].free_tier_limit);
+        
+        // Be explicit about the boolean value
+        const inviteOnly = !!data[0].invite_only_registration;
+        console.log(`Refreshed inviteOnlyEnabled to: ${inviteOnly}`);
+        setInviteOnlyEnabled(inviteOnly);
+      }
+    } catch (error) {
+      console.error('Failed to refresh app settings:', error);
     }
   };
 
@@ -139,7 +172,12 @@ const AdminPage: React.FC = () => {
           <div className="grid gap-6">
             <InviteToggle 
               inviteOnlyEnabled={inviteOnlyEnabled}
-              setInviteOnlyEnabled={setInviteOnlyEnabled}
+              setInviteOnlyEnabled={(value) => {
+                console.log(`setInviteOnlyEnabled called with value: ${value}`);
+                setInviteOnlyEnabled(value);
+                // Refresh settings from the database after changing the invite state
+                setTimeout(refreshSettings, 1000);
+              }}
               session={session}
               isSaving={isSaving}
               setIsSaving={setIsSaving}

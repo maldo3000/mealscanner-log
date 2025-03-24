@@ -34,7 +34,7 @@ serve(async (req) => {
     // Verify the request method
     if (req.method !== 'POST') {
       return new Response(
-        JSON.stringify({ error: 'Method not allowed' }), 
+        JSON.stringify({ success: false, error: 'Method not allowed' }), 
         { 
           status: 405, 
           headers: { 
@@ -49,7 +49,7 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: 'Missing Authorization header' }), 
+        JSON.stringify({ success: false, error: 'Missing Authorization header' }), 
         { 
           status: 401, 
           headers: { 
@@ -69,7 +69,7 @@ serve(async (req) => {
     if (authError || !user) {
       console.error("Auth error:", authError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }), 
+        JSON.stringify({ success: false, error: 'Unauthorized' }), 
         { 
           status: 401, 
           headers: { 
@@ -96,7 +96,7 @@ serve(async (req) => {
     if (roleError) {
       console.error("Role check error:", roleError);
       return new Response(
-        JSON.stringify({ error: 'Error checking user role', details: roleError.message }), 
+        JSON.stringify({ success: false, error: 'Error checking user role', details: roleError.message }), 
         { 
           status: 500, 
           headers: { 
@@ -109,7 +109,7 @@ serve(async (req) => {
 
     if (!roleData || roleData.length === 0) {
       return new Response(
-        JSON.stringify({ error: 'Admin access required' }), 
+        JSON.stringify({ success: false, error: 'Admin access required' }), 
         { 
           status: 403, 
           headers: { 
@@ -130,7 +130,7 @@ serve(async (req) => {
     if (settingsError) {
       console.error('Error getting app settings ID:', settingsError);
       return new Response(
-        JSON.stringify({ error: 'Failed to get app settings', details: settingsError.message }), 
+        JSON.stringify({ success: false, error: 'Failed to get app settings', details: settingsError.message }), 
         { 
           status: 500, 
           headers: { 
@@ -152,7 +152,7 @@ serve(async (req) => {
       if (createError) {
         console.error('Error creating app settings:', createError);
         return new Response(
-          JSON.stringify({ error: 'Failed to create app settings', details: createError.message }), 
+          JSON.stringify({ success: false, error: 'Failed to create app settings', details: createError.message }), 
           { 
             status: 500, 
             headers: { 
@@ -182,17 +182,17 @@ serve(async (req) => {
     const settingsId = settingsData[0].id;
     console.log(`Updating settings with ID ${settingsId} to invite_only_registration=${inviteOnly}`);
     
-    // Get the current settings first to verify
+    // Get the current settings first
     const { data: currentSettings, error: getError } = await supabaseAdmin
       .from('app_settings')
-      .select('*')
+      .select('invite_only_registration')
       .eq('id', settingsId)
       .single();
       
     if (getError) {
       console.error('Error getting current settings:', getError);
       return new Response(
-        JSON.stringify({ error: 'Failed to get current settings', details: getError.message }), 
+        JSON.stringify({ success: false, error: 'Failed to get current settings', details: getError.message }), 
         { 
           status: 500, 
           headers: { 
@@ -204,6 +204,24 @@ serve(async (req) => {
     }
     
     console.log('Current settings:', currentSettings);
+    
+    // Check if there's an actual change to make
+    if (currentSettings.invite_only_registration === inviteOnly) {
+      console.log('No change needed, settings already match the requested value');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: `Invite-only mode already ${inviteOnly ? 'enabled' : 'disabled'}`,
+          data: { invite_only_registration: inviteOnly }
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
     // Do the update
     const { data, error } = await supabaseAdmin
@@ -218,7 +236,7 @@ serve(async (req) => {
     if (error) {
       console.error('Error updating invite settings:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to update invite settings', details: error.message }), 
+        JSON.stringify({ success: false, error: 'Failed to update invite settings', details: error.message }), 
         { 
           status: 500, 
           headers: { 
@@ -232,7 +250,7 @@ serve(async (req) => {
     if (!data || data.length === 0) {
       console.error('No data returned after update');
       return new Response(
-        JSON.stringify({ error: 'No data returned after update' }), 
+        JSON.stringify({ success: false, error: 'No data returned after update' }), 
         { 
           status: 500, 
           headers: { 
@@ -248,7 +266,7 @@ serve(async (req) => {
     // Verify update was applied correctly
     const { data: verifySettings, error: verifyError } = await supabaseAdmin
       .from('app_settings')
-      .select('*')
+      .select('invite_only_registration')
       .eq('id', settingsId)
       .single();
       
@@ -256,6 +274,25 @@ serve(async (req) => {
       console.error('Error verifying settings update:', verifyError);
     } else {
       console.log('Verified settings after update:', verifySettings);
+      
+      if (verifySettings.invite_only_registration !== inviteOnly) {
+        console.error('CRITICAL ERROR: The database value does not match what was requested!');
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Database update verification failed',
+            expected: inviteOnly,
+            actual: verifySettings.invite_only_registration
+          }), 
+          { 
+            status: 500, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json' 
+            } 
+          }
+        );
+      }
     }
     
     return new Response(
@@ -274,7 +311,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in toggle-invite function:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }), 
+      JSON.stringify({ success: false, error: 'Internal server error', details: error.message }), 
       { 
         status: 500, 
         headers: { 

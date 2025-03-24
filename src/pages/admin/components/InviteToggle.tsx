@@ -28,12 +28,14 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
   
   // Sync local state with prop when it changes from parent
   useEffect(() => {
+    console.log(`Parent inviteOnlyEnabled changed to: ${inviteOnlyEnabled}`);
     setLocalInviteOnlyState(inviteOnlyEnabled);
     setHasChanges(false);
   }, [inviteOnlyEnabled]);
   
   // Handle toggling the switch
   const handleToggleChange = (checked: boolean) => {
+    console.log(`Switch toggled to: ${checked}`);
     setLocalInviteOnlyState(checked);
     setHasChanges(true);
   };
@@ -76,7 +78,17 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
       
       console.log('Toggle invite response:', result);
       
-      // Update parent state with the new value on success
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update invite settings');
+      }
+      
+      // Verify the update was applied correctly
+      if (result.data?.invite_only_registration !== localInviteOnlyState) {
+        console.error('Server returned mismatched state:', result.data);
+        throw new Error('Server returned an inconsistent state');
+      }
+      
+      // Only update parent state with the new value on success
       setInviteOnlyEnabled(localInviteOnlyState);
       setHasChanges(false);
       toast.success(result.message || 'Settings saved successfully');
