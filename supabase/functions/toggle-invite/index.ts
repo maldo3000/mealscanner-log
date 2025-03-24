@@ -118,8 +118,9 @@ serve(async (req) => {
         .select();
       
       if (createError) {
+        console.error('Error creating app settings:', createError);
         return new Response(
-          JSON.stringify({ error: 'Failed to create app settings' }), 
+          JSON.stringify({ error: 'Failed to create app settings', details: createError.message }), 
           { 
             status: 500, 
             headers: { 
@@ -147,6 +148,8 @@ serve(async (req) => {
 
     // Update the app settings
     const settingsId = settingsData[0].id;
+    console.log(`Updating settings with ID ${settingsId} to invite_only_registration=${inviteOnly}`);
+    
     const { data, error } = await supabaseAdmin
       .from('app_settings')
       .update({ 
@@ -159,7 +162,7 @@ serve(async (req) => {
     if (error) {
       console.error('Error updating invite settings:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to update invite settings' }), 
+        JSON.stringify({ error: 'Failed to update invite settings', details: error.message }), 
         { 
           status: 500, 
           headers: { 
@@ -170,6 +173,8 @@ serve(async (req) => {
       );
     }
 
+    console.log('Update successful:', data);
+    
     return new Response(
       JSON.stringify({ 
         success: true, 

@@ -24,16 +24,18 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
 }) => {
   // Track local state to avoid UI jumping during saving
   const [localInviteOnlyState, setLocalInviteOnlyState] = useState(inviteOnlyEnabled);
+  const [hasChanges, setHasChanges] = useState(false);
   
   // Sync local state with prop when it changes from parent
   useEffect(() => {
     setLocalInviteOnlyState(inviteOnlyEnabled);
+    setHasChanges(false);
   }, [inviteOnlyEnabled]);
   
   // Handle toggling the switch
   const handleToggleChange = (checked: boolean) => {
     setLocalInviteOnlyState(checked);
-    // We don't immediately update the parent state until save is successful
+    setHasChanges(true);
   };
 
   const saveSettings = async () => {
@@ -43,7 +45,10 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
     }
 
     setIsSaving(true);
+    
     try {
+      console.log(`Sending request to toggle invite: inviteOnly=${localInviteOnlyState}`);
+      
       // Save invite-only settings
       const response = await fetch(`${window.location.origin}/functions/v1/toggle-invite`, {
         method: 'POST',
@@ -62,17 +67,19 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
         throw new Error(result.error || 'Failed to update invite settings');
       }
 
+      console.log('Toggle invite response:', result);
+      
       // Update parent state with the new value on success
       setInviteOnlyEnabled(localInviteOnlyState);
+      setHasChanges(false);
       toast.success(result.message || 'Settings saved successfully');
-      
-      console.log('Settings updated successfully:', result);
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save settings');
       
       // In case of error, revert the local UI state to match the parent state
       setLocalInviteOnlyState(inviteOnlyEnabled);
+      setHasChanges(false);
     } finally {
       setIsSaving(false);
     }
@@ -98,6 +105,7 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
           <Switch 
             checked={localInviteOnlyState} 
             onCheckedChange={handleToggleChange}
+            disabled={isSaving}
           />
         </div>
         
@@ -114,9 +122,9 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
       <CardFooter>
         <Button 
           onClick={saveSettings} 
-          disabled={isSaving || localInviteOnlyState === inviteOnlyEnabled}
+          disabled={isSaving || !hasChanges}
           className="ml-auto"
-          variant={localInviteOnlyState !== inviteOnlyEnabled ? "default" : "outline"}
+          variant={hasChanges ? "default" : "outline"}
         >
           {isSaving ? (
             <>
