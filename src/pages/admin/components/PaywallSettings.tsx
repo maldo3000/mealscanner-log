@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Save, Loader2 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const PaywallSettings: React.FC = () => {
   const {
@@ -54,32 +55,20 @@ const PaywallSettings: React.FC = () => {
     try {
       console.log(`Sending request to toggle paywall: paywallEnabled=${localPaywallEnabled}, freeTierLimit=${localFreeTierLimit}`);
       
-      // Fixed URL path - using v1/ prefix because we're calling functions directly
-      const response = await fetch(`${window.location.origin}/functions/v1/toggle-paywall`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
+      // Use Supabase function invocation instead of direct fetch
+      const { data, error } = await supabase.functions.invoke('toggle-paywall', {
+        body: {
           paywallEnabled: localPaywallEnabled,
           freeTierLimit: localFreeTierLimit
-        })
+        }
       });
 
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('Error response:', text);
-        try {
-          const result = JSON.parse(text);
-          throw new Error(result.error || 'Failed to update paywall settings');
-        } catch (e) {
-          throw new Error(`Server error: ${response.status}`);
-        }
+      if (error) {
+        console.error('Error response:', error);
+        throw new Error(error.message || 'Failed to update paywall settings');
       }
 
-      const result = await response.json();
-      console.log('Toggle paywall response:', result);
+      console.log('Toggle paywall response:', data);
       
       // Update parent state only after successful save
       setPaywallEnabled(localPaywallEnabled);
