@@ -102,20 +102,59 @@ serve(async (req) => {
       );
     }
 
+    // Get the most recent app settings ID
+    const { data: settingsData, error: settingsError } = await supabaseAdmin
+      .from('app_settings')
+      .select('id')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (settingsError || !settingsData || settingsData.length === 0) {
+      console.error('Error getting app settings ID:', settingsError);
+      // If no settings exist, create one
+      const { data: newSettings, error: createError } = await supabaseAdmin
+        .from('app_settings')
+        .insert({ invite_only_registration: inviteOnly })
+        .select();
+      
+      if (createError) {
+        return new Response(
+          JSON.stringify({ error: 'Failed to create app settings' }), 
+          { 
+            status: 500, 
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json' 
+            } 
+          }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Invite-only mode ${inviteOnly ? 'enabled' : 'disabled'}`,
+          data: newSettings[0]
+        }), 
+        { 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
+    }
+
     // Update the app settings
+    const settingsId = settingsData[0].id;
     const { data, error } = await supabaseAdmin
       .from('app_settings')
       .update({ 
         invite_only_registration: inviteOnly, 
         updated_at: new Date().toISOString()
       })
-      .eq('id', (
-        await supabaseAdmin
-          .from('app_settings')
-          .select('id')
-          .order('created_at', { ascending: false })
-          .limit(1)
-      ).data?.[0]?.id);
+      .eq('id', settingsId)
+      .select();
 
     if (error) {
       console.error('Error updating invite settings:', error);
@@ -134,7 +173,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Invite-only mode ${inviteOnly ? 'enabled' : 'disabled'}` 
+        message: `Invite-only mode ${inviteOnly ? 'enabled' : 'disabled'}`,
+        data: data[0] 
       }), 
       { 
         headers: { 
@@ -146,7 +186,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in toggle-invite function:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }), 
+      JSON.stringify({ error: 'Internal server error', details: error.message }), 
       { 
         status: 500, 
         headers: { 

@@ -1,11 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Info, Save } from 'lucide-react';
+import { Info, Save, Loader2 } from 'lucide-react';
 
 interface InviteToggleProps {
   inviteOnlyEnabled: boolean;
@@ -22,6 +22,20 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
   isSaving,
   setIsSaving
 }) => {
+  // Track local state to avoid UI jumping during saving
+  const [localInviteOnlyState, setLocalInviteOnlyState] = useState(inviteOnlyEnabled);
+  
+  // Sync local state with prop when it changes from parent
+  useEffect(() => {
+    setLocalInviteOnlyState(inviteOnlyEnabled);
+  }, [inviteOnlyEnabled]);
+  
+  // Handle toggling the switch
+  const handleToggleChange = (checked: boolean) => {
+    setLocalInviteOnlyState(checked);
+    // We don't immediately update the parent state until save is successful
+  };
+
   const saveSettings = async () => {
     if (!session?.access_token) {
       toast.error('You must be logged in to perform this action');
@@ -31,44 +45,34 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
     setIsSaving(true);
     try {
       // Save invite-only settings
-      const inviteResponse = await fetch(`${window.location.origin}/functions/v1/toggle-invite`, {
+      const response = await fetch(`${window.location.origin}/functions/v1/toggle-invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          inviteOnly: inviteOnlyEnabled
+          inviteOnly: localInviteOnlyState
         })
       });
 
-      if (!inviteResponse.ok) {
-        const inviteResult = await inviteResponse.json();
-        throw new Error(inviteResult.error || 'Failed to update invite settings');
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update invite settings');
       }
 
-      const result = await inviteResponse.json();
+      // Update parent state with the new value on success
+      setInviteOnlyEnabled(localInviteOnlyState);
       toast.success(result.message || 'Settings saved successfully');
+      
+      console.log('Settings updated successfully:', result);
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save settings');
-      // In case of error, revert the UI state to match the server
-      try {
-        const { data } = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ action: 'get_settings' })
-        }).then(res => res.json());
-        
-        if (data && data.invite_only_registration !== undefined) {
-          setInviteOnlyEnabled(data.invite_only_registration);
-        }
-      } catch (fetchError) {
-        console.error('Failed to get current settings:', fetchError);
-      }
+      
+      // In case of error, revert the local UI state to match the parent state
+      setLocalInviteOnlyState(inviteOnlyEnabled);
     } finally {
       setIsSaving(false);
     }
@@ -92,17 +96,17 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
             </p>
           </div>
           <Switch 
-            checked={inviteOnlyEnabled} 
-            onCheckedChange={setInviteOnlyEnabled}
+            checked={localInviteOnlyState} 
+            onCheckedChange={handleToggleChange}
           />
         </div>
         
-        <Alert className={!inviteOnlyEnabled ? "bg-muted/50" : ""}>
+        <Alert className={!localInviteOnlyState ? "bg-muted/50" : ""}>
           <Info className="h-4 w-4" />
           <AlertTitle>Registration Status</AlertTitle>
           <AlertDescription>
-            Registration is currently {inviteOnlyEnabled ? 'invite-only' : 'open to everyone'}. 
-            New users {inviteOnlyEnabled ? 'will' : 'will not'} need an invite code.
+            Registration is currently {localInviteOnlyState ? 'invite-only' : 'open to everyone'}. 
+            New users {localInviteOnlyState ? 'will' : 'will not'} need an invite code.
           </AlertDescription>
         </Alert>
       </CardContent>
@@ -110,11 +114,15 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
       <CardFooter>
         <Button 
           onClick={saveSettings} 
-          disabled={isSaving}
+          disabled={isSaving || localInviteOnlyState === inviteOnlyEnabled}
           className="ml-auto"
+          variant={localInviteOnlyState !== inviteOnlyEnabled ? "default" : "outline"}
         >
           {isSaving ? (
-            <>Saving...</>
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Saving...
+            </>
           ) : (
             <>
               <Save className="h-4 w-4 mr-2" />
