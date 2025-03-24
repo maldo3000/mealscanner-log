@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
@@ -29,7 +28,6 @@ const PaywallSettings: React.FC = () => {
     setIsSaving
   } = useAdmin();
 
-  // Local state for tracking UI changes without immediately updating parent
   const [localPaywallEnabled, setLocalPaywallEnabled] = useState(paywallEnabled);
   const [localFreeTierLimit, setLocalFreeTierLimit] = useState(freeTierLimit);
   const [localMonthlyPrice, setLocalMonthlyPrice] = useState(monthlyPrice);
@@ -37,7 +35,6 @@ const PaywallSettings: React.FC = () => {
   const [localYearlyDiscount, setLocalYearlyDiscount] = useState(yearlyDiscountPercent);
   const [hasChanges, setHasChanges] = useState(false);
   
-  // Sync local state with props when they change from the parent
   useEffect(() => {
     setLocalPaywallEnabled(paywallEnabled);
     setLocalFreeTierLimit(freeTierLimit);
@@ -47,19 +44,16 @@ const PaywallSettings: React.FC = () => {
     setHasChanges(false);
   }, [paywallEnabled, freeTierLimit, monthlyPrice, yearlyPrice, yearlyDiscountPercent]);
   
-  // Handle toggling the paywall switch
   const handlePaywallToggle = (checked: boolean) => {
     setLocalPaywallEnabled(checked);
     setHasChanges(true);
   };
   
-  // Handle changing the free tier limit slider
   const handleFreeTierChange = (value: number[]) => {
     setLocalFreeTierLimit(value[0]);
     setHasChanges(true);
   };
 
-  // Handle price changes
   const handleMonthlyPriceChange = (value: string) => {
     const price = parseFloat(value);
     if (!isNaN(price) && price >= 0) {
@@ -91,7 +85,6 @@ const PaywallSettings: React.FC = () => {
     try {
       console.log(`Sending request to update settings: paywallEnabled=${localPaywallEnabled}, freeTierLimit=${localFreeTierLimit}, prices=${localMonthlyPrice}/${localYearlyPrice}`);
       
-      // Use Supabase function invocation
       const { data, error } = await supabase.functions.invoke('toggle-paywall', {
         body: {
           paywallEnabled: localPaywallEnabled,
@@ -109,7 +102,6 @@ const PaywallSettings: React.FC = () => {
 
       console.log('Settings update response:', data);
       
-      // Update parent state only after successful save
       setPaywallEnabled(localPaywallEnabled);
       setFreeTierLimit(localFreeTierLimit);
       setMonthlyPrice(localMonthlyPrice);
@@ -121,7 +113,6 @@ const PaywallSettings: React.FC = () => {
       console.error('Error saving settings:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save settings');
       
-      // Revert local state to match parent on error
       setLocalPaywallEnabled(paywallEnabled);
       setLocalFreeTierLimit(freeTierLimit);
       setLocalMonthlyPrice(monthlyPrice);

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/context/subscription';
 import { useAuth } from '@/context/auth';
@@ -13,6 +14,17 @@ const SubscriptionPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+
+  // Make sure we're working with the latest pricing data by forcing a rerender when it changes
+  const [pricingKey, setPricingKey] = useState(0);
+  
+  useEffect(() => {
+    // Update the key when pricing changes to force component to recalculate prices
+    if (pricing) {
+      setPricingKey(prev => prev + 1);
+      console.log("Pricing updated:", pricing);
+    }
+  }, [pricing]);
 
   const subscribeNow = async (cycle: 'monthly' | 'yearly') => {
     // In a real implementation, this would redirect to a payment processor
@@ -230,4 +242,3 @@ const SubscriptionPage: React.FC = () => {
 };
 
 export default SubscriptionPage;
-
