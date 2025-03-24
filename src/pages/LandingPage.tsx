@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -73,29 +72,17 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Video Section */}
-        <section ref={videoSectionRef} className="py-8 md:py-12 bg-secondary/30">
+        {/* Video Section - No text, just the video placeholder */}
+        <section ref={videoSectionRef} className="py-12 md:py-16 bg-secondary/30">
           <div className="container max-w-5xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
-              <div className="w-full md:w-1/2">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">See How MealScanner Works</h2>
-                <p className="text-muted-foreground mb-4">
-                  Watch our quick explainer video to see how MealScanner can transform your nutrition tracking experience in just a few taps.
-                </p>
-                <Button variant="default" size="lg" className="hidden sm:flex items-center gap-2">
+            <div className="rounded-xl overflow-hidden border border-border bg-card/50 aspect-video flex items-center justify-center">
+              <div className="flex flex-col items-center text-center p-6">
+                <Play className="h-16 w-16 mb-4 text-primary" />
+                <p className="text-muted-foreground">Your explainer video will appear here</p>
+                <Button variant="default" size="sm" className="mt-4 flex items-center gap-2">
                   <Play className="h-4 w-4" />
                   Watch Demo
                 </Button>
-              </div>
-              <div className="w-full md:w-1/2 rounded-xl overflow-hidden border border-border bg-card/50 aspect-video flex items-center justify-center">
-                <div className="flex flex-col items-center text-center p-6">
-                  <Play className="h-12 w-12 mb-4 text-primary" />
-                  <p className="text-muted-foreground">Your explainer video will appear here</p>
-                  <Button variant="default" size="sm" className="mt-4 sm:hidden flex items-center gap-2">
-                    <Play className="h-4 w-4" />
-                    Watch Demo
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
