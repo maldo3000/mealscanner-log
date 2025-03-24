@@ -61,7 +61,7 @@ const PaywallSettings: React.FC<PaywallSettingsProps> = ({
     try {
       console.log(`Sending request to toggle paywall: paywallEnabled=${localPaywallEnabled}, freeTierLimit=${localFreeTierLimit}`);
       
-      // Save paywall settings
+      // Fixed URL path - using v1/ prefix because we're calling functions directly
       const response = await fetch(`${window.location.origin}/functions/v1/toggle-paywall`, {
         method: 'POST',
         headers: {

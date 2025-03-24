@@ -51,8 +51,8 @@ const InviteToggle: React.FC<InviteToggleProps> = ({
     try {
       console.log(`Sending request to toggle invite: inviteOnly=${localInviteOnlyState}`);
       
-      // Save invite-only settings
-      const response = await fetch(`${window.location.origin}/functions/toggle-invite`, {
+      // Fixed URL path - using v1/ prefix because we're calling functions directly
+      const response = await fetch(`${window.location.origin}/functions/v1/toggle-invite`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

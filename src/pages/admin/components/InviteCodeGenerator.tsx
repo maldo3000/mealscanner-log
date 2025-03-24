@@ -36,7 +36,8 @@ const InviteCodeGenerator: React.FC<InviteCodeGeneratorProps> = ({
 
       console.log(`Generating invite code with email: ${specificEmail || 'none'}, expires: ${expiresInDays || 'never'}`);
 
-      const response = await fetch(`${window.location.origin}/functions/invite-code`, {
+      // Fixed URL path - using v1/ prefix because we're calling functions directly
+      const response = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
