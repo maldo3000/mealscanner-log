@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { CreditCard, User, CheckCircle, ArrowUpRight } from 'lucide-react';
+import { CreditCard, CheckCircle, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/context/auth';
 import { useSubscription } from '@/context/SubscriptionContext';
 
@@ -49,7 +48,6 @@ const ProfilePage: React.FC = () => {
             {/* Account management buttons can be added here in the future */}
             <div className="pt-4 flex flex-col sm:flex-row gap-2">
               <Button variant="outline" disabled className="flex items-center gap-1">
-                <User className="h-4 w-4" />
                 Edit Profile
               </Button>
             </div>
