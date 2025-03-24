@@ -81,24 +81,18 @@ const AdminPage: React.FC = () => {
     try {
       setIsLoadingCodes(true);
       
-      // Fixed URL path - using v1/ prefix because we're calling functions directly
-      const response = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ action: 'list' })
+      // Use Supabase function invocation instead of fetch
+      const { data, error } = await supabase.functions.invoke('invite-code', {
+        body: { action: 'list' }
       });
       
-      if (!response.ok) {
-        console.error(`Error response status: ${response.status}`);
-        throw new Error('Failed to load invite codes');
+      if (error) {
+        console.error('Error loading invite codes:', error);
+        throw new Error(error.message || 'Failed to load invite codes');
       }
       
-      const result = await response.json();
-      console.log('Loaded invite codes:', result);
-      setInviteCodes(result.codes || []);
+      console.log('Loaded invite codes:', data);
+      setInviteCodes(data?.codes || []);
     } catch (error) {
       console.error('Error loading invite codes:', error);
       toast.error('Failed to load invite codes');

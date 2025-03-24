@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InviteCodeGeneratorProps {
   session: any;
@@ -36,44 +37,25 @@ const InviteCodeGenerator: React.FC<InviteCodeGeneratorProps> = ({
 
       console.log(`Generating invite code with email: ${specificEmail || 'none'}, expires: ${expiresInDays || 'never'}`);
 
-      // Fixed URL path - using v1/ prefix because we're calling functions directly
-      const response = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
+      // Use Supabase's function invocation instead of fetch
+      const { data, error } = await supabase.functions.invoke('invite-code', {
+        body: {
           action: 'generate',
           email: specificEmail || null,
           expiresInDays
-        })
+        }
       });
 
-      if (!response.ok) {
-        console.error(`Error response status: ${response.status}`);
-        
-        let errorMessage = `Server error: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-          console.error('Error data:', errorData);
-        } catch (parseError) {
-          console.error('Could not parse error response');
-          const text = await response.text();
-          console.error('Error response text:', text);
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to generate invite code');
+      if (error) {
+        console.error('Error generating invite code:', error);
+        throw new Error(error.message || 'Failed to generate invite code');
       }
       
-      console.log('Generated code result:', result);
+      if (!data || !data.success) {
+        throw new Error(data?.error || 'Failed to generate invite code');
+      }
+      
+      console.log('Generated code result:', data);
       toast.success('Invite code generated successfully');
       await loadInviteCodes(); // Refresh the list
       setSpecificEmail('');

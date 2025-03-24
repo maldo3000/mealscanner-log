@@ -1,12 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Trash2, User, CalendarRange, CheckCircle, XCircle } from 'lucide-react';
+import { Clipboard, Trash2, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InviteCode {
   id: string;
@@ -32,12 +30,20 @@ const InviteCodeList: React.FC<InviteCodeListProps> = ({
   session,
   loadInviteCodes
 }) => {
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success('Copied to clipboard');
-    }).catch(err => {
-      console.error('Could not copy text: ', err);
-      toast.error('Failed to copy to clipboard');
+  const [deletingCodes, setDeletingCodes] = useState<Record<string, boolean>>({});
+
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code)
+      .then(() => toast.success('Code copied to clipboard'))
+      .catch(err => toast.error('Failed to copy code'));
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Never';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -47,29 +53,32 @@ const InviteCodeList: React.FC<InviteCodeListProps> = ({
       return;
     }
 
+    setDeletingCodes(prev => ({ ...prev, [code]: true }));
+    
     try {
-      const response = await fetch(`${window.location.origin}/functions/v1/invite-code`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('invite-code', {
+        body: {
           action: 'delete',
           code
-        })
+        }
       });
 
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || 'Failed to delete invite code');
+      if (error) {
+        console.error('Error deleting invite code:', error);
+        throw new Error(error.message || 'Failed to delete invite code');
       }
-
-      toast.success('Invite code deleted successfully');
-      loadInviteCodes(); // Refresh the list
+      
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to delete invite code');
+      }
+      
+      toast.success('Invite code deleted');
+      await loadInviteCodes(); // Refresh the list
     } catch (error) {
       console.error('Error deleting invite code:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to delete invite code');
+    } finally {
+      setDeletingCodes(prev => ({ ...prev, [code]: false }));
     }
   };
 
@@ -84,108 +93,80 @@ const InviteCodeList: React.FC<InviteCodeListProps> = ({
       
       <CardContent>
         {isLoadingCodes ? (
-          <div className="py-4 text-center text-muted-foreground">
-            Loading invite codes...
+          <div className="flex justify-center items-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : inviteCodes.length === 0 ? (
-          <div className="py-4 text-center text-muted-foreground">
-            No invite codes found. Generate some codes to get started.
+          <div className="text-center p-8 text-muted-foreground">
+            No invite codes found. Generate some using the form above.
           </div>
         ) : (
-          <div className="overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Expires</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {inviteCodes.map((code) => (
-                  <TableRow key={code.id}>
-                    <TableCell className="font-mono font-medium">
-                      {code.code}
-                    </TableCell>
-                    <TableCell>
-                      {code.used ? (
-                        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                          <XCircle className="h-3.5 w-3.5 mr-1" />
-                          Used
-                        </Badge>
+          <div className="space-y-4">
+            <div className="rounded-md border">
+              <div className="grid grid-cols-12 p-3 font-medium bg-muted/50 text-xs md:text-sm">
+                <div className="col-span-4 md:col-span-3">Code</div>
+                <div className="col-span-3 md:col-span-2">Status</div>
+                <div className="hidden md:block md:col-span-3">Email</div>
+                <div className="col-span-3 md:col-span-2">Expires</div>
+                <div className="col-span-2 text-right">Actions</div>
+              </div>
+              
+              {inviteCodes.map(invite => (
+                <div 
+                  key={invite.id} 
+                  className="grid grid-cols-12 p-3 items-center text-xs md:text-sm border-t"
+                >
+                  <div className="col-span-4 md:col-span-3 font-mono">
+                    {invite.code}
+                  </div>
+                  <div className="col-span-3 md:col-span-2">
+                    {invite.used ? (
+                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">
+                        Used
+                      </span>
+                    ) : (
+                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <div className="hidden md:block md:col-span-3 truncate" title={invite.email || 'None'}>
+                    {invite.email || 'Any user'}
+                  </div>
+                  <div className="col-span-3 md:col-span-2">
+                    {formatDate(invite.expires_at)}
+                  </div>
+                  <div className="col-span-2 flex justify-end gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => copyToClipboard(invite.code)}
+                      title="Copy to clipboard"
+                    >
+                      <Clipboard className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => deleteInviteCode(invite.code)}
+                      disabled={deletingCodes[invite.code] || invite.used}
+                      title={invite.used ? "Cannot delete used codes" : "Delete code"}
+                      className={invite.used ? "opacity-30" : ""}
+                    >
+                      {deletingCodes[invite.code] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                          <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                          Available
-                        </Badge>
+                        <Trash2 className="h-4 w-4 text-red-500" />
                       )}
-                    </TableCell>
-                    <TableCell>
-                      {code.email ? (
-                        <div className="flex items-center">
-                          <User className="h-3.5 w-3.5 mr-1.5" />
-                          <span className="text-sm truncate max-w-[120px]">{code.email}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">Any</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <CalendarRange className="h-3.5 w-3.5 mr-1.5" />
-                        {new Date(code.created_at).toLocaleDateString()}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {code.expires_at ? (
-                        format(new Date(code.expires_at), 'MMM d, yyyy')
-                      ) : (
-                        <span className="text-muted-foreground text-sm">Never</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => copyToClipboard(code.code)}
-                          title="Copy code"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        {!code.used && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => deleteInviteCode(code.code)}
-                            title="Delete code"
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
-      
-      <CardFooter className="flex justify-end">
-        <Button 
-          variant="outline" 
-          onClick={loadInviteCodes} 
-          disabled={isLoadingCodes}
-        >
-          Refresh List
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
