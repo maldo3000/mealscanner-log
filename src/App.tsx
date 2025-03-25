@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/auth';
+import { SubscriptionProvider } from './context/subscription';
 import ProfilePage from './pages/ProfilePage';
 import Capture from './pages/Capture';
 import { ThemeProvider } from "@/components/ui/theme-provider"
@@ -12,13 +13,15 @@ function App() {
     <ThemeProvider defaultTheme="system" enableSystem>
       <Router>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Capture />} />
-            <Route path="/capture" element={<Capture />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/subscription" element={<SubscriptionPage />} />
-            <Route path="/subscription/success" element={<SubscriptionSuccess />} />
-          </Routes>
+          <SubscriptionProvider>
+            <Routes>
+              <Route path="/" element={<Capture />} />
+              <Route path="/capture" element={<Capture />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/subscription" element={<SubscriptionPage />} />
+              <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+            </Routes>
+          </SubscriptionProvider>
         </AuthProvider>
       </Router>
     </ThemeProvider>
