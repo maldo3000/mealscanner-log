@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { CreditCard, CheckCircle, ArrowUpRight } from 'lucide-react';
+import { CreditCard, CheckCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/auth';
 import { useSubscription } from '@/context/subscription';
 
@@ -105,7 +105,7 @@ const ProfilePage: React.FC = () => {
                   {isSubscribed ? "Manage Subscription" : (
                     <>
                       Upgrade to Pro
-                      <ArrowUpRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
