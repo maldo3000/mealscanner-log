@@ -3,7 +3,7 @@ import React from "react";
 import { Badge } from "@/components/ui/CustomBadge";
 import { getNutritionScoreBadgeColor } from "@/utils/helpers";
 import { NutritionScore } from "@/types";
-import { Award } from "lucide-react";
+import { Award, Utensils } from "lucide-react";
 
 interface MealImageProps {
   imageUrl: string;
@@ -26,8 +26,9 @@ const MealImage: React.FC<MealImageProps> = ({ imageUrl, title, nutritionScore }
           }}
         />
       ) : (
-        <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-          No image available
+        <div className="flex flex-col items-center justify-center h-full w-full text-muted-foreground bg-muted/30">
+          <Utensils className="w-20 h-20 mb-3 opacity-80" />
+          <span>No image available</span>
         </div>
       )}
       <div className="absolute bottom-4 left-4 flex items-center">

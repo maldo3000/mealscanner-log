@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { MealEntry } from "@/types";
 import { formatDate, formatTime, getNutritionScoreBadgeColor } from "@/utils/helpers";
 import { Badge } from "@/components/ui/CustomBadge";
-import { Clock, CalendarDays, Camera, Trash2, Award } from "lucide-react";
+import { Clock, CalendarDays, Utensils, Trash2, Award } from "lucide-react";
 import { useMealJournal } from "@/context/mealJournal";
 import { toast } from "sonner";
 
@@ -49,9 +49,9 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div className="flex items-center justify-center h-full w-full text-muted-foreground">
-                <Camera className="w-8 h-8 mr-2" />
-                <span>No image</span>
+              <div className="flex flex-col items-center justify-center h-full w-full text-muted-foreground bg-muted/30">
+                <Utensils className="w-16 h-16 mb-2 opacity-80" />
+                <span className="text-sm">No image available</span>
               </div>
             )}
             <div className="absolute top-3 left-3">
