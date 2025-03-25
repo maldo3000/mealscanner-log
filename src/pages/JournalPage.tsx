@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { useMealJournal, FilterPeriod } from "@/context/MealJournalContext";
+import { useMealJournal, FilterPeriod } from "@/context/mealJournal";
 import { MealType, NutritionScore } from "@/types";
 import { JournalHeader } from "@/components/Journal/JournalHeader";
 import { FilterBar } from "@/components/Journal/FilterBar";

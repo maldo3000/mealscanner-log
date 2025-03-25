@@ -14,6 +14,7 @@ import { Toaster } from 'sonner';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
 import Index from './pages/Index';
+import JournalPage from './pages/JournalPage';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/" element={<Layout><Index /></Layout>} />
                 <Route path="/home" element={<Layout><HomePage /></Layout>} />
                 <Route path="/capture" element={<Layout><Capture /></Layout>} />
+                <Route path="/journal" element={<Layout><JournalPage /></Layout>} />
                 <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
                 <Route path="/subscription" element={<Layout><SubscriptionPage /></Layout>} />
                 <Route path="/subscription/success" element={<Layout><SubscriptionSuccess /></Layout>} />
