@@ -75,7 +75,7 @@ const SubscriptionPage: React.FC = () => {
       <div className="mt-6 text-center">
         <Button variant="link" onClick={() => navigate('/capture')}>
           Return to Meal Scanner
-          <ArrowUpRight className="ml-1 h-4 w-4" />
+          <ArrowRight className="ml-1 h-4 w-4" />
         </Button>
       </div>
     </div>
