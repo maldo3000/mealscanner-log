@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FilterPeriod } from '@/context/MealJournalContext';
+import { FilterPeriod } from '@/context/mealJournal';
 
 interface QuickFiltersProps {
   filterPeriod: FilterPeriod;
