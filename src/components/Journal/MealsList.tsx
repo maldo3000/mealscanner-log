@@ -18,7 +18,7 @@ export const MealsList: React.FC<MealsListProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-12">
+      <div className="flex justify-center items-center py-10 sm:py-12">
         <LoadingSpinner size="large" />
       </div>
     );
@@ -29,7 +29,7 @@ export const MealsList: React.FC<MealsListProps> = ({
   }
   
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-3 sm:mt-4">
       {meals.map((meal) => (
         <MealCard key={meal.id} meal={meal} />
       ))}

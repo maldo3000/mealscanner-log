@@ -35,17 +35,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       path: "/home",
       label: "Home",
-      icon: <Home className="w-6 h-6" />
+      icon: <Home className="w-5 h-5 sm:w-6 sm:h-6" />
     },
     {
       path: "/capture",
       label: "Capture",
-      icon: <Camera className="w-6 h-6" />
+      icon: <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
     },
     {
       path: "/journal",
       label: "Journal",
-      icon: <BookOpen className="w-6 h-6" />
+      icon: <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
     }
   ];
 
@@ -56,23 +56,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between py-0 px-4 md:px-6">
-          <div className="flex items-center gap-2">
-            <Link to="/home" className="flex items-center gap-2">
-              <Leaf className="h-6 w-6 text-primary" />
-              <span className="font-bold text-lg md:text-xl">MealScanner</span>
+        <div className="container flex h-14 sm:h-16 items-center justify-between py-0 px-3 sm:px-4 md:px-6">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Link to="/home" className="flex items-center gap-1 sm:gap-2">
+              <Leaf className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              <span className="font-bold text-base sm:text-lg md:text-xl">MealScanner</span>
             </Link>
           </div>
           
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
             {isAdmin && (
               <Link 
                 to="/admin" 
                 className="flex items-center text-primary hover:text-primary/90 font-medium"
                 data-testid="admin-link"
               >
-                <ShieldCheck className="h-5 w-5 mr-1" />
-                <span className={isMobile ? "text-sm" : ""}>Admin</span>
+                <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
+                <span className="text-xs sm:text-sm">Admin</span>
               </Link>
             )}
             
@@ -81,7 +81,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="flex items-center text-muted-foreground hover:text-foreground"
             >
               <User className="h-4 w-4 mr-1" />
-              <span className="text-sm">Profile</span>
+              <span className="text-xs sm:text-sm">Profile</span>
             </Link>
             
             {user && (
@@ -90,22 +90,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className="flex items-center text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="h-4 w-4 mr-1" />
-                <span className="text-sm">Sign Out</span>
+                <span className="text-xs sm:text-sm">Sign Out</span>
               </button>
             )}
           </div>
         </div>
       </header>
       
-      <main className="flex-grow pb-20 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-4 pt-4 pb-24 sm:px-6">
+      <main className="flex-grow pb-16 sm:pb-20 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4 pb-20 sm:pb-24">
           {children}
         </div>
       </main>
       
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-t border-border">
         <div className="max-w-5xl mx-auto">
-          <div className="flex justify-around items-center h-16">
+          <div className="flex justify-around items-center h-14 sm:h-16">
             {navItems.map(item => (
               <Link 
                 key={item.path} 
@@ -117,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div>
                   {item.icon}
                 </div>
-                <span className="text-xs mt-1">{item.label}</span>
+                <span className="text-[10px] sm:text-xs mt-1">{item.label}</span>
               </Link>
             ))}
           </div>
