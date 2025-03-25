@@ -11,6 +11,9 @@ import { ThemeProvider } from "@/components/ui/theme-provider"
 import SubscriptionPage, { SubscriptionSuccess } from './pages/Subscription';
 import Layout from './components/layout/Layout';
 import { Toaster } from 'sonner';
+import LandingPage from './pages/LandingPage';
+import AuthPage from './pages/AuthPage';
+import Index from './pages/Index';
 
 function App() {
   return (
@@ -19,16 +22,19 @@ function App() {
         <AuthProvider>
           <SubscriptionProvider>
             <MealJournalProvider>
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<Capture />} />
-                  <Route path="/home" element={<HomePage />} />
-                  <Route path="/capture" element={<Capture />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/subscription" element={<SubscriptionPage />} />
-                  <Route path="/subscription/success" element={<SubscriptionSuccess />} />
-                </Routes>
-              </Layout>
+              <Routes>
+                {/* Public routes outside the Layout */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                
+                {/* Authenticated routes with Layout */}
+                <Route path="/" element={<Layout><Index /></Layout>} />
+                <Route path="/home" element={<Layout><HomePage /></Layout>} />
+                <Route path="/capture" element={<Layout><Capture /></Layout>} />
+                <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
+                <Route path="/subscription" element={<Layout><SubscriptionPage /></Layout>} />
+                <Route path="/subscription/success" element={<Layout><SubscriptionSuccess /></Layout>} />
+              </Routes>
               <Toaster position="top-right" richColors />
             </MealJournalProvider>
           </SubscriptionProvider>
