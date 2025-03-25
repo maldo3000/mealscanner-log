@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -27,13 +28,17 @@ const ProfilePage: React.FC = () => {
     const email = user.email;
     return email.substring(0, 2).toUpperCase();
   };
-  return <div className="container py-10">
+  
+  return (
+    <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
       
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-col items-center text-center">
-            
+            <Avatar className="h-20 w-20 mb-4">
+              <AvatarFallback className="text-lg">{getInitials()}</AvatarFallback>
+            </Avatar>
             <div>
               <CardTitle>Account Information</CardTitle>
               <CardDescription>Manage your account details</CardDescription>
@@ -73,32 +78,44 @@ const ProfilePage: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-medium">
-                  {isSubscribed ? 'Pro Plan' : 'Free Plan'}
+                  {isSubscribed ? 'Pro Plan' : paywallEnabled ? 'Free Plan' : 'Unlimited Access'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {isSubscribed ? 'Unlimited scans' : paywallEnabled ? `${remainingScans} of ${freeTierLimit} scans remaining` : 'Unlimited scans (Paywall disabled)'}
+                  {isSubscribed 
+                    ? 'Unlimited scans' 
+                    : paywallEnabled 
+                      ? `${remainingScans} of ${freeTierLimit} scans remaining` 
+                      : 'Unlimited scans (Paywall disabled)'}
                 </p>
               </div>
             </div>
             
-            {!isSubscribed && paywallEnabled && <div className="bg-muted p-3 rounded-md text-sm">
+            {!isSubscribed && paywallEnabled && (
+              <div className="bg-muted p-3 rounded-md text-sm">
                 <p>
                   You've used <span className="font-medium">{scanCount}</span> of your{' '}
                   <span className="font-medium">{freeTierLimit}</span> free scans.
                 </p>
-              </div>}
+              </div>
+            )}
             
-            <div className="pt-4">
-              <Button onClick={() => navigate('/subscription')} className="w-full" variant={isSubscribed ? "outline" : "default"}>
-                {isSubscribed ? "Manage Subscription" : <>
-                    Upgrade to Pro
-                    <ArrowUpRight className="ml-2 h-4 w-4" />
-                  </>}
-              </Button>
-            </div>
+            {paywallEnabled && (
+              <div className="pt-4">
+                <Button onClick={() => navigate('/subscription')} className="w-full" variant={isSubscribed ? "outline" : "default"}>
+                  {isSubscribed ? "Manage Subscription" : (
+                    <>
+                      Upgrade to Pro
+                      <ArrowUpRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default ProfilePage;

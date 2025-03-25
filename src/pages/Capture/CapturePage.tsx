@@ -33,7 +33,7 @@ const CapturePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("photo");
   
   useEffect(() => {
-    if (!loadingSubscription && !canScan && paywallEnabled) {
+    if (!loadingSubscription && paywallEnabled && !canScan) {
       toast.error("You've reached your free scan limit. Please subscribe to continue.");
       navigate('/subscription');
     }
@@ -53,10 +53,12 @@ const CapturePage: React.FC = () => {
       return;
     }
     
-    const canProceed = await incrementScanCount();
-    if (!canProceed) {
-      navigate('/subscription');
-      return;
+    if (paywallEnabled) {
+      const canProceed = await incrementScanCount();
+      if (!canProceed) {
+        navigate('/subscription');
+        return;
+      }
     }
     
     try {
@@ -90,10 +92,12 @@ const CapturePage: React.FC = () => {
       return;
     }
     
-    const canProceed = await incrementScanCount();
-    if (!canProceed) {
-      navigate('/subscription');
-      return;
+    if (paywallEnabled) {
+      const canProceed = await incrementScanCount();
+      if (!canProceed) {
+        navigate('/subscription');
+        return;
+      }
     }
     
     try {
@@ -193,7 +197,7 @@ const CapturePage: React.FC = () => {
                   ? `You have ${remainingScans} free scans remaining` 
                   : "You've reached your free scan limit"}
               </p>
-              {remainingScans <= 10 && (
+              {remainingScans <= 10 && paywallEnabled && (
                 <p className="text-muted-foreground mt-1">
                   {remainingScans > 0 
                     ? "Subscribe to unlock unlimited scans" 
