@@ -1,9 +1,17 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Camera, BookOpen, ChevronRight } from "lucide-react";
+import { Camera, BookOpen, ChevronRight, Clock } from "lucide-react";
+import { useMealJournal } from "@/context/mealJournal";
+import MealCard from "@/components/MealCard";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const HomePage = () => {
+  const { meals, isLoading } = useMealJournal();
+  
+  // Get the 2 most recent meals
+  const recentMeals = meals.slice(0, 2);
+  
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="text-center py-8">
@@ -49,6 +57,44 @@ const HomePage = () => {
             See your meals <ChevronRight className="h-4 w-4 ml-1" />
           </Link>
         </div>
+      </div>
+      
+      {/* Recent Meals Section */}
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <Clock className="w-5 h-5 text-primary mr-2" />
+            <h2 className="text-xl font-semibold">Recent Meals</h2>
+          </div>
+          <Link 
+            to="/journal" 
+            className="text-sm text-primary hover:underline flex items-center"
+          >
+            View all <ChevronRight className="h-4 w-4 ml-1" />
+          </Link>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex justify-center py-10">
+            <LoadingSpinner size="medium" />
+          </div>
+        ) : recentMeals.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {recentMeals.map((meal) => (
+              <MealCard key={meal.id} meal={meal} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10 bg-muted/30 rounded-xl">
+            <p className="text-muted-foreground">No meals recorded yet</p>
+            <Link 
+              to="/capture" 
+              className="mt-2 inline-block text-primary hover:underline"
+            >
+              Add your first meal
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
