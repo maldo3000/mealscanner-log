@@ -68,7 +68,7 @@ const ProfilePage: React.FC = () => {
           <CardHeader className="text-center">
             <CardTitle>Subscription</CardTitle>
             <CardDescription>
-              Your current plan and usage
+              {paywallEnabled ? 'Your current plan and usage' : 'Subscription information'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -90,7 +90,7 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             
-            {!isSubscribed && paywallEnabled && (
+            {paywallEnabled && !isSubscribed && (
               <div className="bg-muted p-3 rounded-md text-sm">
                 <p>
                   You've used <span className="font-medium">{scanCount}</span> of your{' '}

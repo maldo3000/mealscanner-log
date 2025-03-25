@@ -29,6 +29,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // Load app settings
   useEffect(() => {
+    console.log('Loading app settings...');
     loadAppSettings(setPaywallEnabled, setFreeTierLimit, setPricing);
   }, []);
 
@@ -53,6 +54,18 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     fetchSubscriptionData();
   }, [isAuthenticated, user]);
+
+  // Debug state changes
+  useEffect(() => {
+    console.log('Subscription context state updated:', {
+      paywallEnabled,
+      freeTierLimit,
+      scanCount,
+      remainingScans,
+      isSubscribed,
+      canScan,
+    });
+  }, [paywallEnabled, freeTierLimit, scanCount, remainingScans, isSubscribed, canScan]);
 
   // Increment scan count and check if user can continue scanning
   const incrementScanCount = async (): Promise<boolean> => {
@@ -87,7 +100,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       if (success) {
         setScanCount(newCount);
-        showRemainingScansMessage(freeTierLimit, newCount);
+        showRemainingScansMessage(freeTierLimit, newCount, paywallEnabled);
       }
       
       return true;

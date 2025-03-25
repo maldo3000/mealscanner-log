@@ -33,6 +33,7 @@ const CapturePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("photo");
   
   useEffect(() => {
+    console.log('CapturePage useEffect - paywall state:', { paywallEnabled, canScan, remainingScans });
     if (!loadingSubscription && paywallEnabled && !canScan) {
       toast.error("You've reached your free scan limit. Please subscribe to continue.");
       navigate('/subscription');

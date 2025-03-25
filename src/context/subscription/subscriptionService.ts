@@ -21,6 +21,7 @@ export const loadAppSettings = async (
     }
 
     if (data && data.length > 0) {
+      console.log('App settings loaded:', data[0]);
       setPaywallEnabled(data[0].paywall_enabled);
       setFreeTierLimit(data[0].free_tier_limit);
       
@@ -60,6 +61,7 @@ export const loadSubscriptionData = async (
     }
 
     if (data) {
+      console.log('Subscription data loaded:', data);
       setScanCount(data.scan_count || 0);
       setIsSubscribed(data.is_subscribed || false);
       setSubscriptionEndDate(data.subscription_end ? new Date(data.subscription_end) : null);
@@ -104,7 +106,10 @@ export const updateScanCount = async (userId: string, newCount: number): Promise
   }
 };
 
-export const showRemainingScansMessage = (freeTierLimit: number, newCount: number) => {
+export const showRemainingScansMessage = (freeTierLimit: number, newCount: number, paywallEnabled: boolean) => {
+  // Only show warning when paywall is enabled
+  if (!paywallEnabled) return;
+  
   // Show warning when approaching limit
   const remaining = freeTierLimit - newCount;
   if (remaining <= 5 && remaining > 0) {
