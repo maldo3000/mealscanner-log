@@ -14,32 +14,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { signOut, user, isAdmin, checkUserRole } = useAuth();
   const isMobile = useIsMobile();
 
-  // For debugging
   useEffect(() => {
-    console.log("Layout rendering - isAdmin:", isAdmin);
-    console.log("Current user:", user?.email);
-    
     // Force a role check when the layout mounts or user changes
     if (user) {
-      console.log("Checking admin role from Layout component");
       checkUserRole();
     }
-  }, [isAdmin, user, checkUserRole]);
-
-  // Enable scrolling on iOS devices
-  useEffect(() => {
-    // Prevent only horizontal scrolling and allow vertical scrolling
-    const handleTouchMove = (e: TouchEvent) => {
-      // Don't prevent default - this allows scrolling
-      return true;
+    
+    // Fix viewport height for mobile browsers
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
     
-    document.addEventListener('touchmove', handleTouchMove, { passive: true });
-    
-    return () => {
-      document.removeEventListener('touchmove', handleTouchMove);
-    };
-  }, []);
+    setVh();
+    window.addEventListener('resize', setVh);
+    return () => window.removeEventListener('resize', setVh);
+  }, [user, checkUserRole]);
 
   const navItems = [
     {
@@ -63,12 +53,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return location.pathname === path;
   };
 
-  const handleSignOut = () => {
-    signOut();
-  };
-
   return (
-    <div className="flex flex-col min-h-screen overflow-y-auto">
+    <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
         <div className="container flex h-16 items-center justify-between py-0 px-4 md:px-6">
           <div className="flex items-center gap-2">
@@ -100,7 +86,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             
             {user && (
               <button 
-                onClick={handleSignOut} 
+                onClick={signOut} 
                 className="flex items-center text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="h-4 w-4 mr-1" />
@@ -111,7 +97,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </header>
       
-      <main className="flex-grow pb-20 overflow-y-auto -webkit-overflow-scrolling-touch">
+      <main className="flex-grow pb-20 overflow-y-auto">
         <div className="max-w-5xl mx-auto px-4 pt-4 pb-24 sm:px-6">
           {children}
         </div>
