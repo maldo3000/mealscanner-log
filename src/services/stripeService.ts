@@ -22,7 +22,6 @@ export async function createCheckoutSession(priceId: string, billingCycle: 'mont
         Authorization: `Bearer ${session.access_token}`,
       },
       method: 'POST',
-      path: 'create-checkout-session',
     });
     
     if (error) {
