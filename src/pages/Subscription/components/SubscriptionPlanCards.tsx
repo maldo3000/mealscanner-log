@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, X, Zap, CalendarCheck, Lock } from 'lucide-react';
+import { Check, X, Zap, CalendarCheck, Lock, Loader2 } from 'lucide-react';
 import { PricingInfo } from '@/context/subscription';
+import { createCheckoutSession } from '@/services/stripeService';
 
 interface SubscriptionPlanCardsProps {
   billingCycle: 'monthly' | 'yearly';
@@ -21,6 +22,7 @@ const SubscriptionPlanCards: React.FC<SubscriptionPlanCardsProps> = ({
   pricingKey
 }) => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const getDisplayPrice = () => {
     if (!pricing) return { monthly: '$4.99', yearly: '$49.99', discount: 15 };
@@ -37,15 +39,34 @@ const SubscriptionPlanCards: React.FC<SubscriptionPlanCardsProps> = ({
     ? (pricing?.yearlyPrice || 49.99) / 12 
     : null;
 
+  // These would be your actual Stripe price IDs from your Stripe dashboard
+  const stripePriceIds = {
+    monthly: 'price_monthly', // Replace with your actual price ID
+    yearly: 'price_yearly'    // Replace with your actual price ID
+  };
+
   const subscribeNow = async (cycle: 'monthly' | 'yearly') => {
-    // In a real implementation, this would redirect to a payment processor
-    // For now, we'll just show a toast that this is a demo
-    toast.info(`This is a demo. In a real app, this would connect to a payment processor for ${cycle} billing.`, {
-      duration: 5000,
-    });
-    
-    // Redirect back to the capture page after subscription UI is shown
-    navigate('/capture');
+    try {
+      setIsLoading(true);
+      
+      // Get the appropriate Stripe price ID
+      const priceId = cycle === 'monthly' ? stripePriceIds.monthly : stripePriceIds.yearly;
+      
+      // Create a checkout session and redirect to Stripe
+      const checkoutUrl = await createCheckoutSession(priceId, cycle);
+      
+      if (checkoutUrl) {
+        // Redirect to Stripe Checkout
+        window.location.href = checkoutUrl;
+      } else {
+        toast.error('Failed to create checkout session. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error);
+      toast.error('An error occurred during checkout. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -137,9 +158,22 @@ const SubscriptionPlanCards: React.FC<SubscriptionPlanCardsProps> = ({
           </div>
         </CardContent>
         <CardFooter>
-          <Button className="w-full" onClick={() => subscribeNow(billingCycle)}>
-            <Zap className="h-4 w-4 mr-2" />
-            Upgrade Now
+          <Button 
+            className="w-full" 
+            onClick={() => subscribeNow(billingCycle)}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Zap className="h-4 w-4 mr-2" />
+                Upgrade Now
+              </>
+            )}
           </Button>
         </CardFooter>
       </Card>

@@ -13,6 +13,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     scanCount,
     setScanCount,
     isSubscribed,
+    setIsSubscribed,
     freeTierLimit,
     paywallEnabled,
     subscriptionEndDate,
@@ -44,7 +45,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         incrementScanCount,
         subscriptionEndDate,
         loadingSubscription,
-        pricing
+        pricing,
+        setIsSubscribed
       }}
     >
       {children}

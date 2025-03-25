@@ -20,4 +20,5 @@ export interface SubscriptionContextType {
   subscriptionEndDate: Date | null;
   loadingSubscription: boolean;
   pricing: PricingInfo | null;
+  setIsSubscribed: (value: boolean) => void;
 }

@@ -67,6 +67,7 @@ export const useSubscriptionState = () => {
     scanCount,
     setScanCount,
     isSubscribed,
+    setIsSubscribed,
     freeTierLimit,
     paywallEnabled,
     subscriptionEndDate,
@@ -76,8 +77,5 @@ export const useSubscriptionState = () => {
     // Computed properties
     remainingScans,
     canScan,
-    
-    // State updaters
-    setIsSubscribed,
   };
 };
