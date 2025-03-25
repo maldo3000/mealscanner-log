@@ -1,3 +1,3 @@
 
 // Re-export from the new location for backward compatibility
-export * from './mealJournal';
+export * from './mealJournal/MealJournalContext';

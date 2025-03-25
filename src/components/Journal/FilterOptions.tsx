@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Calendar, X } from 'lucide-react';
-import { FilterPeriod } from '@/context/MealJournalContext';
+import { FilterPeriod } from '@/context/mealJournal';
 import { MealType, NutritionScore } from '@/types';
 import { getMealTypeOptions } from '@/utils/helpers';
 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { format } from 'date-fns';
-import { FilterPeriod } from '@/context/MealJournalContext';
+import { FilterPeriod } from '@/context/mealJournal';
 
 interface StatsCardProps {
   totalCalories: number;

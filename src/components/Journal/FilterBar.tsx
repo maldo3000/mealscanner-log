@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Filter, ChevronDown } from 'lucide-react';
-import { FilterPeriod } from '@/context/MealJournalContext';
+import { FilterPeriod } from '@/context/mealJournal';
 import { QuickFilters } from './QuickFilters';
 import { SearchBar } from './SearchBar';
 
