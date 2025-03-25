@@ -10,8 +10,8 @@ import SubscriptionPage, { SubscriptionSuccess } from './pages/Subscription';
 function App() {
   return (
     <ThemeProvider defaultTheme="system" enableSystem>
-      <AuthProvider>
-        <Router>
+      <Router>
+        <AuthProvider>
           <Routes>
             <Route path="/" element={<Capture />} />
             <Route path="/capture" element={<Capture />} />
@@ -19,8 +19,8 @@ function App() {
             <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/subscription/success" element={<SubscriptionSuccess />} />
           </Routes>
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }
