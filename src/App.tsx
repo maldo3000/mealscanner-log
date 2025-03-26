@@ -16,8 +16,9 @@ import AuthPage from './pages/AuthPage';
 import Index from './pages/Index';
 import JournalPage from './pages/JournalPage';
 import MealDetailsPage from './pages/MealDetailsPage';
-import AdminPage from './pages/admin';
+import AdminPage from './pages/admin/AdminPage'; // Fix the import path
 import { AdminRoute } from './components/auth';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -42,6 +43,9 @@ function App() {
                 
                 {/* Admin route */}
                 <Route path="/admin" element={<Layout><AdminRoute><AdminPage /></AdminRoute></Layout>} />
+                
+                {/* Not Found / 404 route - should be last */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster position="top-right" richColors />
             </MealJournalProvider>

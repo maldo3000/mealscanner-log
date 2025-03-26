@@ -25,6 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     // Force a role check when the layout mounts or user changes
     if (user) {
       checkUserRole();
+      console.log("Layout - Admin status:", isAdmin ? "Admin" : "Not admin");
     }
     
     // Fix viewport height for mobile browsers
@@ -36,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setVh();
     window.addEventListener('resize', setVh);
     return () => window.removeEventListener('resize', setVh);
-  }, [user, checkUserRole]);
+  }, [user, checkUserRole, isAdmin]);
 
   const navItems = [
     {
@@ -75,7 +76,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {isAdmin && (
               <Link 
                 to="/admin" 
-                className="flex items-center text-primary hover:text-primary/90 font-medium"
+                className={`flex items-center font-medium ${isActive('/admin') ? 'text-primary' : 'text-muted-foreground hover:text-primary/90'}`}
                 data-testid="admin-link"
               >
                 <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
@@ -112,7 +113,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <>
                   <Link 
                     to="/profile" 
-                    className="flex items-center text-muted-foreground hover:text-foreground"
+                    className={`flex items-center ${isActive('/profile') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     <User className="h-4 w-4 mr-1" />
                     <span className="text-xs sm:text-sm">Profile</span>

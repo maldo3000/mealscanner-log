@@ -7,6 +7,10 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 const Index = () => {
   const { isAuthenticated, loading } = useAuth();
   
+  useEffect(() => {
+    console.log("Index page - Auth status:", isAuthenticated ? "Authenticated" : "Not authenticated");
+  }, [isAuthenticated]);
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
