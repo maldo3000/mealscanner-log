@@ -39,10 +39,11 @@ const SubscriptionPlanCards: React.FC<SubscriptionPlanCardsProps> = ({
     ? (pricing?.yearlyPrice || 49.99) / 12 
     : null;
 
-  // These would be your actual Stripe price IDs from your Stripe dashboard
+  // These are your actual Stripe price IDs from your Stripe dashboard
+  // You should replace these with your actual IDs
   const stripePriceIds = {
-    monthly: 'price_monthly', // Replace with your actual price ID
-    yearly: 'price_yearly'    // Replace with your actual price ID
+    monthly: 'price_1OZIZTIDcNuHMF6SkOKGtR3O', // Replace with your actual price ID
+    yearly: 'price_1OZIa3IDcNuHMF6S8WYx35Qs'    // Replace with your actual price ID
   };
 
   const subscribeNow = async (cycle: 'monthly' | 'yearly') => {
@@ -52,10 +53,13 @@ const SubscriptionPlanCards: React.FC<SubscriptionPlanCardsProps> = ({
       // Get the appropriate Stripe price ID
       const priceId = cycle === 'monthly' ? stripePriceIds.monthly : stripePriceIds.yearly;
       
+      console.log(`Starting checkout with priceId: ${priceId}, cycle: ${cycle}`);
+      
       // Create a checkout session and redirect to Stripe
       const checkoutUrl = await createCheckoutSession(priceId, cycle);
       
       if (checkoutUrl) {
+        console.log(`Redirecting to checkout URL: ${checkoutUrl}`);
         // Redirect to Stripe Checkout
         window.location.href = checkoutUrl;
       } else {

@@ -12,16 +12,15 @@ export async function createCheckoutSession(priceId: string, billingCycle: 'mont
     
     // Call our Stripe edge function
     const { data, error } = await supabase.functions.invoke('stripe-payment', {
-      body: JSON.stringify({
+      body: {
         priceId,
         billingCycle,
         successUrl: `${window.location.origin}/subscription/success`,
         cancelUrl: `${window.location.origin}/subscription`,
-      }),
+      },
       headers: {
         Authorization: `Bearer ${session.access_token}`,
       },
-      method: 'POST',
     });
     
     if (error) {
