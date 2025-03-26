@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, BookOpen, Home, Leaf, LogOut, ShieldCheck, User } from "lucide-react";
 import { useAuth } from "@/context/auth";
