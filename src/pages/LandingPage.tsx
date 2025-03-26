@@ -1,10 +1,10 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth';
-import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock } from 'lucide-react';
+import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -13,6 +13,7 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const videoSectionRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // If authenticated, redirect to app home
   if (isAuthenticated) {
@@ -22,6 +23,10 @@ const LandingPage: React.FC = () => {
 
   const scrollToVideo = () => {
     videoSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handlePlayVideo = () => {
+    setIsPlaying(true);
   };
 
   return (
@@ -77,13 +82,33 @@ const LandingPage: React.FC = () => {
           <div className="container max-w-5xl mx-auto px-4">
             <div className="rounded-xl overflow-hidden border border-border bg-card/50">
               <AspectRatio ratio={16/9} className="w-full">
-                <iframe 
-                  src="https://www.youtube.com/embed/fzM_bK8l9bU" 
-                  title="MealScanner Demo Video"
-                  className="w-full h-full" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen>
-                </iframe>
+                {isPlaying ? (
+                  <iframe 
+                    src="https://www.youtube.com/embed/fzM_bK8l9bU?autoplay=1&rel=0&modestbranding=1&showinfo=0" 
+                    title="MealScanner Demo Video"
+                    className="w-full h-full" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen
+                    frameBorder="0"
+                  />
+                ) : (
+                  <div className="relative w-full h-full">
+                    {/* Custom thumbnail with play button overlay */}
+                    <img 
+                      src="https://i.ytimg.com/vi/fzM_bK8l9bU/maxresdefault.jpg" 
+                      alt="Video thumbnail" 
+                      className="w-full h-full object-cover"
+                    />
+                    <button 
+                      onClick={handlePlayVideo}
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+                    >
+                      <div className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:bg-primary/90 transition-all duration-200 hover:scale-110">
+                        <Play className="h-10 w-10 md:h-12 md:w-12 fill-primary-foreground" />
+                      </div>
+                    </button>
+                  </div>
+                )}
               </AspectRatio>
             </div>
           </div>
