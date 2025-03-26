@@ -16,6 +16,8 @@ import AuthPage from './pages/AuthPage';
 import Index from './pages/Index';
 import JournalPage from './pages/JournalPage';
 import MealDetailsPage from './pages/MealDetailsPage';
+import AdminPage from './pages/admin';
+import { AdminRoute } from './components/auth';
 
 function App() {
   return (
@@ -37,6 +39,9 @@ function App() {
                 <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
                 <Route path="/subscription" element={<Layout><SubscriptionPage /></Layout>} />
                 <Route path="/subscription/success" element={<Layout><SubscriptionSuccess /></Layout>} />
+                
+                {/* Admin route */}
+                <Route path="/admin" element={<Layout><AdminRoute><AdminPage /></AdminRoute></Layout>} />
               </Routes>
               <Toaster position="top-right" richColors />
             </MealJournalProvider>
