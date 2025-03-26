@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth';
-import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play } from 'lucide-react';
+import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 const LandingPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -52,7 +53,6 @@ const LandingPage: React.FC = () => {
       </header>
 
       <main className="flex-grow flex flex-col">
-        {/* Hero Section */}
         <section className="py-10 sm:py-16 px-4">
           <div className="container max-w-5xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
@@ -72,18 +72,18 @@ const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Video Section - No text, just the video placeholder */}
         <section ref={videoSectionRef} className="py-12 md:py-16 bg-secondary/30">
           <div className="container max-w-5xl mx-auto px-4">
-            <div className="rounded-xl overflow-hidden border border-border bg-card/50 aspect-video flex items-center justify-center">
-              <div className="flex flex-col items-center text-center p-6">
-                <Play className="h-16 w-16 mb-4 text-primary" />
-                <p className="text-muted-foreground">Your explainer video will appear here</p>
-                <Button variant="default" size="sm" className="mt-4 flex items-center gap-2">
-                  <Play className="h-4 w-4" />
-                  Watch Demo
-                </Button>
-              </div>
+            <div className="rounded-xl overflow-hidden border border-border bg-card/50">
+              <AspectRatio ratio={16/9} className="w-full">
+                <iframe 
+                  src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+                  title="MealScanner Demo Video"
+                  className="w-full h-full" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen>
+                </iframe>
+              </AspectRatio>
             </div>
           </div>
         </section>
