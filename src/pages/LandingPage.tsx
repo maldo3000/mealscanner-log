@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -77,7 +78,7 @@ const LandingPage: React.FC = () => {
             <div className="rounded-xl overflow-hidden border border-border bg-card/50">
               <AspectRatio ratio={16/9} className="w-full">
                 <iframe 
-                  src="https://www.youtube.com/embed/YOUR_VIDEO_ID" 
+                  src="https://www.youtube.com/embed/fzM_bK8l9bU" 
                   title="MealScanner Demo Video"
                   className="w-full h-full" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
