@@ -10,8 +10,8 @@ export async function createCheckoutSession(priceId: string, billingCycle: 'mont
       throw new Error('You must be logged in to subscribe');
     }
     
-    // Call our Stripe edge function
-    const { data, error } = await supabase.functions.invoke('stripe-payment', {
+    // Call our Stripe edge function with the checkout endpoint
+    const { data, error } = await supabase.functions.invoke('stripe-payment/checkout', {
       body: {
         priceId,
         billingCycle,
