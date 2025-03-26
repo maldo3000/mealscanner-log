@@ -1,9 +1,16 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, BookOpen, Home, Leaf, LogOut, ShieldCheck, User } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -76,22 +83,52 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
             )}
             
-            <Link 
-              to="/profile" 
-              className="flex items-center text-muted-foreground hover:text-foreground"
-            >
-              <User className="h-4 w-4 mr-1" />
-              <span className="text-xs sm:text-sm">Profile</span>
-            </Link>
-            
-            {user && (
-              <button 
-                onClick={signOut} 
-                className="flex items-center text-muted-foreground hover:text-foreground"
-              >
-                <LogOut className="h-4 w-4 mr-1" />
-                <span className="text-xs sm:text-sm">Sign Out</span>
-              </button>
+            {isMobile ? (
+              /* Mobile profile dropdown */
+              user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center justify-center h-8 w-8 rounded-full bg-muted/50 hover:bg-muted transition-colors">
+                    <User className="h-4 w-4 text-foreground" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center cursor-pointer">
+                        <User className="h-4 w-4 mr-2" />
+                        <span>Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={signOut}
+                      className="flex items-center cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      <span>Sign Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )
+            ) : (
+              /* Desktop layout - keep original buttons */
+              <>
+                <Link 
+                  to="/profile" 
+                  className="flex items-center text-muted-foreground hover:text-foreground"
+                >
+                  <User className="h-4 w-4 mr-1" />
+                  <span className="text-xs sm:text-sm">Profile</span>
+                </Link>
+                
+                {user && (
+                  <button 
+                    onClick={signOut} 
+                    className="flex items-center text-muted-foreground hover:text-foreground"
+                  >
+                    <LogOut className="h-4 w-4 mr-1" />
+                    <span className="text-xs sm:text-sm">Sign Out</span>
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
