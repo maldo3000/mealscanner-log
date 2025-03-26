@@ -83,9 +83,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
             )}
             
-            {isMobile ? (
-              /* Mobile profile dropdown */
-              user && (
+            {user && (
+              isMobile ? (
+                /* Mobile profile dropdown */
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center justify-center h-8 w-8 rounded-full bg-muted/50 hover:bg-muted transition-colors">
                     <User className="h-4 w-4 text-foreground" />
@@ -107,19 +107,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )
-            ) : (
-              /* Desktop layout - keep original buttons */
-              <>
-                <Link 
-                  to="/profile" 
-                  className="flex items-center text-muted-foreground hover:text-foreground"
-                >
-                  <User className="h-4 w-4 mr-1" />
-                  <span className="text-xs sm:text-sm">Profile</span>
-                </Link>
-                
-                {user && (
+              ) : (
+                /* Desktop layout - keep original buttons */
+                <>
+                  <Link 
+                    to="/profile" 
+                    className="flex items-center text-muted-foreground hover:text-foreground"
+                  >
+                    <User className="h-4 w-4 mr-1" />
+                    <span className="text-xs sm:text-sm">Profile</span>
+                  </Link>
+                  
                   <button 
                     onClick={signOut} 
                     className="flex items-center text-muted-foreground hover:text-foreground"
@@ -127,8 +125,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <LogOut className="h-4 w-4 mr-1" />
                     <span className="text-xs sm:text-sm">Sign Out</span>
                   </button>
-                )}
-              </>
+                </>
+              )
             )}
           </div>
         </div>
