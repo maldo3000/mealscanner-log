@@ -27,6 +27,9 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
     }
   };
   
+  // Check if this is a text-only entry
+  const hasNoImage = !meal.imageUrl || imageError;
+  
   return (
     <div 
       className="block w-full relative"
@@ -40,7 +43,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal }) => {
       >
         <div className="glass-card glass-card-hover rounded-2xl overflow-hidden transition-all duration-300 h-full">
           <div className="relative aspect-video w-full overflow-hidden bg-muted">
-            {meal.imageUrl && !imageError ? (
+            {!hasNoImage ? (
               <img
                 src={meal.imageUrl}
                 alt={meal.title}
