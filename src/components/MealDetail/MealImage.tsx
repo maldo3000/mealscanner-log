@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/CustomBadge";
 import { getNutritionScoreBadgeColor } from "@/utils/helpers";
 import { NutritionScore } from "@/types";
@@ -12,18 +12,19 @@ interface MealImageProps {
 }
 
 const MealImage: React.FC<MealImageProps> = ({ imageUrl, title, nutritionScore }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  // Check if this is a text-only entry
+  const hasNoImage = !imageUrl || imageError;
+  
   return (
     <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-muted">
-      {imageUrl ? (
+      {!hasNoImage ? (
         <img
           src={imageUrl}
           alt={title}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            // Handle image loading errors by replacing with fallback
-            console.error("Image failed to load:", imageUrl);
-            (e.target as HTMLImageElement).src = "/placeholder.svg";
-          }}
+          onError={() => setImageError(true)}
         />
       ) : (
         <div className="flex flex-col items-center justify-center h-full w-full text-muted-foreground bg-muted/30">
