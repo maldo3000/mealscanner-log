@@ -12,46 +12,47 @@ export const useScanCount = (
   setScanCount: (count: number) => void,
   freeTierLimit: number
 ) => {
-  // Increment scan count and check if user can continue scanning
+  // Verify scan permissions with the backend and increment count if allowed
   const incrementScanCount = async (): Promise<boolean> => {
     if (!isAuthenticated || !userId) {
       // Allow anonymous users to scan without limit
       return true;
     }
 
-    // If already subscribed or paywall is disabled, allow scanning
-    if (isSubscribed || !paywallEnabled) {
-      // Still increment count for analytics, but don't limit
-      if (isAuthenticated && userId) {
-        const newCount = scanCount + 1;
-        const success = await updateScanCount(userId, newCount);
-        if (success) {
-          setScanCount(newCount);
-        }
-      }
-      return true;
-    }
-
-    // Check if user has reached the free tier limit
-    if (scanCount >= freeTierLimit) {
-      toast.error(`You've reached your free scan limit of ${freeTierLimit}. Please subscribe to continue.`);
-      return false;
-    }
-
-    // Increment scan count
     try {
-      const newCount = scanCount + 1;
-      const success = await updateScanCount(userId, newCount);
+      // Call the verify-scan-limit edge function to check if scanning is allowed
+      const { data, error } = await supabase.functions.invoke('verify-scan-limit');
       
-      if (success) {
-        setScanCount(newCount);
-        showRemainingScansMessage(freeTierLimit, newCount, paywallEnabled);
+      if (error) {
+        console.error('Error verifying scan limit:', error);
+        // Allow scan on error, but don't update the count
+        toast.error('Error verifying scan permissions');
+        return true;
+      }
+      
+      console.log('Scan verification result:', data);
+      
+      // Update local state with the latest values from the server
+      if (data.scanCount !== undefined) {
+        setScanCount(data.scanCount);
+      }
+      
+      // Show message about remaining scans if available
+      if (data.remainingScans !== undefined && data.paywallEnabled) {
+        showRemainingScansMessage(freeTierLimit, scanCount, true);
+      }
+      
+      // If user can't scan, inform them and redirect to subscription page
+      if (!data.canScan) {
+        toast.error(`You've reached your free scan limit of ${freeTierLimit}. Please subscribe to continue.`);
+        return false;
       }
       
       return true;
     } catch (error) {
-      console.error('Failed to update scan count:', error);
-      return true; // Allow scan even if update fails
+      console.error('Failed to verify scan permissions:', error);
+      // Default to allowing scan on error
+      return true;
     }
   };
 

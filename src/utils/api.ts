@@ -72,6 +72,7 @@ export const analyzeMealPhoto = async (
     const base64 = await fileToBase64(photoFile);
     
     // Call the Supabase Edge Function for meal analysis
+    // This will now verify scan permissions and increment count on the server side
     const { data, error } = await supabase.functions.invoke('analyze-meal', {
       body: { 
         imageData: base64,
@@ -87,6 +88,11 @@ export const analyzeMealPhoto = async (
     
     if (!data) {
       throw new Error('No data returned from meal analysis');
+    }
+    
+    // If scan limit was reached, handle the error
+    if (data.scanLimitReached) {
+      throw new Error(`You've reached your free scan limit. Please subscribe to continue.`);
     }
     
     // Add the permanent image URL to the analysis result
@@ -108,6 +114,7 @@ export const analyzeMealText = async (description: string): Promise<MealAnalysis
     console.log("Analyzing meal description:", description);
     
     // Call the Supabase Edge Function for meal analysis
+    // This will now verify scan permissions and increment count on the server side
     const { data, error } = await supabase.functions.invoke('analyze-meal', {
       body: { 
         description,
@@ -122,6 +129,11 @@ export const analyzeMealText = async (description: string): Promise<MealAnalysis
     
     if (!data) {
       throw new Error('No data returned from meal text analysis');
+    }
+    
+    // If scan limit was reached, handle the error
+    if (data.scanLimitReached) {
+      throw new Error(`You've reached your free scan limit. Please subscribe to continue.`);
     }
     
     // For text analysis, we'll use a placeholder image
