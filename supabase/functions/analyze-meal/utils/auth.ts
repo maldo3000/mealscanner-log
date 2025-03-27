@@ -67,7 +67,10 @@ export const verifyAndIncrementScanCount = async (req: Request) => {
     if (!paywall_enabled || (subscriptionData && subscriptionData.is_subscribed)) {
       // Still increment the count for analytics
       await incrementScanCount(user.id, subscriptionData ? subscriptionData.scan_count + 1 : 1);
-      return { canProceed: true };
+      return { 
+        canProceed: true,
+        freeTierLimit: free_tier_limit // Include current free tier limit
+      };
     }
     
     // For non-subscribed users with paywall enabled, check if they've reached limit
@@ -75,7 +78,8 @@ export const verifyAndIncrementScanCount = async (req: Request) => {
       return { 
         canProceed: false, 
         error: `You've reached your free scan limit of ${free_tier_limit}. Please subscribe to continue.`,
-        status: 403
+        status: 403,
+        freeTierLimit: free_tier_limit
       };
     }
     
@@ -86,7 +90,8 @@ export const verifyAndIncrementScanCount = async (req: Request) => {
     return { 
       canProceed: true, 
       scanCount: newCount,
-      remainingScans: free_tier_limit - newCount 
+      remainingScans: free_tier_limit - newCount,
+      freeTierLimit: free_tier_limit // Include current free tier limit
     };
     
   } catch (error) {

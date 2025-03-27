@@ -152,7 +152,8 @@ serve(async (req) => {
           canScan: true,
           isSubscribed: false,
           scanCount: subscriptionData.scan_count,
-          paywallEnabled: false
+          paywallEnabled: false,
+          freeTierLimit: free_tier_limit // Include current free tier limit
         }), 
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -171,7 +172,7 @@ serve(async (req) => {
         scanCount: subscriptionData.scan_count,
         remainingScans,
         paywallEnabled: true,
-        freeTierLimit: free_tier_limit
+        freeTierLimit: free_tier_limit // Include current free tier limit
       }), 
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

@@ -15,7 +15,9 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     isSubscribed,
     setIsSubscribed,
     freeTierLimit,
+    setFreeTierLimit,
     paywallEnabled,
+    setPaywallEnabled,
     subscriptionEndDate,
     loadingSubscription,
     pricing,
@@ -30,7 +32,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     paywallEnabled,
     scanCount,
     setScanCount,
-    freeTierLimit
+    freeTierLimit,
+    setFreeTierLimit // Pass setFreeTierLimit to update from server
   );
 
   return (

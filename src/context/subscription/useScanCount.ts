@@ -10,7 +10,8 @@ export const useScanCount = (
   paywallEnabled: boolean,
   scanCount: number,
   setScanCount: (count: number) => void,
-  freeTierLimit: number
+  freeTierLimit: number,
+  setFreeTierLimit?: (limit: number) => void // Add setFreeTierLimit param
 ) => {
   // Verify scan permissions with the backend and increment count if allowed
   const incrementScanCount = async (): Promise<boolean> => {
@@ -37,14 +38,24 @@ export const useScanCount = (
         setScanCount(data.scanCount);
       }
       
+      // Update freeTierLimit if provided from server and we have a setter
+      if (setFreeTierLimit && data.freeTierLimit) {
+        console.log(`Updating free tier limit from server: ${data.freeTierLimit}`);
+        setFreeTierLimit(data.freeTierLimit);
+      }
+      
       // Show message about remaining scans if available
       if (data.remainingScans !== undefined && data.paywallEnabled) {
-        showRemainingScansMessage(freeTierLimit, scanCount, true);
+        // Use the freeTierLimit from the server if available
+        const limitToUse = data.freeTierLimit || freeTierLimit;
+        showRemainingScansMessage(limitToUse, scanCount, true);
       }
       
       // If user can't scan, inform them and redirect to subscription page
       if (!data.canScan) {
-        toast.error(`You've reached your free scan limit of ${freeTierLimit}. Please subscribe to continue.`);
+        // Use the freeTierLimit from the server if available
+        const limitToUse = data.freeTierLimit || freeTierLimit;
+        toast.error(`You've reached your free scan limit of ${limitToUse}. Please subscribe to continue.`);
         return false;
       }
       
