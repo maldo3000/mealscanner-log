@@ -17,7 +17,7 @@ serve(async (req) => {
 
   try {
     // Get the request body
-    const { action, userId, adminVerified } = await req.json();
+    const { action, userId, email, adminVerified } = await req.json();
     
     // Verify that this is an authenticated request
     const authHeader = req.headers.get('Authorization');
@@ -73,6 +73,51 @@ serve(async (req) => {
         auth: { persistSession: false }
       }
     );
+
+    // New action to find user by email
+    if (action === 'find-user-by-email' && email) {
+      console.log(`Admin requested to find user with email: ${email}`);
+      
+      // Use admin auth API to find a user by email
+      const { data: { users }, error: findUserError } = await supabaseAdmin.auth.admin.listUsers({
+        filters: {
+          email: email
+        }
+      });
+      
+      if (findUserError || !users || users.length === 0) {
+        console.error('Error finding user by email:', findUserError || 'No user found');
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'User not found'
+          }), 
+          { 
+            status: 404,
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
+      
+      const user = users[0];
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          userId: user.id,
+          email: user.email
+        }), 
+        { 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
 
     if (action === 'reset-scans' && userId) {
       console.log(`Admin requested scan count reset for user: ${userId}`);

@@ -26,36 +26,45 @@ const UserManagement: React.FC = () => {
     setUserDetails(null);
 
     try {
-      // First, find the user ID from the email
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('username', email)
-        .single();
+      // First, get the user ID directly from auth.users using the edge function
+      const { data: userData, error } = await supabase.functions.invoke('manage-user-scans', {
+        body: { 
+          action: 'find-user-by-email',
+          email: email,
+          adminVerified: true
+        }
+      });
 
-      if (userError) {
+      if (error || !userData?.success) {
+        console.error('Error finding user:', error || userData?.error);
         toast.error('User not found');
         setIsLoading(false);
         return;
       }
 
-      // Get detailed user info using the edge function
-      const { data, error } = await supabase.functions.invoke('manage-user-scans', {
+      if (!userData.userId) {
+        toast.error('User not found');
+        setIsLoading(false);
+        return;
+      }
+
+      // Now get detailed user info using the found user ID
+      const { data: userDetailsData, error: detailsError } = await supabase.functions.invoke('manage-user-scans', {
         body: { 
           action: 'get-user-details',
-          userId: userData.id,
+          userId: userData.userId,
           adminVerified: true
         }
       });
 
-      if (error || !data.success) {
-        console.error('Error fetching user details:', error || data.error);
+      if (detailsError || !userDetailsData?.success) {
+        console.error('Error fetching user details:', detailsError || userDetailsData?.error);
         toast.error('Failed to fetch user details');
         setIsLoading(false);
         return;
       }
 
-      setUserDetails(data.user);
+      setUserDetails(userDetailsData.user);
     } catch (error) {
       console.error('Error searching for user:', error);
       toast.error('An error occurred while searching for the user');
