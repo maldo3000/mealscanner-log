@@ -12,13 +12,27 @@ import SubscriptionPlanCards from './components/SubscriptionPlanCards';
 import UsageProgressBar from './components/UsageProgressBar';
 
 const SubscriptionPage: React.FC = () => {
-  const { isSubscribed, scanCount, freeTierLimit, paywallEnabled, pricing, remainingScans } = useSubscription();
+  const { 
+    isSubscribed, 
+    scanCount, 
+    freeTierLimit, 
+    paywallEnabled, 
+    pricing, 
+    remainingScans,
+    refreshSubscriptionData 
+  } = useSubscription();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   // Make sure we're working with the latest pricing data by forcing a rerender when it changes
   const [pricingKey, setPricingKey] = useState(0);
+  
+  // Refresh subscription data when the subscription page is loaded
+  useEffect(() => {
+    console.log('Subscription page loaded, refreshing subscription data');
+    refreshSubscriptionData();
+  }, [refreshSubscriptionData]);
   
   useEffect(() => {
     // Update the key when pricing changes to force component to recalculate prices

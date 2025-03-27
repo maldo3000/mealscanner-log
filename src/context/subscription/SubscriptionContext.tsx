@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { SubscriptionContextType } from './types';
 import { useSubscriptionState } from './useSubscriptionState';
@@ -22,7 +22,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     loadingSubscription,
     pricing,
     remainingScans,
-    canScan
+    canScan,
+    refreshSubscriptionData
   } = useSubscriptionState();
 
   const { incrementScanCount } = useScanCount(
@@ -35,6 +36,28 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     freeTierLimit,
     setFreeTierLimit // Pass setFreeTierLimit to update from server
   );
+
+  // Refresh subscription data when profile page is loaded
+  useEffect(() => {
+    // Listen for route changes
+    const handleRouteChange = () => {
+      const path = window.location.pathname;
+      if (path === '/profile' || path === '/subscription') {
+        console.log('Profile or Subscription page detected, refreshing subscription data');
+        refreshSubscriptionData();
+      }
+    };
+
+    // Call once on first load
+    handleRouteChange();
+
+    // Add event listener for popstate (back/forward navigation)
+    window.addEventListener('popstate', handleRouteChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [refreshSubscriptionData]);
 
   return (
     <SubscriptionContext.Provider
@@ -49,7 +72,8 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         subscriptionEndDate,
         loadingSubscription,
         pricing,
-        setIsSubscribed
+        setIsSubscribed,
+        refreshSubscriptionData
       }}
     >
       {children}

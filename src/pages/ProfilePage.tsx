@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,9 +18,16 @@ const ProfilePage: React.FC = () => {
     scanCount,
     freeTierLimit,
     remainingScans,
-    paywallEnabled
+    paywallEnabled,
+    refreshSubscriptionData
   } = useSubscription();
   const navigate = useNavigate();
+
+  // Refresh subscription data when profile page is loaded
+  useEffect(() => {
+    console.log('Profile page loaded, refreshing subscription data');
+    refreshSubscriptionData();
+  }, [refreshSubscriptionData]);
 
   // Get user's initials for avatar fallback
   const getInitials = () => {

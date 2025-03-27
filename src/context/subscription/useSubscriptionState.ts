@@ -17,16 +17,22 @@ export const useSubscriptionState = () => {
   const [subscriptionEndDate, setSubscriptionEndDate] = useState<Date | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState<boolean>(true);
   const [pricing, setPricing] = useState<PricingInfo | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
   // Computed properties
   const remainingScans = Math.max(0, freeTierLimit - scanCount);
   const canScan = isSubscribed || !paywallEnabled || remainingScans > 0;
 
+  // Function to force a refresh of subscription data
+  const refreshSubscriptionData = () => {
+    setLastRefresh(Date.now());
+  };
+
   // Load app settings
   useEffect(() => {
     console.log('Loading app settings...');
     loadAppSettings(setPaywallEnabled, setFreeTierLimit, setPricing);
-  }, []);
+  }, [lastRefresh]); // Re-run when lastRefresh changes
 
   // Load user subscription data
   useEffect(() => {
@@ -48,7 +54,7 @@ export const useSubscriptionState = () => {
     };
 
     fetchSubscriptionData();
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, lastRefresh]); // Re-run when lastRefresh changes
 
   // Debug state changes
   useEffect(() => {
@@ -75,6 +81,9 @@ export const useSubscriptionState = () => {
     subscriptionEndDate,
     loadingSubscription,
     pricing,
+    
+    // Actions
+    refreshSubscriptionData,
     
     // Computed properties
     remainingScans,
