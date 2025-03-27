@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import PaywallSettings from '../paywall-settings';
+import PaywallSettings from '../PaywallSettings';
 import InviteCodeGenerator from '../InviteCodeGenerator';
 import InviteCodeList from '../InviteCodeList';
 import InviteToggle from '../InviteToggle';
