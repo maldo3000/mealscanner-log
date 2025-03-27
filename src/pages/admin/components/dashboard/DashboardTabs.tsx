@@ -6,6 +6,7 @@ import InviteCodeGenerator from '../InviteCodeGenerator';
 import InviteCodeList from '../InviteCodeList';
 import InviteToggle from '../InviteToggle';
 import UserManagement from './UserManagement';
+import { Users } from 'lucide-react';
 
 interface DashboardTabsProps {
   activeTab: string;
@@ -18,7 +19,10 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ activeTab, onTabChange })
       <TabsList className="w-full">
         <TabsTrigger value="paywall" className="flex-1">Paywall Settings</TabsTrigger>
         <TabsTrigger value="invite" className="flex-1">Invite Codes</TabsTrigger>
-        <TabsTrigger value="users" className="flex-1">User Management</TabsTrigger>
+        <TabsTrigger value="users" className="flex-1 flex items-center justify-center gap-1">
+          <Users className="h-4 w-4" />
+          <span>User Management</span>
+        </TabsTrigger>
       </TabsList>
       
       <TabsContent value="paywall" className="space-y-6">
