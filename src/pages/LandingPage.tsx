@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { useAuth } from '@/context/auth';
 import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play, DollarSign, BadgeDollarSign, CheckCheck } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+
 const LandingPage: React.FC = () => {
   const {
     isAuthenticated
@@ -14,42 +16,46 @@ const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
   if (isAuthenticated) {
     navigate('/home');
     return null;
   }
+
   const scrollToVideo = () => {
     videoSectionRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
+
   const handlePlayVideo = () => {
     setIsPlaying(true);
   };
+
   return <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
-        <div className="container max-w-5xl mx-auto flex flex-col sm:flex-row items-center">
-          <div className="flex items-center justify-between w-full mb-4 sm:mb-0">
-            <Link to="/" className="flex items-center text-lg font-semibold">
+        <div className="container max-w-5xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center">
+            <Link to="/" className="flex items-center text-lg font-semibold mb-4 sm:mb-0">
               <Zap className="mr-2 h-6 w-6 text-primary" />
               <span className="text-xl">MealScanner</span>
             </Link>
-            <div className="sm:hidden">
-              <Button asChild variant="secondary" size="sm" className="px-3 py-2">
+            <div className="sm:hidden w-full flex justify-center mb-2">
+              <Button asChild variant="secondary" size="sm" className="w-full max-w-[200px]">
+                <Link to="/auth" className="flex items-center justify-center">
+                  <span>Get Started</span>
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+            <div className="hidden sm:flex sm:ml-auto">
+              <Button asChild variant="secondary">
                 <Link to="/auth" className="flex items-center">
                   <span>Get Started</span>
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
             </div>
-          </div>
-          <div className="hidden sm:flex sm:ml-auto">
-            <Button asChild variant="secondary">
-              <Link to="/auth" className="flex items-center">
-                <span>Get Started</span>
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
           </div>
         </div>
       </header>
@@ -142,7 +148,10 @@ const LandingPage: React.FC = () => {
                   We believe nutrition tracking should be straightforward and affordable without compromising on quality.
                 </p>
                 <ul className="space-y-2">
-                  
+                  <li className="flex items-center">
+                    <BadgeDollarSign className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>No subscriptions or hidden fees</span>
+                  </li>
                   <li className="flex items-center">
                     <DollarSign className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
                     <span>Fair and transparent pricing</span>
@@ -172,4 +181,5 @@ const LandingPage: React.FC = () => {
       </footer>
     </div>;
 };
+
 export default LandingPage;
