@@ -6,6 +6,30 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useInView } from '@/hooks/useInView';
+import { cn } from '@/lib/utils';
+
+const AnimatedFAQ: React.FC<{
+  children: React.ReactNode;
+  delay?: number;
+}> = ({ children, delay = 0 }) => {
+  const [ref, isInView] = useInView({ threshold: 0.1 });
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "transition-all duration-700 ease-out",
+        isInView
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4"
+      )}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
 
 const FAQSection: React.FC = () => {
   const faqs = [
@@ -30,14 +54,16 @@ const FAQSection: React.FC = () => {
         
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`} className="border-b border-border">
-              <AccordionTrigger className="text-left font-medium py-4 hover:no-underline">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent>
-                <p className="text-muted-foreground pb-2">{faq.answer}</p>
-              </AccordionContent>
-            </AccordionItem>
+            <AnimatedFAQ key={index} delay={index * 100}>
+              <AccordionItem value={`item-${index}`} className="border-b border-border">
+                <AccordionTrigger className="text-left font-medium py-4 hover:no-underline">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-muted-foreground pb-2">{faq.answer}</p>
+                </AccordionContent>
+              </AccordionItem>
+            </AnimatedFAQ>
           ))}
         </Accordion>
       </div>
