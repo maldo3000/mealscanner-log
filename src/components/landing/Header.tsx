@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Zap, ChevronRight } from 'lucide-react';
+import { Leaf, ChevronRight } from 'lucide-react';
 
 const Header: React.FC = () => {
   return (
@@ -10,7 +10,7 @@ const Header: React.FC = () => {
       <div className="container max-w-5xl mx-auto">
         <div className="flex flex-col sm:flex-row items-center">
           <Link to="/" className="flex items-center text-lg font-semibold mb-4 sm:mb-0">
-            <Zap className="mr-2 h-6 w-6 text-primary" />
+            <Leaf className="mr-2 h-6 w-6 text-primary" />
             <span className="text-xl">MealScanner</span>
           </Link>
           <div className="sm:hidden w-full flex justify-center mb-2">
