@@ -9,6 +9,7 @@ import {
   VideoSection,
   FeaturesSection,
   WhyChooseSection,
+  FAQSection,
   Footer
 } from '@/components/landing';
 
@@ -38,6 +39,7 @@ const LandingPage: React.FC = () => {
         <VideoSection videoRef={videoSectionRef} />
         <FeaturesSection />
         <WhyChooseSection />
+        <FAQSection />
       </main>
       
       <Footer />
