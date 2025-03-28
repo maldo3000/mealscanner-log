@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,6 @@ import { useAuth } from '@/context/auth';
 import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play, DollarSign, BadgeDollarSign, CheckCheck } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-
 const LandingPage: React.FC = () => {
   const {
     isAuthenticated
@@ -16,22 +14,18 @@ const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-
   if (isAuthenticated) {
     navigate('/home');
     return null;
   }
-
   const scrollToVideo = () => {
     videoSectionRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
   const handlePlayVideo = () => {
     setIsPlaying(true);
   };
-
   return <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto">
@@ -148,10 +142,7 @@ const LandingPage: React.FC = () => {
                   We believe nutrition tracking should be straightforward and affordable without compromising on quality.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center">
-                    <BadgeDollarSign className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>No subscriptions or hidden fees</span>
-                  </li>
+                  
                   <li className="flex items-center">
                     <DollarSign className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
                     <span>Fair and transparent pricing</span>
@@ -181,5 +172,4 @@ const LandingPage: React.FC = () => {
       </footer>
     </div>;
 };
-
 export default LandingPage;
