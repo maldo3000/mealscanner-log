@@ -1,11 +1,24 @@
+
 import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth';
-import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play, DollarSign, BadgeDollarSign, CheckCheck } from 'lucide-react';
+import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play, DollarSign, BadgeDollarSign, CheckCheck, Mail } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+const betaEmailSchema = z.object({
+  email: z.string().email('Please enter a valid email address')
+});
+
 const LandingPage: React.FC = () => {
   const {
     isAuthenticated
@@ -14,18 +27,56 @@ const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const form = useForm<z.infer<typeof betaEmailSchema>>({
+    resolver: zodResolver(betaEmailSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
   if (isAuthenticated) {
     navigate('/home');
     return null;
   }
+  
   const scrollToVideo = () => {
     videoSectionRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
+  
   const handlePlayVideo = () => {
     setIsPlaying(true);
   };
+  
+  const onSubmitEmail = async (values: z.infer<typeof betaEmailSchema>) => {
+    setIsSubmitting(true);
+    try {
+      // Insert the email into the beta_testers table
+      const { error } = await supabase
+        .from('beta_testers')
+        .insert([{ email: values.email }]);
+      
+      if (error) {
+        if (error.code === '23505') { // Unique violation error code
+          toast.info('This email is already registered for beta testing. Thank you for your interest!');
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success('Thank you for your interest! We\'ll be in touch soon.');
+        form.reset();
+      }
+    } catch (error) {
+      console.error('Error submitting email:', error);
+      toast.error('Failed to submit your email. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto">
@@ -68,6 +119,50 @@ const LandingPage: React.FC = () => {
               <Button onClick={scrollToVideo} variant="outline" size={isMobile ? "default" : "lg"} className="w-full sm:w-auto">
                 Learn More
               </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-8 bg-primary/5">
+          <div className="container max-w-5xl mx-auto px-4">
+            <div className="text-center mb-6">
+              <Badge variant="outline" className="mb-2 text-primary border-primary">New</Badge>
+              <h2 className="text-2xl sm:text-3xl font-semibold">MealScanner is now in Beta!</h2>
+              <p className="text-muted-foreground mt-2 mb-4">Submit your email below if you'd like to start testing for free!</p>
+            </div>
+            
+            <div className="max-w-md mx-auto">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmitEmail)} className="flex flex-col sm:flex-row gap-3">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              placeholder="Enter your email" 
+                              className="pl-10" 
+                              {...field} 
+                              disabled={isSubmitting}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="sm:w-auto"
+                  >
+                    {isSubmitting ? "Submitting..." : "Join Beta"}
+                  </Button>
+                </form>
+              </Form>
             </div>
           </div>
         </section>
