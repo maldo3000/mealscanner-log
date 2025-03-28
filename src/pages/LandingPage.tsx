@@ -54,7 +54,7 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
       <main className="flex-grow flex flex-col">

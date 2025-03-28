@@ -101,6 +101,7 @@
     -webkit-overflow-scrolling: touch;
     -webkit-text-size-adjust: 100%;
     overscroll-behavior-y: none;
+    position: relative;
   }
 
   #root {
@@ -199,16 +200,16 @@
     height: calc(var(--vh, 1vh) * 100);
   }
   
-  .fixed {
-    position: fixed;
-    width: 100%;
-    left: 0;
-    right: 0;
+  /* Fix for Safari - disable fixed positioning for footer */
+  footer {
+    position: relative !important;
   }
-
+  
+  /* Ensure the main content area pushes the footer down */
   main {
     -webkit-overflow-scrolling: touch;
     overflow-y: auto;
+    flex: 1 0 auto;
   }
   
   body, html {

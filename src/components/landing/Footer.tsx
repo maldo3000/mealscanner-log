@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="py-6 sm:py-8 border-t border-border">
+    <footer className="py-6 sm:py-8 border-t border-border relative">
       <div className="container max-w-5xl mx-auto text-center text-muted-foreground px-4">
         <p>&copy; {new Date().getFullYear()} MealScanner. All rights reserved.</p>
         <p className="mt-2">
