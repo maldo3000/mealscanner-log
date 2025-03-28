@@ -6,6 +6,7 @@ import { useAuth } from '@/context/auth';
 import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+
 const LandingPage: React.FC = () => {
   const {
     isAuthenticated
@@ -15,19 +16,21 @@ const LandingPage: React.FC = () => {
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // If authenticated, redirect to app home
   if (isAuthenticated) {
     navigate('/home');
-    return null; // Return null to prevent rendering anything else
+    return null;
   }
+
   const scrollToVideo = () => {
     videoSectionRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
+
   const handlePlayVideo = () => {
     setIsPlaying(true);
   };
+
   return <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto flex flex-col sm:flex-row items-center">
@@ -81,7 +84,6 @@ const LandingPage: React.FC = () => {
             <div className="rounded-xl overflow-hidden border border-border bg-card/50">
               <AspectRatio ratio={16 / 9} className="w-full">
                 {isPlaying ? <iframe src="https://www.youtube.com/embed/i1TgxQ-Ql6I?autoplay=1&rel=0&modestbranding=1&showinfo=0" title="MealScanner Demo Video" className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen frameBorder="0" /> : <div className="relative w-full h-full">
-                    {/* Custom thumbnail with play button overlay */}
                     <img src="https://i.ytimg.com/vi/i1TgxQ-Ql6I/maxresdefault.jpg" alt="Video thumbnail" className="w-full h-full object-cover" />
                     <button onClick={handlePlayVideo} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                       <div className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:bg-primary/90 transition-all duration-200 hover:scale-110">
@@ -99,9 +101,9 @@ const LandingPage: React.FC = () => {
             <h2 className="text-2xl sm:text-3xl font-semibold text-center mb-6 sm:mb-8">Key Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               <div className="flex flex-col items-center text-center p-4 sm:p-6 bg-card/30 rounded-lg">
-                <HeartPulse className="h-10 w-10 text-primary mb-3" />
-                <h3 className="font-semibold text-lg mb-2">Personalized Nutrition Insights</h3>
-                <p className="text-muted-foreground">Get detailed analysis of your meals, including a health score.</p>
+                <Camera className="h-10 w-10 text-primary mb-3" />
+                <h3 className="font-semibold text-lg mb-2">AI-Powered Meal Recognition</h3>
+                <p className="text-muted-foreground">Simply snap a photo of your meal, and let our AI identify the ingredients and nutritional content.</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 sm:p-6 bg-card/30 rounded-lg">
                 <PieChart className="h-10 w-10 text-primary mb-3" />
@@ -109,9 +111,9 @@ const LandingPage: React.FC = () => {
                 <p className="text-muted-foreground">Automatically track your macronutrient intake with every meal, simplifying your diet management.</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 sm:p-6 bg-card/30 rounded-lg">
-                <Camera className="h-10 w-10 text-primary mb-3" />
-                <h3 className="font-semibold text-lg mb-2">AI-Powered Meal Recognition</h3>
-                <p className="text-muted-foreground">Simply snap a photo of your meal, and let our AI identify the ingredients and nutritional content.</p>
+                <HeartPulse className="h-10 w-10 text-primary mb-3" />
+                <h3 className="font-semibold text-lg mb-2">Personalized Nutrition Insights</h3>
+                <p className="text-muted-foreground">Get detailed analysis of your meals, including a health score.</p>
               </div>
             </div>
           </div>
@@ -176,4 +178,5 @@ const LandingPage: React.FC = () => {
       </footer>
     </div>;
 };
+
 export default LandingPage;
