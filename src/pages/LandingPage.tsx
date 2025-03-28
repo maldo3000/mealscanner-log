@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,9 +6,10 @@ import { useAuth } from '@/context/auth';
 import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-
 const LandingPage: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const {
+    isAuthenticated
+  } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const videoSectionRef = useRef<HTMLDivElement>(null);
@@ -20,17 +20,15 @@ const LandingPage: React.FC = () => {
     navigate('/home');
     return null; // Return null to prevent rendering anything else
   }
-
   const scrollToVideo = () => {
-    videoSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    videoSectionRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
   };
-
   const handlePlayVideo = () => {
     setIsPlaying(true);
   };
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
+  return <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto flex flex-col sm:flex-row items-center">
           <div className="flex items-center justify-between w-full mb-4 sm:mb-0">
@@ -81,34 +79,16 @@ const LandingPage: React.FC = () => {
         <section ref={videoSectionRef} className="py-12 md:py-16 bg-secondary/30">
           <div className="container max-w-5xl mx-auto px-4">
             <div className="rounded-xl overflow-hidden border border-border bg-card/50">
-              <AspectRatio ratio={16/9} className="w-full">
-                {isPlaying ? (
-                  <iframe 
-                    src="https://www.youtube.com/embed/i1TgxQ-Ql6I?autoplay=1&rel=0&modestbranding=1&showinfo=0" 
-                    title="MealScanner Demo Video"
-                    className="w-full h-full" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                    frameBorder="0"
-                  />
-                ) : (
-                  <div className="relative w-full h-full">
+              <AspectRatio ratio={16 / 9} className="w-full">
+                {isPlaying ? <iframe src="https://www.youtube.com/embed/i1TgxQ-Ql6I?autoplay=1&rel=0&modestbranding=1&showinfo=0" title="MealScanner Demo Video" className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen frameBorder="0" /> : <div className="relative w-full h-full">
                     {/* Custom thumbnail with play button overlay */}
-                    <img 
-                      src="https://i.ytimg.com/vi/i1TgxQ-Ql6I/maxresdefault.jpg" 
-                      alt="Video thumbnail" 
-                      className="w-full h-full object-cover"
-                    />
-                    <button 
-                      onClick={handlePlayVideo}
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
-                    >
+                    <img src="https://i.ytimg.com/vi/i1TgxQ-Ql6I/maxresdefault.jpg" alt="Video thumbnail" className="w-full h-full object-cover" />
+                    <button onClick={handlePlayVideo} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
                       <div className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:bg-primary/90 transition-all duration-200 hover:scale-110">
                         <Play className="h-10 w-10 md:h-12 md:w-12 fill-primary-foreground" />
                       </div>
                     </button>
-                  </div>
-                )}
+                  </div>}
               </AspectRatio>
             </div>
           </div>
@@ -121,7 +101,7 @@ const LandingPage: React.FC = () => {
               <div className="flex flex-col items-center text-center p-4 sm:p-6 bg-card/30 rounded-lg">
                 <HeartPulse className="h-10 w-10 text-primary mb-3" />
                 <h3 className="font-semibold text-lg mb-2">Personalized Nutrition Insights</h3>
-                <p className="text-muted-foreground">Get detailed analysis of your meals, tailored to your dietary needs and preferences.</p>
+                <p className="text-muted-foreground">Get detailed analysis of your meals, including a health score.</p>
               </div>
               <div className="flex flex-col items-center text-center p-4 sm:p-6 bg-card/30 rounded-lg">
                 <PieChart className="h-10 w-10 text-primary mb-3" />
@@ -194,8 +174,6 @@ const LandingPage: React.FC = () => {
           </p>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default LandingPage;
