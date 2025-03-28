@@ -34,7 +34,7 @@ export const useUserManagement = () => {
         return;
       }
 
-      setUsers(data.users || []);
+      setUsers(data.data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('An error occurred while fetching users');

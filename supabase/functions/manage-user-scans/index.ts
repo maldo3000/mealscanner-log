@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "./utils/cors.ts";
 import { verifyAuth } from "./utils/auth.ts";
@@ -81,7 +80,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true,
-          users: result.data
+          data: result.data
         }), 
         { 
           headers: { 

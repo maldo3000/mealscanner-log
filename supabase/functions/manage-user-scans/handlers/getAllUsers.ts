@@ -7,7 +7,7 @@ export const getAllUsers = async () => {
   const supabaseAdmin = createAdminClient();
   
   // Get all users from auth.users table using the admin API
-  const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
+  const { data, error } = await supabaseAdmin.auth.admin.listUsers();
   
   if (error) {
     console.error('Error fetching users:', error);
@@ -21,7 +21,7 @@ export const getAllUsers = async () => {
   // Process users and fetch their subscription details
   const enhancedUsers = [];
   
-  for (const user of users) {
+  for (const user of data.users) {
     // Get user subscription info for each user
     const { data: subscriptionData, error: subError } = await supabaseAdmin
       .from('user_subscriptions')
