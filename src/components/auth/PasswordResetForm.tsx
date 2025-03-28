@@ -21,12 +21,14 @@ const PasswordResetForm: React.FC<PasswordResetFormProps> = ({
   onCancel
 }) => {
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4" autoComplete="on">
       <div className="space-y-2">
         <Label htmlFor="reset-email" className="text-foreground/90">Email</Label>
         <Input
           id="reset-email"
           type="email"
+          name="email"
+          autoComplete="email"
           placeholder="your@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}

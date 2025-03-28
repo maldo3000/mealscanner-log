@@ -42,12 +42,14 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   onSubmit
 }) => {
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4" autoComplete="on">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-foreground/90">Email</Label>
+        <Label htmlFor="signup-email" className="text-foreground/90">Email</Label>
         <Input
-          id="email"
+          id="signup-email"
           type="email"
+          name="email"
+          autoComplete="email"
           placeholder="your@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -62,6 +64,8 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
           <Input
             id="inviteCode"
             type="text"
+            name="inviteCode"
+            autoComplete="off"
             placeholder="Enter your invite code"
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
@@ -75,10 +79,12 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
       )}
       
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-foreground/90">Password</Label>
+        <Label htmlFor="signup-password" className="text-foreground/90">Password</Label>
         <Input
-          id="password"
+          id="signup-password"
           type="password"
+          name="password"
+          autoComplete="new-password"
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -93,6 +99,8 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         <Input
           id="confirmPassword"
           type="password"
+          name="confirmPassword"
+          autoComplete="new-password"
           placeholder="••••••••"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}

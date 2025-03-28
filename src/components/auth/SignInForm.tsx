@@ -27,12 +27,14 @@ const SignInForm: React.FC<SignInFormProps> = ({
   disabled
 }) => {
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4" autoComplete="on">
       <div className="space-y-2">
         <Label htmlFor="email" className="text-foreground/90">Email</Label>
         <Input
           id="email"
           type="email"
+          name="email"
+          autoComplete="email"
           placeholder="your@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -55,6 +57,8 @@ const SignInForm: React.FC<SignInFormProps> = ({
         <Input
           id="password"
           type="password"
+          name="password"
+          autoComplete="current-password"
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

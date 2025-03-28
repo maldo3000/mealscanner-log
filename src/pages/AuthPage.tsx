@@ -44,7 +44,7 @@ const AuthPage: React.FC = () => {
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    return <Navigate to="/" />;
+    return <Navigate to="/home" />;
   }
 
   return (
