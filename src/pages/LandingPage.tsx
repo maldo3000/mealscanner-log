@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth';
-import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play } from 'lucide-react';
+import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play, DollarSign, BadgeDollarSign, CheckCheck } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+
 const LandingPage: React.FC = () => {
   const {
     isAuthenticated
@@ -14,18 +15,22 @@ const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
   if (isAuthenticated) {
     navigate('/home');
     return null;
   }
+
   const scrollToVideo = () => {
     videoSectionRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
+
   const handlePlayVideo = () => {
     setIsPlaying(true);
   };
+
   return <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto flex flex-col sm:flex-row items-center">
@@ -139,20 +144,24 @@ const LandingPage: React.FC = () => {
               <div className="p-4 sm:p-6 bg-card/30 rounded-lg">
                 <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Simple and Cost Effective</h3>
                 <p className="text-muted-foreground mb-4">
-                  Your data is safe with us. We prioritize your privacy and ensure that your meal information is securely stored and never shared.
+                  We believe nutrition tracking should be straightforward and affordable without compromising on quality.
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-center">
-                    <Lock className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>No </span>
+                    <BadgeDollarSign className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>No subscriptions or hidden fees</span>
                   </li>
                   <li className="flex items-center">
-                    <Lock className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>Anonymous data options</span>
+                    <DollarSign className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>Fair and transparent pricing</span>
                   </li>
                   <li className="flex items-center">
-                    <Lock className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>Full control over your data</span>
+                    <CheckCheck className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>Designed for everyday use</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                    <span>No fluff, just function</span>
                   </li>
                 </ul>
               </div>
@@ -171,4 +180,5 @@ const LandingPage: React.FC = () => {
       </footer>
     </div>;
 };
+
 export default LandingPage;
