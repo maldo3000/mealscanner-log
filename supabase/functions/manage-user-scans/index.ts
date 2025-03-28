@@ -5,6 +5,7 @@ import { verifyAuth } from "./utils/auth.ts";
 import { findUserByEmail } from "./handlers/findUserByEmail.ts";
 import { resetScans } from "./handlers/resetScans.ts";
 import { getUserDetails } from "./handlers/getUserDetails.ts";
+import { getAllUsers } from "./handlers/getAllUsers.ts";
 
 // This function manages user scan counts
 serve(async (req) => {
@@ -48,6 +49,39 @@ serve(async (req) => {
           success: true,
           userId: result.data.userId,
           email: result.data.email
+        }), 
+        { 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+
+    if (action === 'get-all-users') {
+      const result = await getAllUsers();
+      
+      if (!result.success) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: result.error 
+          }), 
+          { 
+            status: result.status || 500,
+            headers: { 
+              ...corsHeaders, 
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          users: result.data
         }), 
         { 
           headers: { 

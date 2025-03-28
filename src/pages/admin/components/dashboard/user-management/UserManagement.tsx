@@ -1,23 +1,21 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import UserSearchForm from './UserSearchForm';
-import UserDetailsPanel from './UserDetailsPanel';
+import UsersList from './UsersList';
 import ConfirmResetDialog from './ConfirmResetDialog';
 import { useUserManagement } from './useUserManagement';
 
 const UserManagement: React.FC = () => {
   const {
-    email,
-    setEmail,
-    userDetails,
+    users,
     isLoading,
     isResetting,
+    selectedUser,
     confirmDialogOpen,
     setConfirmDialogOpen,
-    searchUser,
     handleResetScans,
-    confirmResetScans
+    confirmResetScans,
+    handleSelectUser
   } = useUserManagement();
   
   return (
@@ -26,23 +24,17 @@ const UserManagement: React.FC = () => {
         <CardHeader>
           <CardTitle>User Management</CardTitle>
           <CardDescription>
-            Search for users by email and manage their scan count
+            View and manage all users in the system
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <UserSearchForm
-            email={email}
-            setEmail={setEmail}
-            searchUser={searchUser}
+          <UsersList 
+            users={users}
             isLoading={isLoading}
+            selectedUser={selectedUser}
+            onSelectUser={handleSelectUser}
+            onResetScans={handleResetScans}
           />
-
-          {userDetails && (
-            <UserDetailsPanel
-              userDetails={userDetails}
-              handleResetScans={handleResetScans}
-            />
-          )}
         </CardContent>
       </Card>
 
@@ -51,7 +43,7 @@ const UserManagement: React.FC = () => {
         onOpenChange={setConfirmDialogOpen}
         onConfirm={confirmResetScans}
         isResetting={isResetting}
-        userEmail={userDetails?.email}
+        userEmail={selectedUser?.email}
       />
     </div>
   );

@@ -1,79 +1,62 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useUserManagement = () => {
-  const [email, setEmail] = useState('');
-  const [userDetails, setUserDetails] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isResetting, setIsResetting] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   
-  const searchUser = async () => {
-    if (!email) {
-      toast.error('Please enter an email address');
-      return;
-    }
+  // Fetch users on mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
+  const fetchUsers = async () => {
     setIsLoading(true);
-    setUserDetails(null);
+    setUsers([]);
 
     try {
-      // First, get the user ID directly from auth.users using the edge function
-      const { data: userData, error } = await supabase.functions.invoke('manage-user-scans', {
+      const { data, error } = await supabase.functions.invoke('manage-user-scans', {
         body: { 
-          action: 'find-user-by-email',
-          email: email,
+          action: 'get-all-users',
           adminVerified: true
         }
       });
 
-      if (error || !userData?.success) {
-        console.error('Error finding user:', error || userData?.error);
-        toast.error('User not found');
+      if (error || !data?.success) {
+        console.error('Error fetching users:', error || data?.error);
+        toast.error('Failed to fetch users');
         setIsLoading(false);
         return;
       }
 
-      const userId = userData.userId;
-      if (!userId) {
-        toast.error('User not found');
-        setIsLoading(false);
-        return;
-      }
-
-      // Now get detailed user info using the found user ID
-      const { data: userDetailsData, error: detailsError } = await supabase.functions.invoke('manage-user-scans', {
-        body: { 
-          action: 'get-user-details',
-          userId: userId,
-          adminVerified: true
-        }
-      });
-
-      if (detailsError || !userDetailsData?.success) {
-        console.error('Error fetching user details:', detailsError || userDetailsData?.error);
-        toast.error('Failed to fetch user details');
-        setIsLoading(false);
-        return;
-      }
-
-      setUserDetails(userDetailsData.user);
+      setUsers(data.users || []);
     } catch (error) {
-      console.error('Error searching for user:', error);
-      toast.error('An error occurred while searching for the user');
+      console.error('Error fetching users:', error);
+      toast.error('An error occurred while fetching users');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSelectUser = (user: any) => {
+    setSelectedUser(user);
+  };
+
   const handleResetScans = () => {
+    if (!selectedUser) {
+      toast.error('No user selected');
+      return;
+    }
     setConfirmDialogOpen(true);
   };
 
   const confirmResetScans = async () => {
-    if (!userDetails?.user_id) {
+    if (!selectedUser?.id) {
       toast.error('No user selected');
       setConfirmDialogOpen(false);
       return;
@@ -84,7 +67,7 @@ export const useUserManagement = () => {
       const { data, error } = await supabase.functions.invoke('manage-user-scans', {
         body: { 
           action: 'reset-scans',
-          userId: userDetails.user_id,
+          userId: selectedUser.id,
           adminVerified: true
         }
       });
@@ -99,17 +82,13 @@ export const useUserManagement = () => {
 
       toast.success('Scan count reset successfully');
       
-      // Refresh user details
-      const refreshResult = await supabase.functions.invoke('manage-user-scans', {
-        body: { 
-          action: 'get-user-details',
-          userId: userDetails.user_id,
-          adminVerified: true
-        }
-      });
+      // Refresh users list
+      await fetchUsers();
       
-      if (!refreshResult.error && refreshResult.data.success) {
-        setUserDetails(refreshResult.data.user);
+      // Find and re-select the user in the updated list
+      const updatedUser = users.find(u => u.id === selectedUser.id);
+      if (updatedUser) {
+        setSelectedUser(updatedUser);
       }
     } catch (error) {
       console.error('Error resetting scan count:', error);
@@ -121,14 +100,14 @@ export const useUserManagement = () => {
   };
 
   return {
-    email,
-    setEmail,
-    userDetails,
+    users,
+    selectedUser,
     isLoading,
     isResetting,
     confirmDialogOpen,
     setConfirmDialogOpen,
-    searchUser,
+    fetchUsers,
+    handleSelectUser,
     handleResetScans,
     confirmResetScans
   };
