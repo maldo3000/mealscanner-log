@@ -142,7 +142,7 @@ const LandingPage: React.FC = () => {
                   Your data is safe with us. We prioritize your privacy and ensure that your meal information is securely stored and never shared.
                 </p>
                 <ul className="space-y-2">
-                  <li className="flex items-center">
+                  <li className="Designed for everyday use\u2014no fluff, just function">
                     <Lock className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
                     <span>No </span>
                   </li>
