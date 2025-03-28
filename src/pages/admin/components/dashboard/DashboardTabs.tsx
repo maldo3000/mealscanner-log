@@ -5,7 +5,7 @@ import PaywallSettings from '../PaywallSettings';
 import InviteCodeGenerator from '../InviteCodeGenerator';
 import InviteCodeList from '../InviteCodeList';
 import InviteToggle from '../InviteToggle';
-import UserManagement from './UserManagement';
+import UserManagement from './user-management';
 import { Users } from 'lucide-react';
 
 interface DashboardTabsProps {
