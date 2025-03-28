@@ -1,8 +1,6 @@
-
 import React, { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth';
 import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play, DollarSign, BadgeDollarSign, CheckCheck, Mail } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -126,7 +124,6 @@ const LandingPage: React.FC = () => {
         <section className="py-8 bg-primary/5">
           <div className="container max-w-5xl mx-auto px-4">
             <div className="text-center mb-6">
-              <Badge variant="outline" className="mb-2 text-primary border-primary">New</Badge>
               <h2 className="text-2xl sm:text-3xl font-semibold">MealScanner is now in Beta!</h2>
               <p className="text-muted-foreground mt-2 mb-4">Submit your email below if you'd like to start testing for free!</p>
             </div>
