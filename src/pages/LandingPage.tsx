@@ -6,7 +6,6 @@ import { useAuth } from '@/context/auth';
 import { ChevronRight, Zap, HeartPulse, PieChart, Camera, Check, Lock, Play } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-
 const LandingPage: React.FC = () => {
   const {
     isAuthenticated
@@ -15,22 +14,18 @@ const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
   const videoSectionRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-
   if (isAuthenticated) {
     navigate('/home');
     return null;
   }
-
   const scrollToVideo = () => {
     videoSectionRef.current?.scrollIntoView({
       behavior: 'smooth'
     });
   };
-
   const handlePlayVideo = () => {
     setIsPlaying(true);
   };
-
   return <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 px-4 md:px-6 py-5 border-b border-border bg-background/90 backdrop-blur-sm">
         <div className="container max-w-5xl mx-auto flex flex-col sm:flex-row items-center">
@@ -65,9 +60,7 @@ const LandingPage: React.FC = () => {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
               Snap, Analyze, <span className="text-primary">Eat Smarter</span>
             </h1>
-            <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto">
-              Effortlessly track your nutrition, discover healthier choices, and achieve your wellness goals with our AI-powered meal analysis.
-            </p>
+            <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto">Effortlessly log your meals, track your nutrition, and achieve your wellness goals with your own AI-powered meal journal.</p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Button asChild size={isMobile ? "default" : "lg"} className="w-full sm:w-auto">
                 <Link to="/auth">Start Tracking</Link>
@@ -178,5 +171,4 @@ const LandingPage: React.FC = () => {
       </footer>
     </div>;
 };
-
 export default LandingPage;
