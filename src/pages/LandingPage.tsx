@@ -84,7 +84,7 @@ const LandingPage: React.FC = () => {
               <AspectRatio ratio={16/9} className="w-full">
                 {isPlaying ? (
                   <iframe 
-                    src="https://www.youtube.com/embed/fzM_bK8l9bU?autoplay=1&rel=0&modestbranding=1&showinfo=0" 
+                    src="https://www.youtube.com/embed/i1TgxQ-Ql6I?autoplay=1&rel=0&modestbranding=1&showinfo=0" 
                     title="MealScanner Demo Video"
                     className="w-full h-full" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -95,7 +95,7 @@ const LandingPage: React.FC = () => {
                   <div className="relative w-full h-full">
                     {/* Custom thumbnail with play button overlay */}
                     <img 
-                      src="https://i.ytimg.com/vi/fzM_bK8l9bU/maxresdefault.jpg" 
+                      src="https://i.ytimg.com/vi/i1TgxQ-Ql6I/maxresdefault.jpg" 
                       alt="Video thumbnail" 
                       className="w-full h-full object-cover"
                     />
