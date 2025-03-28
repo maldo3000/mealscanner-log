@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Search, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 interface UserSearchFormProps {
   email: string;
@@ -38,10 +38,7 @@ const UserSearchForm: React.FC<UserSearchFormProps> = ({
             {isLoading ? (
               <RefreshCw className="h-4 w-4 animate-spin" />
             ) : (
-              <>
-                <Search className="h-4 w-4 mr-1" />
-                Search
-              </>
+              "Search"
             )}
           </Button>
         </div>
