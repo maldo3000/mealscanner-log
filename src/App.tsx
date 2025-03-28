@@ -16,7 +16,7 @@ import AuthPage from './pages/AuthPage';
 import Index from './pages/Index';
 import JournalPage from './pages/JournalPage';
 import MealDetailsPage from './pages/MealDetailsPage';
-import AdminPage from './pages/admin/AdminPage'; // Fix the import path
+import AdminPage from './pages/admin/AdminPage';
 import { AdminRoute } from './components/auth';
 import NotFound from './pages/NotFound';
 
