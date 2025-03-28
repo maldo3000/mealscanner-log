@@ -36,7 +36,8 @@ export const useUserManagement = () => {
         return;
       }
 
-      if (!userData.userId) {
+      const userId = userData.userId;
+      if (!userId) {
         toast.error('User not found');
         setIsLoading(false);
         return;
@@ -46,7 +47,7 @@ export const useUserManagement = () => {
       const { data: userDetailsData, error: detailsError } = await supabase.functions.invoke('manage-user-scans', {
         body: { 
           action: 'get-user-details',
-          userId: userData.userId,
+          userId: userId,
           adminVerified: true
         }
       });

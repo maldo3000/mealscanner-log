@@ -46,7 +46,8 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           success: true,
-          ...result.data
+          userId: result.data.userId,
+          email: result.data.email
         }), 
         { 
           headers: { 
