@@ -124,27 +124,27 @@ const LandingPage: React.FC = () => {
                 <ul className="space-y-2">
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>Track calories and macros effortlessly</span>
+                    <span>Effortlessly log your meals</span>
                   </li>
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>Discover nutritious alternatives</span>
+                    <span>Track your calories and your macros</span>
                   </li>
                   <li className="flex items-center">
                     <Check className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>Personalized recommendations</span>
+                    <span>Easily monitor your eating habits</span>
                   </li>
                 </ul>
               </div>
               <div className="p-4 sm:p-6 bg-card/30 rounded-lg">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Privacy and Security</h3>
+                <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Simple and Cost Effective</h3>
                 <p className="text-muted-foreground mb-4">
                   Your data is safe with us. We prioritize your privacy and ensure that your meal information is securely stored and never shared.
                 </p>
                 <ul className="space-y-2">
                   <li className="flex items-center">
                     <Lock className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                    <span>End-to-end encryption</span>
+                    <span>No </span>
                   </li>
                   <li className="flex items-center">
                     <Lock className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
