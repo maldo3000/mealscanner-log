@@ -21,7 +21,7 @@ const VideoSection: React.FC<VideoSectionProps> = ({ videoRef }) => {
           <AspectRatio ratio={16 / 9} className="w-full">
             {isPlaying ? (
               <iframe 
-                src="https://www.youtube.com/embed/7_YTq1HtHN0?autoplay=1&rel=0&modestbranding=1&showinfo=0" 
+                src="https://www.youtube.com/embed/7_YTq1HtHN0?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&color=white&iv_load_policy=3&disablekb=1&fs=0" 
                 title="MealScanner Demo Video" 
                 className="w-full h-full" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
