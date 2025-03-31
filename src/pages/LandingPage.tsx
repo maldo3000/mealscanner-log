@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth';
@@ -7,7 +6,6 @@ import { useInView } from '@/hooks/useInView';
 import {
   Header,
   Hero,
-  BetaSignup,
   VideoSection,
   FeaturesSection,
   WhyChooseSection,
@@ -60,10 +58,6 @@ const LandingPage: React.FC = () => {
       <main className="flex-grow flex flex-col">
         <FadeInSection>
           <Hero scrollToVideo={scrollToVideo} />
-        </FadeInSection>
-        
-        <FadeInSection delay={100}>
-          <BetaSignup />
         </FadeInSection>
         
         <FadeInSection delay={200}>
