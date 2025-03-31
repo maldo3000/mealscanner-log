@@ -20,14 +20,16 @@ const VideoSection: React.FC<VideoSectionProps> = ({ videoRef }) => {
         <div className="rounded-xl overflow-hidden border border-border bg-card/50">
           <AspectRatio ratio={16 / 9} className="w-full">
             {isPlaying ? (
-              <iframe 
-                src="https://www.youtube.com/embed/7_YTq1HtHN0?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&color=white&iv_load_policy=3&disablekb=1&fs=0" 
-                title="MealScanner Demo Video" 
-                className="w-full h-full" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen 
-                frameBorder="0" 
-              />
+              <div className="relative w-full h-full">
+                <iframe 
+                  src="https://www.youtube.com/embed/7_YTq1HtHN0?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&color=white&iv_load_policy=3&disablekb=1&fs=0&playsinline=1" 
+                  title="MealScanner Demo Video" 
+                  className="w-full h-full absolute inset-0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen 
+                  frameBorder="0" 
+                />
+              </div>
             ) : (
               <div className="relative w-full h-full">
                 <img 
