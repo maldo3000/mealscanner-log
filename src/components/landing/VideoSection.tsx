@@ -40,6 +40,7 @@ const VideoSection: React.FC<VideoSectionProps> = ({ videoRef }) => {
                 <button 
                   onClick={handlePlayVideo} 
                   className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+                  aria-label="Play video"
                 >
                   <div className="bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:bg-primary/90 transition-all duration-200 hover:scale-110">
                     <Play className="h-10 w-10 md:h-12 md:w-12 fill-primary-foreground" />
