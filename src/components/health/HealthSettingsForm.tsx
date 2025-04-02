@@ -382,7 +382,7 @@ const HealthSettingsForm: React.FC = () => {
               {customTargets && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <FormLabel>Daily Calorie Target</FormLabel>
+                    <label className="block text-sm font-medium">Daily Calorie Target</label>
                     <Input 
                       type="number" 
                       value={customTargets.calories} 
@@ -391,7 +391,7 @@ const HealthSettingsForm: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <FormLabel>Protein (g)</FormLabel>
+                    <label className="block text-sm font-medium">Protein (g)</label>
                     <Input 
                       type="number" 
                       value={customTargets.macros.protein} 
@@ -400,7 +400,7 @@ const HealthSettingsForm: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <FormLabel>Carbs (g)</FormLabel>
+                    <label className="block text-sm font-medium">Carbs (g)</label>
                     <Input 
                       type="number" 
                       value={customTargets.macros.carbs} 
@@ -409,7 +409,7 @@ const HealthSettingsForm: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <FormLabel>Fat (g)</FormLabel>
+                    <label className="block text-sm font-medium">Fat (g)</label>
                     <Input 
                       type="number" 
                       value={customTargets.macros.fat} 
