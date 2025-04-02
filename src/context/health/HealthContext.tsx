@@ -47,6 +47,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     try {
       // First try to load from Supabase
       if (user) {
+        // Use any() to tell TypeScript we're working with a dynamically created table
         const { data, error } = await supabase
           .from('user_health_data')
           .select('*')
@@ -55,7 +56,7 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           
         if (data && !error) {
           // Data exists in Supabase, use it
-          setHealthData(JSON.parse(data.health_data));
+          setHealthData(JSON.parse(data.health_data as string));
         } else {
           // Fall back to localStorage
           const savedData = localStorage.getItem(`health_data_${user.id}`);
