@@ -90,7 +90,7 @@ const HealthTargetsCard: React.FC = () => {
         <h2 className="text-lg sm:text-xl font-semibold">Today's Nutrition</h2>
         <Link 
           to="/journal" 
-          className="text-xs sm:text-sm text-primary hover:underline flex items-center"
+          className="text-xs sm:text-sm text-primary flex items-center"
         >
           View all meals <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1" />
         </Link>
