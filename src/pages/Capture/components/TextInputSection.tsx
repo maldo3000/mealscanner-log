@@ -29,14 +29,14 @@ const TextInputSection: React.FC<TextInputSectionProps> = ({
           </Label>
           <Textarea
             id="meal-description"
-            placeholder="Describe your meal in detail (e.g., 'I had a fistful of brown rice, a palm-sized grilled chicken breast with herbs, and a large handful of steamed broccoli with a teaspoon of olive oil')"
+            placeholder="Describe your meal"
             value={mealDescription}
             onChange={(e) => setMealDescription(e.target.value)}
             className="min-h-[150px]"
             disabled={isAnalyzing || !!analysisResult}
           />
           <p className="text-sm text-muted-foreground mt-2">
-            Be specific about portion sizes, ingredients, and preparation methods for more accurate analysis
+            Include portion sizes and ingredients for better analysis
           </p>
         </div>
         
