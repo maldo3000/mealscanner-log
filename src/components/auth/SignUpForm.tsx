@@ -44,8 +44,8 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
 }) => {
   const [captchaToken, setCaptchaToken] = useState<string | undefined>();
   
-  // Cloudflare Turnstile site key - this is visible to users so it's okay to be in the code
-  const TURNSTILE_SITE_KEY = '1x00000000000000000000AA'; // Replace with your actual site key
+  // Cloudflare Turnstile site key with the real site key
+  const TURNSTILE_SITE_KEY = '0x4AAAAAABDjdvQiOXUYlGXY';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
