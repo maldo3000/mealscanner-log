@@ -14,7 +14,7 @@ const HomePage = () => {
   
   return (
     <div className="space-y-8 animate-fade-in px-2 sm:px-4">
-      <div className="text-center py-6 sm:py-8">
+      <div className="text-center py-6 sm:py-8 glass-card rounded-xl backdrop-blur-md bg-card/50 border-border/30 shadow-sm mb-6">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">Welcome to MealScanner</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto px-2">
           Track your nutrition with AI-powered meal analysis
@@ -22,7 +22,7 @@ const HomePage = () => {
       </div>
       
       <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-        <div className="glass-card rounded-2xl p-4 sm:p-6 hover:shadow-md transition-all">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 hover:shadow-md transition-all border-border/30 backdrop-blur-md bg-card/50">
           <div className="flex items-center mb-3 sm:mb-4">
             <div className="bg-primary/10 p-2 sm:p-3 rounded-full mr-3 sm:mr-4">
               <Camera className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
@@ -40,7 +40,7 @@ const HomePage = () => {
           </Link>
         </div>
         
-        <div className="glass-card rounded-2xl p-4 sm:p-6 hover:shadow-md transition-all">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 hover:shadow-md transition-all border-border/30 backdrop-blur-md bg-card/50">
           <div className="flex items-center mb-3 sm:mb-4">
             <div className="bg-primary/10 p-2 sm:p-3 rounded-full mr-3 sm:mr-4">
               <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
@@ -61,7 +61,7 @@ const HomePage = () => {
       
       {/* Recent Meals Section */}
       <div className="mt-6 sm:mt-8">
-        <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center justify-between mb-3 sm:mb-4 px-3 py-2 glass-card rounded-lg backdrop-blur-sm bg-card/40 border-border/30">
           <div className="flex items-center">
             <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary mr-1 sm:mr-2" />
             <h2 className="text-lg sm:text-xl font-semibold">Recent Meals</h2>
@@ -85,7 +85,7 @@ const HomePage = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 sm:py-10 px-4 bg-muted/30 rounded-xl">
+          <div className="text-center py-8 sm:py-10 px-4 glass-card rounded-xl backdrop-blur-md bg-card/50 border-border/30">
             <p className="text-muted-foreground text-sm sm:text-base">No meals recorded yet</p>
             <Link 
               to="/capture" 

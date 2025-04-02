@@ -48,43 +48,53 @@ const MealDetailsPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-8 animate-fade-in">
       {/* Title section is now separate for better organization */}
-      <div className="mb-2">
+      <div className="mb-2 glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
         <h1 className="text-2xl font-bold">Meal Details</h1>
       </div>
       
-      <MealHeader 
-        isEditing={isEditing}
-        onEditToggle={() => setIsEditing(!isEditing)}
-        onSaveChanges={handleSaveChanges}
-        onDelete={handleDelete}
-      />
+      <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+        <MealHeader 
+          isEditing={isEditing}
+          onEditToggle={() => setIsEditing(!isEditing)}
+          onSaveChanges={handleSaveChanges}
+          onDelete={handleDelete}
+        />
+      </div>
       
-      <MealImage 
-        imageUrl={meal.imageUrl}
-        title={meal.title}
-        nutritionScore={meal.nutritionScore}
-      />
+      <div className="glass-card rounded-xl overflow-hidden backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+        <MealImage 
+          imageUrl={meal.imageUrl}
+          title={meal.title}
+          nutritionScore={meal.nutritionScore}
+        />
+      </div>
       
-      <MealInfo
-        title={title}
-        mealType={mealType}
-        createdAt={meal.createdAt}
-        description={meal.description}
-        isEditing={isEditing}
-        onTitleChange={setTitle}
-        onMealTypeChange={setMealType}
-      />
+      <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+        <MealInfo
+          title={title}
+          mealType={mealType}
+          createdAt={meal.createdAt}
+          description={meal.description}
+          isEditing={isEditing}
+          onTitleChange={setTitle}
+          onMealTypeChange={setMealType}
+        />
+      </div>
       
-      <NutritionSection 
-        nutrition={meal.nutrition}
-        foodItems={meal.foodItems}
-      />
+      <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+        <NutritionSection 
+          nutrition={meal.nutrition}
+          foodItems={meal.foodItems}
+        />
+      </div>
       
-      <MealNotes
-        notes={notes}
-        isEditing={isEditing}
-        onNotesChange={setNotes}
-      />
+      <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+        <MealNotes
+          notes={notes}
+          isEditing={isEditing}
+          onNotesChange={setNotes}
+        />
+      </div>
     </div>
   );
 };

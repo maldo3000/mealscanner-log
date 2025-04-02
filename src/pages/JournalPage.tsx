@@ -94,7 +94,7 @@ const JournalPage: React.FC = () => {
   
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
         <JournalHeader />
         
         <button
@@ -121,20 +121,22 @@ const JournalPage: React.FC = () => {
         />
         
         {showFilters && (
-          <FilterOptions
-            filterPeriod={filterPeriod}
-            handlePeriodChange={handlePeriodChange}
-            filterDate={filterDate}
-            handleDateChange={handleDateChange}
-            setFilterDate={setFilterDate}
-            customDateRange={customDateRange}
-            handleCustomStartDateChange={handleCustomStartDateChange}
-            handleCustomEndDateChange={handleCustomEndDateChange}
-            filterMealType={filterMealType}
-            setFilterMealType={setFilterMealType}
-            filterNutritionScore={filterNutritionScore}
-            setFilterNutritionScore={setFilterNutritionScore}
-          />
+          <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+            <FilterOptions
+              filterPeriod={filterPeriod}
+              handlePeriodChange={handlePeriodChange}
+              filterDate={filterDate}
+              handleDateChange={handleDateChange}
+              setFilterDate={setFilterDate}
+              customDateRange={customDateRange}
+              handleCustomStartDateChange={handleCustomStartDateChange}
+              handleCustomEndDateChange={handleCustomEndDateChange}
+              filterMealType={filterMealType}
+              setFilterMealType={setFilterMealType}
+              filterNutritionScore={filterNutritionScore}
+              setFilterNutritionScore={setFilterNutritionScore}
+            />
+          </div>
         )}
         
         {filteredMeals.length > 0 && !isLoading && (
@@ -146,11 +148,13 @@ const JournalPage: React.FC = () => {
           />
         )}
         
-        <MealsList
-          meals={filteredMeals}
-          areFiltersActive={areFiltersActive}
-          isLoading={isLoading}
-        />
+        <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+          <MealsList
+            meals={filteredMeals}
+            areFiltersActive={areFiltersActive}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );

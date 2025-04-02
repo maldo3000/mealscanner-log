@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/60 backdrop-blur-lg shadow-sm">
         <div className="container flex h-14 sm:h-16 items-center justify-between py-0 px-3 sm:px-4 md:px-6">
           <div className="flex items-center gap-1 sm:gap-2">
             <Link to="/home" className="flex items-center gap-1 sm:gap-2">
@@ -91,7 +91,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <DropdownMenuTrigger className="flex items-center justify-center h-8 w-8 rounded-full bg-muted/50 hover:bg-muted transition-colors">
                     <User className="h-4 w-4 text-foreground" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-48 bg-card/90 backdrop-blur-md border-border/50">
                     <DropdownMenuItem asChild>
                       <Link to="/profile" className="flex items-center cursor-pointer">
                         <User className="h-4 w-4 mr-2" />
@@ -139,7 +139,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </main>
       
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-t border-border">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border shadow-sm">
         <div className="max-w-5xl mx-auto">
           <div className="flex justify-around items-center h-14 sm:h-16">
             {navItems.map(item => (

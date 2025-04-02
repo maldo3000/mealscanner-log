@@ -43,51 +43,63 @@ const CapturePage: React.FC = () => {
   
   return (
     <div className={cn("space-y-6 animate-fade-in", isMobile && isAnalyzing ? "pt-0" : "")}>
-      <CaptureHeader
-        paywallEnabled={paywallEnabled}
-        remainingScans={remainingScans}
-        isMobile={isMobile}
-        isAnalyzing={isAnalyzing}
-      />
+      <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+        <CaptureHeader
+          paywallEnabled={paywallEnabled}
+          remainingScans={remainingScans}
+          isMobile={isMobile}
+          isAnalyzing={isAnalyzing}
+        />
+      </div>
       
-      <CaptureTabs
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        isMobile={isMobile}
-        isAnalyzing={isAnalyzing}
-        selectedFile={selectedFile}
-        previewUrl={previewUrl}
-        onPhotoSelected={handlePhotoSelected}
-        onAnalyzePhoto={handleAnalyzePhoto}
-        notes={notes}
-        setNotes={setNotes}
-        analysisResult={analysisResult}
-        mealDescription={mealDescription}
-        setMealDescription={setMealDescription}
-        onAnalyzeText={handleAnalyzeText}
-      />
+      <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+        <CaptureTabs
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isMobile={isMobile}
+          isAnalyzing={isAnalyzing}
+          selectedFile={selectedFile}
+          previewUrl={previewUrl}
+          onPhotoSelected={handlePhotoSelected}
+          onAnalyzePhoto={handleAnalyzePhoto}
+          notes={notes}
+          setNotes={setNotes}
+          analysisResult={analysisResult}
+          mealDescription={mealDescription}
+          setMealDescription={setMealDescription}
+          onAnalyzeText={handleAnalyzeText}
+        />
+      </div>
       
-      {isAnalyzing && <AnalysisInProgress />}
+      {isAnalyzing && (
+        <div className="glass-card rounded-xl p-6 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+          <AnalysisInProgress />
+        </div>
+      )}
       
       {analysisError && !isAnalyzing && !analysisResult && (
-        <AnalysisError 
-          error={analysisError} 
-          onRetry={() => activeTab === "photo" ? handleAnalyzePhoto(false) : handleAnalyzeText()} 
-        />
+        <div className="glass-card rounded-xl p-6 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+          <AnalysisError 
+            error={analysisError} 
+            onRetry={() => activeTab === "photo" ? handleAnalyzePhoto(false) : handleAnalyzeText()} 
+          />
+        </div>
       )}
       
       {analysisResult && (
-        <MealDetailsForm
-          analysisResult={analysisResult}
-          title={title}
-          setTitle={setTitle}
-          mealType={mealType}
-          setMealType={setMealType}
-          notes={notes}
-          setNotes={setNotes}
-          onReanalyze={() => activeTab === "photo" ? handleAnalyzePhoto(true) : handleAnalyzeText()}
-          onSave={handleSave}
-        />
+        <div className="glass-card rounded-xl p-6 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
+          <MealDetailsForm
+            analysisResult={analysisResult}
+            title={title}
+            setTitle={setTitle}
+            mealType={mealType}
+            setMealType={setMealType}
+            notes={notes}
+            setNotes={setNotes}
+            onReanalyze={() => activeTab === "photo" ? handleAnalyzePhoto(true) : handleAnalyzeText()}
+            onSave={handleSave}
+          />
+        </div>
       )}
     </div>
   );
