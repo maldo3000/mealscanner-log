@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { JournalHeader, MealsList, FilterBar, EmptyJournal } from "@/components/Journal";
 import { useMealJournal } from "@/context/mealJournal";
@@ -10,6 +11,7 @@ import { useSearchParams } from "react-router-dom";
 import { MealType } from "@/types";
 import { format } from 'date-fns';
 import { useExportData } from "@/hooks/use-export-data";
+import { FilterPeriod } from "@/context/mealJournal";
 
 // Journal page contains the meal journal entries and filtering options
 const JournalPage: React.FC = () => {
@@ -21,7 +23,7 @@ const JournalPage: React.FC = () => {
   const [filterDate, setFilterDate] = useState<Date | null>(null);
   const [filterMealType, setFilterMealType] = useState<MealType | null>(null);
   const [filterNutritionScore, setFilterNutritionScore] = useState<number | null>(null);
-  const [filterPeriod, setFilterPeriod] = useState<string | null>(null);
+  const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>(null);
   const [customDateRange, setCustomDateRange] = useState<{ start: Date | null; end: Date | null }>({
     start: null,
     end: null,
@@ -67,7 +69,13 @@ const JournalPage: React.FC = () => {
     
     // Apply nutrition score filter
     if (filterNutritionScore) {
-      results = results.filter(meal => meal.nutritionScore === filterNutritionScore);
+      results = results.filter(meal => {
+        // Ensure we're comparing the same types
+        const mealScore = typeof meal.nutritionScore === 'number' ? 
+          meal.nutritionScore : 
+          parseInt(meal.nutritionScore as unknown as string);
+        return mealScore === filterNutritionScore;
+      });
     }
     
     // Apply period filter
@@ -75,18 +83,18 @@ const JournalPage: React.FC = () => {
       const today = new Date();
       let startDate: Date | null = null;
       
-      if (filterPeriod === 'last7Days') {
+      if (filterPeriod === 'day') {
+        startDate = new Date(today.setDate(today.getDate() - 1));
+      } else if (filterPeriod === 'week') {
         startDate = new Date(today.setDate(today.getDate() - 7));
-      } else if (filterPeriod === 'last30Days') {
-        startDate = new Date(today.setDate(today.getDate() - 30));
-      } else if (filterPeriod === 'thisMonth') {
-        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      } else if (filterPeriod === 'custom') {
+        // Custom date range is handled separately
       }
       
       if (startDate) {
         results = results.filter(meal => {
           const mealDate = new Date(meal.timestamp);
-          return mealDate >= startDate;
+          return mealDate >= startDate!;
         });
       }
     }
@@ -166,17 +174,13 @@ const JournalPage: React.FC = () => {
         <div className="glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
           <FilterBar 
             searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            filterDate={filterDate}
-            onDateChange={setFilterDate}
-            filterMealType={filterMealType}
-            onMealTypeChange={setFilterMealType}
-            filterNutritionScore={filterNutritionScore}
-            onNutritionScoreChange={setFilterNutritionScore}
+            setSearchTerm={setSearchTerm}
+            showFilters={!!filterPeriod || !!filterDate || !!filterMealType || !!filterNutritionScore}
+            toggleFilters={() => {}}
+            areFiltersActive={hasActiveFilters()}
+            clearFilters={clearFilters}
             filterPeriod={filterPeriod}
-            onPeriodChange={setFilterPeriod}
-            customDateRange={customDateRange}
-            onCustomDateRangeChange={setCustomDateRange}
+            onQuickFilter={setFilterPeriod}
           />
         </div>
         
@@ -190,7 +194,10 @@ const JournalPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <MealsList meals={filteredMeals} />
+            <MealsList 
+              meals={filteredMeals}
+              areFiltersActive={hasActiveFilters()}
+            />
           </motion.div>
         ) : (
           <motion.div 
@@ -200,8 +207,7 @@ const JournalPage: React.FC = () => {
             className="glass-card rounded-xl p-6 backdrop-blur-md bg-card/50 border-border/30 shadow-sm"
           >
             <EmptyJournal
-              hasFilters={hasActiveFilters()}
-              onClearFilters={clearFilters}
+              areFiltersActive={hasActiveFilters()}
             />
           </motion.div>
         )}
