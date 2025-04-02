@@ -3,22 +3,18 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ActivityLevel, HealthGoal, UserHealthData } from "@/types/health";
-import UnitToggle from "./UnitToggle";
+import {
+  HeightInputSection,
+  WeightInputSection,
+  AgeInput,
+  GenderSelect,
+  ActivityLevelSelect,
+  GoalSelect,
+  SubmitButton
+} from "./form";
 
 const healthFormSchema = z.object({
   height: z.coerce.number().min(30, "Height must be at least 30cm").max(300, "Height must be less than 300cm"),
@@ -31,45 +27,11 @@ const healthFormSchema = z.object({
 
 export type HealthFormValues = z.infer<typeof healthFormSchema>;
 
-const activityLevelOptions = [
-  { value: "sedentary", label: "Sedentary (little or no exercise)" },
-  { value: "light", label: "Light (exercise 1-3 times/week)" },
-  { value: "moderate", label: "Moderate (exercise 3-5 times/week)" },
-  { value: "active", label: "Active (exercise 6-7 times/week)" },
-  { value: "very_active", label: "Very Active (intense exercise daily)" }
-];
-
-const goalOptions = [
-  { value: "weight_loss", label: "Weight Loss" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "muscle_gain", label: "Muscle Gain" }
-];
-
 interface HealthInformationFormProps {
   healthData: UserHealthData;
   onSubmit: (values: HealthFormValues) => Promise<void>;
   isCalculating: boolean;
 }
-
-const activityLevelDescription = (level: ActivityLevel) => {
-  switch (level) {
-    case "sedentary": return "Little or no exercise";
-    case "light": return "Light exercise 1-3 times/week";
-    case "moderate": return "Moderate exercise 3-5 times/week";
-    case "active": return "Daily or intense exercise 6-7 times/week";
-    case "very_active": return "Very intense exercise daily or physical job";
-    default: return "";
-  }
-};
-
-const goalDescription = (goal: HealthGoal) => {
-  switch (goal) {
-    case "weight_loss": return "Calorie deficit for gradual weight loss";
-    case "maintenance": return "Balanced intake to maintain current weight";
-    case "muscle_gain": return "Calorie surplus to support muscle growth";
-    default: return "";
-  }
-};
 
 const HealthInformationForm: React.FC<HealthInformationFormProps> = ({ 
   healthData, 
@@ -186,205 +148,33 @@ const HealthInformationForm: React.FC<HealthInformationFormProps> = ({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <FormLabel className="text-base">Height</FormLabel>
-                <UnitToggle 
-                  metricUnit="cm" 
-                  imperialUnit="ft/in" 
-                  value={heightUnit} 
-                  onChange={handleHeightUnitChange}
-                  className="w-40"
-                />
-              </div>
-              
-              {heightUnit === "metric" ? (
-                <FormField
-                  control={form.control}
-                  name="height"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input placeholder="175" type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <FormLabel>Feet</FormLabel>
-                    <Input 
-                      type="number" 
-                      value={feet} 
-                      onChange={handleFeetChange}
-                      min={0}
-                      max={8}
-                    />
-                  </div>
-                  <div>
-                    <FormLabel>Inches</FormLabel>
-                    <Input 
-                      type="number" 
-                      value={inches} 
-                      onChange={handleInchesChange}
-                      min={0}
-                      max={11}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <FormLabel className="text-base">Weight</FormLabel>
-                <UnitToggle 
-                  metricUnit="kg" 
-                  imperialUnit="lbs" 
-                  value={weightUnit} 
-                  onChange={handleWeightUnitChange}
-                  className="w-40"
-                />
-              </div>
-              
-              {weightUnit === "metric" ? (
-                <FormField
-                  control={form.control}
-                  name="weight"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input placeholder="70" type="number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ) : (
-                <div>
-                  <Input 
-                    type="number" 
-                    value={pounds} 
-                    onChange={handlePoundsChange}
-                    min={0}
-                    max={1000}
-                  />
-                </div>
-              )}
-            </div>
-
-            <FormField
-              control={form.control}
-              name="age"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Age</FormLabel>
-                  <FormControl>
-                    <Input placeholder="30" type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-              
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gender</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <HeightInputSection 
+              form={form}
+              heightUnit={heightUnit}
+              feet={feet}
+              inches={inches}
+              handleHeightUnitChange={handleHeightUnitChange}
+              handleFeetChange={handleFeetChange}
+              handleInchesChange={handleInchesChange}
             />
 
-            <FormField
-              control={form.control}
-              name="activityLevel"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Activity Level</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      {activityLevelOptions.map((option) => (
-                        <FormItem 
-                          key={option.value} 
-                          className="flex items-center space-x-3 space-y-0 rounded-md border p-3"
-                        >
-                          <FormControl>
-                            <RadioGroupItem value={option.value} />
-                          </FormControl>
-                          <div className="space-y-0.5">
-                            <FormLabel className="font-medium">{option.label}</FormLabel>
-                            <FormDescription className="text-xs">
-                              {activityLevelDescription(option.value as ActivityLevel)}
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <WeightInputSection 
+              form={form}
+              weightUnit={weightUnit}
+              pounds={pounds}
+              handleWeightUnitChange={handleWeightUnitChange}
+              handlePoundsChange={handlePoundsChange}
             />
 
-            <FormField
-              control={form.control}
-              name="goal"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Goal</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      {goalOptions.map((option) => (
-                        <FormItem 
-                          key={option.value} 
-                          className="flex items-center space-x-3 space-y-0 rounded-md border p-3"
-                        >
-                          <FormControl>
-                            <RadioGroupItem value={option.value} />
-                          </FormControl>
-                          <div className="space-y-0.5">
-                            <FormLabel className="font-medium">{option.label}</FormLabel>
-                            <FormDescription className="text-xs">
-                              {goalDescription(option.value as HealthGoal)}
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <AgeInput form={form} />
+            
+            <GenderSelect form={form} />
+            
+            <ActivityLevelSelect form={form} />
+            
+            <GoalSelect form={form} />
 
-            <Button type="submit" disabled={isCalculating}>
-              {isCalculating ? "Calculating..." : "Calculate Recommendations"}
-            </Button>
+            <SubmitButton isCalculating={isCalculating} />
           </form>
         </Form>
       </CardContent>
