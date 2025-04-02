@@ -33,10 +33,12 @@ const EmailConfirmedPage: React.FC = () => {
     }
   }, [countdown, navigate, error]);
 
+  console.log("EmailConfirmedPage rendering, error:", error, "countdown:", countdown);
+
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-background">
-      <Card className="w-full max-w-md shadow-lg border-border">
-        <CardHeader className="pb-2 text-center">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center">
           {error ? (
             <h2 className="text-2xl font-bold text-destructive">Confirmation Error</h2>
           ) : (
@@ -47,7 +49,7 @@ const EmailConfirmedPage: React.FC = () => {
           )}
         </CardHeader>
 
-        <CardContent className="pt-4 text-center">
+        <CardContent className="text-center">
           {error ? (
             <div className="space-y-2">
               <p className="text-destructive">There was an error confirming your email:</p>
