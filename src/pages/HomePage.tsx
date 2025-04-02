@@ -6,9 +6,12 @@ import { useMealJournal } from "@/context/mealJournal";
 import MealCard from "@/components/MealCard";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import BackgroundGradient from "@/components/ui/background-gradient";
+import { GoalCard, HealthTargetsCard } from "@/components/health";
+import { useHealth } from "@/context/health";
 
 const HomePage = () => {
   const { meals, isLoading } = useMealJournal();
+  const { isHealthDataSet } = useHealth();
   
   // Get the 2 most recent meals
   const recentMeals = meals.slice(0, 2);
@@ -24,7 +27,12 @@ const HomePage = () => {
           </p>
         </div>
         
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+        {/* Health Targets Card (shown if user has already set their goals) */}
+        {isHealthDataSet && (
+          <HealthTargetsCard />
+        )}
+        
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
           <div className="glass-card rounded-2xl p-4 sm:p-6 hover:shadow-md transition-all border-border/30 backdrop-blur-md bg-card/50">
             <div className="flex items-center mb-3 sm:mb-4">
               <div className="bg-primary/10 p-2 sm:p-3 rounded-full mr-3 sm:mr-4">
@@ -60,6 +68,9 @@ const HomePage = () => {
               See your meals <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
           </div>
+          
+          {/* Set Your Goal Card */}
+          <GoalCard />
         </div>
         
         {/* Recent Meals Section */}

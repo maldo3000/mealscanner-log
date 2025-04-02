@@ -1,12 +1,13 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { CreditCard, CheckCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/auth';
 import { useSubscription } from '@/context/subscription';
+import { HealthSettingsForm } from '@/components/health';
 
 const ProfilePage: React.FC = () => {
   const {
@@ -22,12 +23,21 @@ const ProfilePage: React.FC = () => {
     refreshSubscriptionData
   } = useSubscription();
   const navigate = useNavigate();
+  const location = useLocation();
+  const healthSectionRef = useRef<HTMLDivElement>(null);
 
   // Refresh subscription data when profile page is loaded
   useEffect(() => {
     console.log('Profile page loaded, refreshing subscription data');
     refreshSubscriptionData();
   }, [refreshSubscriptionData]);
+
+  // Scroll to health section if URL hash is #health
+  useEffect(() => {
+    if (location.hash === '#health' && healthSectionRef.current) {
+      healthSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [location.hash]);
 
   // Get user's initials for avatar fallback
   const getInitials = () => {
@@ -40,7 +50,7 @@ const ProfilePage: React.FC = () => {
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6 text-center">Your Profile</h1>
       
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 mb-10">
         <Card>
           <CardHeader className="flex flex-col items-center text-center">
             <Avatar className="h-20 w-20 mb-4">
@@ -120,6 +130,11 @@ const ProfilePage: React.FC = () => {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Health Settings Section */}
+      <div ref={healthSectionRef} className="mt-10">
+        <HealthSettingsForm />
       </div>
     </div>
   );
