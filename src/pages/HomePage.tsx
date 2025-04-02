@@ -13,7 +13,15 @@ const HomePage = () => {
   const recentMeals = meals.slice(0, 2);
   
   return (
-    <div className="space-y-8 animate-fade-in px-2 sm:px-4">
+    <div className="space-y-8 animate-fade-in px-2 sm:px-4 relative">
+      {/* Gradient overlays for background effect */}
+      <div className="absolute inset-0 bg-gradient-radial from-primary/5 to-transparent opacity-70 -z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 -z-10"></div>
+      
+      {/* Decorative circles */}
+      <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl -z-10"></div>
+      <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl -z-10"></div>
+      
       <div className="text-center py-6 sm:py-8 glass-card rounded-xl backdrop-blur-md bg-card/50 border-border/30 shadow-sm mb-6">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">Welcome to MealScanner</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto px-2">

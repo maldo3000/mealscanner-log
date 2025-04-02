@@ -46,7 +46,15 @@ const MealDetailsPage: React.FC = () => {
   };
   
   return (
-    <div className="space-y-6 pb-8 animate-fade-in">
+    <div className="space-y-6 pb-8 animate-fade-in relative">
+      {/* Gradient overlays for background effect */}
+      <div className="absolute inset-0 bg-gradient-radial from-primary/5 to-transparent opacity-70 -z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 -z-10"></div>
+      
+      {/* Decorative circles */}
+      <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl -z-10"></div>
+      <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl -z-10"></div>
+      
       {/* Title section is now separate for better organization */}
       <div className="mb-2 glass-card rounded-xl p-4 backdrop-blur-md bg-card/50 border-border/30 shadow-sm">
         <h1 className="text-2xl font-bold">Meal Details</h1>
