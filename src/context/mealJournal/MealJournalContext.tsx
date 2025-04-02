@@ -9,6 +9,9 @@ import { MealEntry, MealType, NutritionScore } from '@/types';
 
 const MealJournalContext = createContext<MealJournalContextType | undefined>(undefined);
 
+// Maximum number of meals to store in localStorage
+const MAX_LOCAL_MEALS = 30;
+
 export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [meals, setMeals] = useState<MealEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +60,41 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     if (!isAuthenticated && meals.length > 0 && isInitialized) {
       console.log('Saving meals to localStorage');
-      localStorage.setItem('mealJournal', JSON.stringify(meals));
+      
+      try {
+        // Limit the number of meals saved to localStorage to prevent quota errors
+        const mealsToSave = meals.slice(0, MAX_LOCAL_MEALS);
+        
+        // Remove large image data from meals before saving
+        const trimmedMeals = mealsToSave.map(meal => {
+          if (meal.imageUrl && meal.imageUrl.length > 1000) {
+            // If image is a data URL, store a placeholder instead
+            if (meal.imageUrl.startsWith('data:')) {
+              return { ...meal, imageUrl: 'placeholder' };
+            }
+          }
+          return meal;
+        });
+        
+        localStorage.setItem('mealJournal', JSON.stringify(trimmedMeals));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+          toast.error('Storage limit reached. Some meal data couldn't be saved locally.');
+          
+          // Try saving with even fewer meals if quota is still exceeded
+          try {
+            const fewerMeals = meals.slice(0, 10).map(meal => ({
+              ...meal,
+              imageUrl: 'placeholder',
+              description: meal.description.slice(0, 100) // Truncate descriptions
+            }));
+            localStorage.setItem('mealJournal', JSON.stringify(fewerMeals));
+          } catch (innerError) {
+            console.error('Still unable to save to localStorage:', innerError);
+          }
+        }
+      }
     }
   }, [meals, isAuthenticated, isInitialized]);
 
