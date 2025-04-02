@@ -1,3 +1,26 @@
 
 project_id = "ltwsevcmuddlefroaxff"
-branch = "dev"
+
+[functions.analyze-meal]
+verify_jwt = true
+
+[functions.invite-code]
+verify_jwt = true
+
+[functions.invalidate-settings-cache]
+verify_jwt = true
+
+[functions.manage-user-scans]
+verify_jwt = true
+
+[functions.stripe-payment]
+verify_jwt = true
+
+[functions.toggle-invite]
+verify_jwt = true
+
+[functions.toggle-paywall]
+verify_jwt = true
+
+[functions.verify-scan-limit]
+verify_jwt = true
