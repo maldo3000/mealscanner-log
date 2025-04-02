@@ -25,7 +25,7 @@ interface UseAuthFormResult {
   setInviteCode: (inviteCode: string) => void;
   setAcceptedTerms: (accepted: boolean) => void;
   toggleAuthMode: () => void;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
+  handleSubmit: (e: React.FormEvent, captchaToken?: string) => Promise<void>;
   handlePasswordReset: (e: React.FormEvent) => Promise<void>;
   showPasswordResetForm: () => void;
   hidePasswordResetForm: () => void;
@@ -135,7 +135,7 @@ export const useAuthForm = (): UseAuthFormResult => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, captchaToken?: string) => {
     e.preventDefault();
     setAuthError(null);
     setInviteCodeError(null);
@@ -151,12 +151,17 @@ export const useAuthForm = (): UseAuthFormResult => {
         return;
       }
 
+      if (!captchaToken) {
+        toast.error('Please verify that you are human');
+        return;
+      }
+
       if (inviteRequired) {
         const isValid = await validateInviteCode();
         if (!isValid) return;
       }
       
-      const result = await signUp(email, password, inviteCode);
+      const result = await signUp(email, password, inviteCode, captchaToken);
       if (result.error) {
         if (result.userExists) {
           setAuthError('An account with this email already exists. Sign in or reset your password.');

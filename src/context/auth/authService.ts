@@ -43,6 +43,7 @@ export const authService = {
     email: string, 
     password: string, 
     inviteCode: string = '',
+    captchaToken: string = '',
     navigate: NavigateFunction, 
     setLoading: (loading: boolean) => void
   ) => {
@@ -79,8 +80,18 @@ export const authService = {
         return { error: new Error('Invite code is required to register') };
       }
       
-      // Proceed with sign up
-      const { error, data } = await supabase.auth.signUp({ email, password });
+      // Proceed with sign up, including captcha token
+      const signUpOptions = captchaToken 
+        ? { 
+            email, 
+            password, 
+            options: { 
+              captchaToken 
+            } 
+          } 
+        : { email, password };
+      
+      const { error, data } = await supabase.auth.signUp(signUpOptions);
       
       if (error) {
         // Check if the error is due to the user already existing

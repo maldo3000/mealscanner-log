@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import TurnstileWidget from './TurnstileWidget';
 
 interface SignUpFormProps {
   email: string;
@@ -21,7 +22,7 @@ interface SignUpFormProps {
   loading: boolean;
   inviteCodeError: string | null;
   inviteRequired: boolean;
-  onSubmit: (e: React.FormEvent) => Promise<void>;
+  onSubmit: (e: React.FormEvent, captchaToken?: string) => Promise<void>;
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({
@@ -41,8 +42,22 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   inviteRequired,
   onSubmit
 }) => {
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>();
+  
+  // Cloudflare Turnstile site key - this is visible to users so it's okay to be in the code
+  const TURNSTILE_SITE_KEY = '1x00000000000000000000AA'; // Replace with your actual site key
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(e, captchaToken);
+  };
+
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+  
   return (
-    <form onSubmit={onSubmit} className="space-y-4" autoComplete="on">
+    <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
       <div className="space-y-2">
         <Label htmlFor="signup-email" className="text-foreground/90">Email</Label>
         <Input
@@ -113,6 +128,12 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         )}
       </div>
       
+      {/* Turnstile captcha widget */}
+      <TurnstileWidget 
+        siteKey={TURNSTILE_SITE_KEY} 
+        onVerify={handleCaptchaVerify} 
+      />
+      
       <div className="flex items-center space-x-2 mt-4">
         <Checkbox 
           id="terms" 
@@ -128,7 +149,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
       <Button 
         type="submit" 
         className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-        disabled={loading || !passwordsMatch || !acceptedTerms || (inviteRequired && !inviteCode)}
+        disabled={loading || !passwordsMatch || !acceptedTerms || (inviteRequired && !inviteCode) || !captchaToken}
       >
         {loading ? (
           <LoadingSpinner size="small" className="mr-2" />
