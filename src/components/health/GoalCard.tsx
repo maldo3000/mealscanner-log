@@ -25,7 +25,7 @@ const GoalCard: React.FC = () => {
       </p>
       <Link 
         to="/profile#health" 
-        className="flex items-center text-primary hover:underline text-sm sm:text-base"
+        className="flex items-center text-primary text-sm sm:text-base"
       >
         {isHealthDataSet ? "Update goals" : "Get started"} <ChevronRight className="h-4 w-4 ml-1" />
       </Link>

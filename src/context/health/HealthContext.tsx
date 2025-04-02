@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserHealthData, ActivityLevel, HealthGoal, MacroTarget } from '@/types/health';
 import { useAuth } from '@/context/auth';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HealthContextType {
   healthData: UserHealthData;
@@ -44,11 +45,28 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const loadHealthData = async () => {
     setIsLoading(true);
     try {
-      // Mock data loading for now - in a real app, this would fetch from a database
-      // When integrating with Supabase, replace this with actual data fetching
-      const savedData = localStorage.getItem(`health_data_${user?.id}`);
-      if (savedData) {
-        setHealthData(JSON.parse(savedData));
+      // First try to load from Supabase
+      if (user) {
+        const { data, error } = await supabase
+          .from('user_health_data')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (data && !error) {
+          // Data exists in Supabase, use it
+          setHealthData(JSON.parse(data.health_data));
+        } else {
+          // Fall back to localStorage
+          const savedData = localStorage.getItem(`health_data_${user.id}`);
+          if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            setHealthData(parsedData);
+            
+            // Also save to Supabase for future use
+            await saveToSupabase(parsedData);
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to load health data:', error);
@@ -58,15 +76,40 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
+  const saveToSupabase = async (data: UserHealthData) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_health_data')
+        .upsert(
+          { 
+            user_id: user.id, 
+            health_data: JSON.stringify(data),
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: 'user_id' }
+        );
+        
+      if (error) throw error;
+    } catch (error) {
+      console.error('Failed to save health data to Supabase:', error);
+      // Don't show toast here as it's a background operation
+    }
+  };
+
   const updateHealthData = async (data: Partial<UserHealthData>) => {
     try {
       const updatedData = { ...healthData, ...data };
       setHealthData(updatedData);
       
-      // Mock data saving - replace with database call when integrating with Supabase
+      // Save to localStorage
       if (user) {
         localStorage.setItem(`health_data_${user.id}`, JSON.stringify(updatedData));
       }
+      
+      // Save to Supabase
+      await saveToSupabase(updatedData);
       
       toast.success('Health data updated successfully');
     } catch (error) {
@@ -174,10 +217,13 @@ export const HealthProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       
       setHealthData(updatedData);
       
-      // Mock data saving - replace with database call when integrating with Supabase
+      // Save to localStorage
       if (user) {
         localStorage.setItem(`health_data_${user.id}`, JSON.stringify(updatedData));
       }
+      
+      // Save to Supabase
+      await saveToSupabase(updatedData);
       
       toast.success('Nutrition targets saved successfully');
     } catch (error) {
