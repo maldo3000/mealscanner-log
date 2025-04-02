@@ -34,16 +34,8 @@ const EmailConfirmedPage: React.FC = () => {
   }, [countdown, navigate, error]);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-background relative overflow-hidden">
-      {/* Gradient overlays for background effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-primary/5 to-transparent opacity-70"></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10"></div>
-      
-      {/* Decorative circles */}
-      <div className="absolute top-1/4 -left-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
-      <div className="absolute bottom-1/4 -right-24 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
-      
-      <Card className="w-full max-w-md glass-card border-border/30 backdrop-blur-md bg-card/60 animate-fade-in">
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-background">
+      <Card className="w-full max-w-md shadow-lg border-border">
         <CardHeader className="pb-2 text-center">
           {error ? (
             <h2 className="text-2xl font-bold text-destructive">Confirmation Error</h2>
