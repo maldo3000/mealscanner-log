@@ -80,7 +80,7 @@ export const MealJournalProvider: React.FC<{ children: React.ReactNode }> = ({ c
       } catch (error) {
         console.error('Error saving to localStorage:', error);
         if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-          toast.error('Storage limit reached. Some meal data couldn't be saved locally.');
+          toast.error("Storage limit reached. Some meal data couldn't be saved locally.");
           
           // Try saving with even fewer meals if quota is still exceeded
           try {
