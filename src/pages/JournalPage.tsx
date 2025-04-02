@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { JournalHeader, MealsList, FilterBar, EmptyJournal } from "@/components/Journal";
 import { useMealJournal } from "@/context/mealJournal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import BackgroundGradient from "@/components/ui/background-gradient";
 import { useSearchParams } from "react-router-dom";
@@ -189,27 +187,18 @@ const JournalPage: React.FC = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredMeals.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+          <div className="animate-fade-in">
             <MealsList 
               meals={filteredMeals}
               areFiltersActive={hasActiveFilters()}
             />
-          </motion.div>
+          </div>
         ) : (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="glass-card rounded-xl p-6 backdrop-blur-md bg-card/50 border-border/30 shadow-sm"
-          >
+          <div className="glass-card rounded-xl p-6 backdrop-blur-md bg-card/50 border-border/30 shadow-sm animate-fade-in">
             <EmptyJournal
               areFiltersActive={hasActiveFilters()}
             />
-          </motion.div>
+          </div>
         )}
       </div>
     </>

@@ -7,7 +7,6 @@ import { MealJournalProvider } from './context/mealJournal';
 import ProfilePage from './pages/ProfilePage';
 import HomePage from './pages/HomePage';
 import Capture from './pages/Capture';
-import { ThemeProvider } from "@/components/ui/theme-provider"
 import SubscriptionPage, { SubscriptionSuccess } from './pages/Subscription';
 import Layout from './components/layout/Layout';
 import { Toaster } from 'sonner';
@@ -19,6 +18,7 @@ import MealDetailsPage from './pages/MealDetailsPage';
 import AdminPage from './pages/admin/AdminPage';
 import { AdminRoute } from './components/auth';
 import NotFound from './pages/NotFound';
+import { ThemeProvider } from './components/theme-provider';
 
 function App() {
   return (
