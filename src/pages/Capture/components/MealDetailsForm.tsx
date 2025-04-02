@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { MealType, MealAnalysisResponse } from "@/types";
 import { formatDate, formatTime, getMealTypeOptions } from "@/utils/helpers";
 import { CalendarDays, Clock, RefreshCw } from "lucide-react";
@@ -31,6 +31,27 @@ const MealDetailsForm: React.FC<MealDetailsFormProps> = ({
 }) => {
   const mealTypeOptions = getMealTypeOptions();
   const now = new Date();
+  
+  // Automatically include the health reason in the notes if available
+  useEffect(() => {
+    if (analysisResult.healthReason && notes.indexOf(analysisResult.healthReason) === -1) {
+      const healthScoreNote = `Health Score (${analysisResult.nutritionScore}): ${analysisResult.healthReason}`;
+      
+      if (notes.trim() === '') {
+        setNotes(healthScoreNote);
+      } else {
+        // Check if notes already has health score information
+        if (notes.includes('Health Score (')) {
+          // Replace existing health score note with new one
+          const updatedNotes = notes.replace(/Health Score \([^)]+\): [^\n]+/g, healthScoreNote);
+          setNotes(updatedNotes);
+        } else {
+          // Add health score note at the beginning followed by existing notes
+          setNotes(`${healthScoreNote}\n\n${notes}`);
+        }
+      }
+    }
+  }, [analysisResult.healthReason, analysisResult.nutritionScore, notes, setNotes]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -110,6 +131,7 @@ const MealDetailsForm: React.FC<MealDetailsFormProps> = ({
       <MealNutritionInfo 
         nutrition={analysisResult.nutrition} 
         nutritionScore={analysisResult.nutritionScore} 
+        healthReason={analysisResult.healthReason}
       />
       
       <div className="flex justify-center mt-8">

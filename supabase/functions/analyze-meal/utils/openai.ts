@@ -11,6 +11,7 @@ export const createSystemPrompt = (requestType: string, notes?: string) => {
    - "fat": Fat in grams
    - "carbs": Carbohydrates in grams
 5. "nutritionScore": Overall healthiness rating (one of: "very healthy", "healthy", "moderate", "unhealthy", "not healthy")
+6. "healthReason": A one-sentence explanation of why the nutritionScore was given
 
 Your analysis must be accurate to ${requestType === 'photo' ? 'what is visible in the image' : 'the information provided in the description'}. Provide your best estimate for nutrition values.
 Your response MUST be valid JSON without any extra text, markdown, or explanations.`;
@@ -119,7 +120,7 @@ export const parseOpenAIResponse = (content: string) => {
 
 // Validate the analysis result has required fields
 export const validateAnalysisResult = (analysisResult: any) => {
-  const requiredFields = ['title', 'description', 'foodItems', 'nutrition', 'nutritionScore'];
+  const requiredFields = ['title', 'description', 'foodItems', 'nutrition', 'nutritionScore', 'healthReason'];
   const missingFields = requiredFields.filter(field => !analysisResult[field]);
   
   if (missingFields.length > 0) {

@@ -5,9 +5,14 @@ import { NutritionInfo, NutritionScore } from "@/types";
 interface MealNutritionInfoProps {
   nutrition: NutritionInfo;
   nutritionScore: NutritionScore;
+  healthReason?: string;
 }
 
-const MealNutritionInfo: React.FC<MealNutritionInfoProps> = ({ nutrition, nutritionScore }) => {
+const MealNutritionInfo: React.FC<MealNutritionInfoProps> = ({ 
+  nutrition, 
+  nutritionScore,
+  healthReason 
+}) => {
   return (
     <div className="glass-card rounded-2xl p-6">
       <h3 className="text-lg font-medium mb-2">Nutrition Information</h3>
@@ -35,6 +40,9 @@ const MealNutritionInfo: React.FC<MealNutritionInfoProps> = ({ nutrition, nutrit
         <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full font-medium capitalize">
           {nutritionScore}
         </span>
+        {healthReason && (
+          <p className="mt-2 text-sm text-muted-foreground">{healthReason}</p>
+        )}
       </div>
     </div>
   );
