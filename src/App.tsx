@@ -13,6 +13,7 @@ import Layout from './components/layout/Layout';
 import { Toaster } from 'sonner';
 import LandingPage from './pages/LandingPage';
 import AuthPage from './pages/AuthPage';
+import EmailConfirmedPage from './pages/EmailConfirmedPage';
 import Index from './pages/Index';
 import JournalPage from './pages/JournalPage';
 import MealDetailsPage from './pages/MealDetailsPage';
@@ -33,6 +34,7 @@ function App() {
                   {/* Public routes outside the Layout */}
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/email-confirmed" element={<EmailConfirmedPage />} />
                   
                   {/* Authenticated routes with Layout */}
                   <Route path="/home" element={<Layout><HomePage /></Layout>} />
