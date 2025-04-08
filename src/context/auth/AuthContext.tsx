@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,20 +14,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
-  // Function to check if the current user has admin role
   const checkUserRole = async () => {
     await authService.checkUserRole(user, setIsAdmin);
   };
 
   useEffect(() => {
-    // Check for active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       console.log("Auth state changed:", _event);
       setSession(session);
@@ -39,7 +35,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  // Check admin role whenever the user changes
   useEffect(() => {
     if (user) {
       console.log("User changed, checking role for:", user.email);
@@ -49,8 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
-  const signIn = async (email: string, password: string) => {
-    return authService.signIn(email, password, navigate, setLoading);
+  const signIn = async (email: string, password: string, captchaToken: string = '') => {
+    return authService.signIn(email, password, captchaToken, navigate, setLoading);
   };
 
   const signUp = async (email: string, password: string, inviteCode: string = '', captchaToken: string = '') => {

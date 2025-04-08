@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth';
 import { useSearchParams } from 'react-router-dom';
@@ -176,7 +177,12 @@ export const useAuthForm = (): UseAuthFormResult => {
         return;
       }
       
-      const result = await signIn(email, password);
+      if (!captchaToken) {
+        toast.error('Please verify that you are human');
+        return;
+      }
+      
+      const result = await signIn(email, password, captchaToken);
       if (result.error) {
         setLoginAttempts(prev => prev + 1);
         if (result.error.message === 'Invalid login credentials') {

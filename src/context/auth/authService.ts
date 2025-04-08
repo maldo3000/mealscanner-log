@@ -7,12 +7,24 @@ export const authService = {
   signIn: async (
     email: string, 
     password: string, 
+    captchaToken: string = '',
     navigate: NavigateFunction, 
     setLoading: (loading: boolean) => void
   ) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      const signInOptions = captchaToken 
+        ? { 
+            email, 
+            password, 
+            options: { 
+              captchaToken 
+            } 
+          } 
+        : { email, password };
+      
+      const { error } = await supabase.auth.signInWithPassword(signInOptions);
       
       if (error) {
         throw error;
@@ -29,6 +41,8 @@ export const authService = {
         errorMessage = 'Incorrect email or password';
       } else if (error.message?.includes('rate limit')) {
         errorMessage = 'Too many login attempts. Please try again later.';
+      } else if (error.message?.includes('captcha verification')) {
+        errorMessage = 'Captcha verification failed. Please try again.';
       }
       
       toast.error(errorMessage);

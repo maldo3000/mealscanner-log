@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import TurnstileWidget from './TurnstileWidget';
 
 interface SignInFormProps {
   email: string;
@@ -11,7 +12,7 @@ interface SignInFormProps {
   password: string;
   setPassword: (password: string) => void;
   loading: boolean;
-  onSubmit: (e: React.FormEvent) => Promise<void>;
+  onSubmit: (e: React.FormEvent, captchaToken?: string) => Promise<void>;
   onForgotPassword: () => void;
   disabled: boolean;
 }
@@ -26,8 +27,22 @@ const SignInForm: React.FC<SignInFormProps> = ({
   onForgotPassword,
   disabled
 }) => {
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>();
+  
+  // Cloudflare Turnstile site key
+  const TURNSTILE_SITE_KEY = '0x4AAAAAABDjdvQiOXUYlGXY';
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(e, captchaToken);
+  };
+
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="space-y-4" autoComplete="on">
+    <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
       <div className="space-y-2">
         <Label htmlFor="email" className="text-foreground/90">Email</Label>
         <Input
@@ -68,10 +83,16 @@ const SignInForm: React.FC<SignInFormProps> = ({
         />
       </div>
       
+      {/* Turnstile captcha widget */}
+      <TurnstileWidget 
+        siteKey={TURNSTILE_SITE_KEY} 
+        onVerify={handleCaptchaVerify} 
+      />
+      
       <Button 
         type="submit" 
         className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-        disabled={disabled || loading}
+        disabled={disabled || loading || !captchaToken}
       >
         {loading ? (
           <LoadingSpinner size="small" className="mr-2" />
