@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -149,6 +148,8 @@ export function useCaptureState() {
       foodItems: analysisResult.foodItems,
       nutrition: analysisResult.nutrition,
       nutritionScore: analysisResult.nutritionScore,
+      fiberScore: analysisResult.fiberScore,
+      fiberNote: analysisResult.fiberNote,
       imageUrl: analysisResult.imageUrl,
       mealType,
       notes,

@@ -10,8 +10,11 @@ export const createSystemPrompt = (requestType: string, notes?: string) => {
    - "protein": Protein in grams
    - "fat": Fat in grams
    - "carbs": Carbohydrates in grams
+   - "fiber": Dietary fiber in grams
 5. "nutritionScore": Overall healthiness rating (one of: "very healthy", "healthy", "moderate", "unhealthy", "not healthy")
-6. "healthReason": A one-sentence explanation of why the nutritionScore was given
+6. "fiberScore": Fiber content rating (one of: "excellent", "good", "moderate", "low", "very low")
+7. "fiberNote": A brief, helpful note about the fiber content and its benefits for this meal (max 50 words)
+8. "healthReason": A one-sentence explanation of why the nutritionScore was given
 
 Your analysis must be accurate to ${requestType === 'photo' ? 'what is visible in the image' : 'the information provided in the description'}. Provide your best estimate for nutrition values.
 Your response MUST be valid JSON without any extra text, markdown, or explanations.`;
@@ -120,7 +123,7 @@ export const parseOpenAIResponse = (content: string) => {
 
 // Validate the analysis result has required fields
 export const validateAnalysisResult = (analysisResult: any) => {
-  const requiredFields = ['title', 'description', 'foodItems', 'nutrition', 'nutritionScore', 'healthReason'];
+  const requiredFields = ['title', 'description', 'foodItems', 'nutrition', 'nutritionScore', 'fiberScore', 'fiberNote', 'healthReason'];
   const missingFields = requiredFields.filter(field => !analysisResult[field]);
   
   if (missingFields.length > 0) {
@@ -138,7 +141,7 @@ export const validateAnalysisResult = (analysisResult: any) => {
 // Validate and normalize nutrition fields
 export const normalizeNutritionFields = (analysisResult: any) => {
   // Ensure nutrition has all required properties
-  const nutritionFields = ['calories', 'protein', 'fat', 'carbs'];
+  const nutritionFields = ['calories', 'protein', 'fat', 'carbs', 'fiber'];
   const missingNutritionFields = nutritionFields.filter(field => 
     !analysisResult.nutrition || analysisResult.nutrition[field] === undefined
   );
@@ -165,6 +168,15 @@ export const normalizeNutritionFields = (analysisResult: any) => {
       analysisResult.nutrition[key] = parseFloat(cleanedValue) || 0;
     }
   });
+  
+  // Set default values for fiber fields if missing
+  if (!analysisResult.fiberScore) {
+    analysisResult.fiberScore = 'moderate';
+  }
+  
+  if (!analysisResult.fiberNote) {
+    analysisResult.fiberNote = 'Fiber content information not available.';
+  }
   
   return analysisResult;
 };

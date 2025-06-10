@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { MealType, MealAnalysisResponse } from "@/types";
 import { formatDate, formatTime, getMealTypeOptions } from "@/utils/helpers";
@@ -130,7 +129,9 @@ const MealDetailsForm: React.FC<MealDetailsFormProps> = ({
       
       <MealNutritionInfo 
         nutrition={analysisResult.nutrition} 
-        nutritionScore={analysisResult.nutritionScore} 
+        nutritionScore={analysisResult.nutritionScore}
+        fiberScore={analysisResult.fiberScore}
+        fiberNote={analysisResult.fiberNote}
         healthReason={analysisResult.healthReason}
       />
       

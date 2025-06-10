@@ -1,5 +1,5 @@
 
-import { MealEntry, MealType, NutritionScore } from '@/types';
+import { MealEntry, MealType, NutritionScore, FiberScore } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,6 +9,14 @@ const validateNutritionScore = (score: string): NutritionScore => {
   const validScores: NutritionScore[] = ['very healthy', 'healthy', 'moderate', 'unhealthy', 'not healthy'];
   return validScores.includes(score as NutritionScore) 
     ? (score as NutritionScore) 
+    : 'moderate'; // Default to moderate if invalid
+};
+
+// Helper function to validate fiberScore
+const validateFiberScore = (score: string): FiberScore => {
+  const validScores: FiberScore[] = ['excellent', 'good', 'moderate', 'low', 'very low'];
+  return validScores.includes(score as FiberScore) 
+    ? (score as FiberScore) 
     : 'moderate'; // Default to moderate if invalid
 };
 
@@ -43,6 +51,8 @@ export const loadMealsFromSupabase = async (userId: string): Promise<MealEntry[]
         ? JSON.parse(meal.nutrition) 
         : meal.nutrition,
       nutritionScore: validateNutritionScore(meal.nutrition_score),
+      fiberScore: validateFiberScore(meal.fiber_score || 'moderate'),
+      fiberNote: meal.fiber_note || 'No fiber information available.',
       notes: meal.notes || '',
       timestamp: meal.timestamp,
       createdAt: new Date(meal.created_at)
@@ -65,7 +75,10 @@ export const loadMealsFromLocalStorage = (): MealEntry[] => {
         ...meal,
         createdAt: new Date(meal.createdAt),
         // Ensure nutritionScore is valid
-        nutritionScore: validateNutritionScore(meal.nutritionScore)
+        nutritionScore: validateNutritionScore(meal.nutritionScore),
+        // Add default fiber fields for backwards compatibility
+        fiberScore: validateFiberScore(meal.fiberScore || 'moderate'),
+        fiberNote: meal.fiberNote || 'No fiber information available.'
       }));
       console.log("Loaded meals from localStorage:", formattedMeals.length);
       return formattedMeals;
@@ -99,6 +112,8 @@ export const saveMealToSupabase = async (meal: MealEntry, userId: string): Promi
       image_url: mealToSave.imageUrl,
       nutrition: nutritionJson,
       nutrition_score: mealToSave.nutritionScore,
+      fiber_score: mealToSave.fiberScore,
+      fiber_note: mealToSave.fiberNote,
       notes: mealToSave.notes,
       timestamp: mealToSave.timestamp,
       created_at: mealToSave.createdAt.toISOString(),
@@ -131,6 +146,8 @@ export const updateMealInSupabase = async (id: string, updates: Partial<MealEntr
     if (updates.imageUrl !== undefined) supabaseUpdates.image_url = updates.imageUrl;
     if (updates.nutrition) supabaseUpdates.nutrition = JSON.stringify(updates.nutrition);
     if (updates.nutritionScore) supabaseUpdates.nutrition_score = updates.nutritionScore;
+    if (updates.fiberScore) supabaseUpdates.fiber_score = updates.fiberScore;
+    if (updates.fiberNote) supabaseUpdates.fiber_note = updates.fiberNote;
     if (updates.notes !== undefined) supabaseUpdates.notes = updates.notes;
     if (updates.timestamp) supabaseUpdates.timestamp = updates.timestamp;
     if (updates.createdAt) supabaseUpdates.created_at = updates.createdAt.toISOString();
@@ -185,6 +202,10 @@ export const createNewMeal = (meal: Omit<MealEntry, 'id' | 'createdAt'>): MealEn
     createdAt: now,
     timestamp: meal.timestamp || now.toISOString(),
     // Ensure nutritionScore is valid
-    nutritionScore: validateNutritionScore(meal.nutritionScore as string)
+    nutritionScore: validateNutritionScore(meal.nutritionScore as string),
+    // Ensure fiberScore is valid
+    fiberScore: validateFiberScore(meal.fiberScore as string),
+    // Ensure fiberNote has a default
+    fiberNote: meal.fiberNote || 'No fiber information available.'
   };
 };
